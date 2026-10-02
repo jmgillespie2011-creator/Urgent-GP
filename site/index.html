@@ -109,6 +109,7 @@ button.btn:hover { background: var(--accent-wash); }
 .tbl-wrap { overflow-x: auto; border: 1px solid var(--hair); border-radius: 8px; }
 table { border-collapse: collapse; width: 100%; font-size: 0.82rem; }
 th, td { text-align: left; padding: 7px 10px; border-bottom: 1px solid var(--hair); white-space: nowrap; }
+th.nt { text-transform: none; letter-spacing: 0; }
 th { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted); font-weight: 600; background: var(--surface); position: sticky; top: 0; }
 td.r, th.r { text-align: right; font-variant-numeric: tabular-nums; }
 tbody tr:last-child td { border-bottom: 0; }
@@ -210,7 +211,7 @@ th.sortable:hover { color: var(--ink); }
       <p id="wf-note"></p>
     </div>
     <div class="tiles" id="wf-tiles"></div>
-    <p class="muted" style="font-size:0.82rem">Each row splits English practices into fifths by a staffing measure and shows the median practice's access in each fifth (dot) with the middle 50% (line), for the area selected above. "After population mix" is the effect per 1 SD of that staffing measure once deprivation, age and disease burden are held constant, with the other staffing measures also in the model. Practice-level returns exclude staff employed by PCNs through the ARRS scheme.</p>
+    <p class="muted" style="font-size:0.82rem">Each row splits English practices into fifths by a staffing measure and shows the median practice's access in each fifth, for the area selected above. All rows share one vertical scale (<span id="wf-scale"></span>), so steeper rows mean bigger differences. "After population mix" is the effect per 1 SD of that staffing measure once deprivation, age and disease burden are held constant, with the other staffing measures also in the model. Practice-level returns exclude staff employed by PCNs through the ARRS scheme.</p>
     <div class="tbl-wrap"><table id="wf-table"></table></div>
   </section>
 
@@ -269,6 +270,7 @@ th.sortable:hover { color: var(--ink); }
       <li>August is a holiday month with one bank holiday, so its volumes run about 15% below June and July.</li>
       <li>Correlation is not causation. Disease prevalences are strongly linked to age and to each other, so adjusted coefficients for related factors (e.g. hypertension and CHD) share the same signal and can flip sign.</li>
       <li id="agesex-note">Age and sex: this build has a proxy for age (share of patients under 17). For full age bands, % male and smoking, load the NHS Digital quinary-age file and a QOF smoking extract above.</li>
+      <li>Appointments per GP FTE share a denominator with the staffing measures, so practices with few GPs per patient will mechanically show more appointments per GP. Read those two together, not as cause and effect.</li>
       <li>Workforce: practice-level returns from the NHS Digital GP workforce collection, a single month's snapshot. Staff employed by PCNs (ARRS roles such as clinical pharmacists, paramedics and physician associates) are not attributed to practices, so practices in PCNs that deliver same-day hubs may look under-staffed for the appointments they record. Practices that did not submit a full return are estimated or missing.</li>
     </ul>
     <p class="muted" id="provenance"></p>
@@ -475,7 +477,11 @@ function strength(r) {
   const s = a < 0.1 ? "No meaningful link" : a < 0.3 ? "Weak" : a < 0.5 ? "Moderate" : "Strong";
   return a < 0.1 ? s : `${s}, ${r > 0 ? "rises" : "falls"} with factor`;
 }
-function shortFactor(f) { return f ? f.label.replace(/ \(.*\)$/, "").replace(/,.*$/, "").toLowerCase().replace("imd 2025 score", "IMD") : ""; }
+function shortFactor(f) {
+  if (!f) return "";
+  const s = f.label.replace(/ \(.*\)$/, "").replace(/, \S.*$/, "").replace("Deprivation", "deprivation");
+  return /^[A-Z][a-z]/.test(s) ? s[0].toLowerCase() + s.slice(1) : s;
+}
 
 // ---------------------------------------------------------------- rendering: scatter (canvas)
 const css = (n) => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
@@ -640,7 +646,7 @@ function renderModel() {
   const { corr, model, m } = view;
   const t = $("model-table"); t.replaceChildren();
   const thead = t.createTHead().insertRow();
-  ["Factor", "Group", "Coverage", "Unadjusted ρ", "", "Adjusted effect per 1 SD", "In model"].forEach((h, i) => { const th = document.createElement("th"); th.textContent = h; if ([2, 3, 5].includes(i)) th.className = "r"; thead.append(th); });
+  ["Factor", "Group", "Coverage", "Unadjusted ρ", "", "Adjusted effect per 1 SD", "In model"].forEach((h, i) => { const th = document.createElement("th"); th.textContent = h; if ([2, 3, 5].includes(i)) th.className = "r"; if (i === 3) th.classList.add("nt"); thead.append(th); });
   const tb = t.createTBody();
   corr.forEach(({ c, rho, cover }) => {
     const tr = tb.insertRow(); tr.className = "clickable" + (c.key === state.factor ? " sel" : "");
@@ -666,7 +672,9 @@ function renderModel() {
 
 // ---------------------------------------------------------------- workforce panel
 function renderWorkforce() {
-  const wf = COV.filter((c) => c.group === "Workforce" && coverage(c.key) > 0.5);
+  const WF_ORDER = ["gp_qual_fte_10k", "gp_fte_10k", "pts_per_gp", "nurse_fte_10k", "dpc_fte_10k", "admin_fte_10k", "front_fte_10k", "pct_partner", "pct_trainee", "pct_locum"];
+  const wf = COV.filter((c) => c.group === "Workforce" && coverage(c.key) > 0.5)
+    .sort((a, b) => (WF_ORDER.indexOf(a.key) + 99) % 99 - (WF_ORDER.indexOf(b.key) + 99) % 99);
   $("wf-card").hidden = !wf.length; if (!wf.length) return;
   const { m, all, area } = view;
   const med = (k) => quantile(area.map((r) => r.cov[k]).filter((v) => v != null).sort((a, b) => a - b), 0.5);
@@ -682,15 +690,21 @@ function renderWorkforce() {
   $("wf-note").textContent = model ? `${m.short} · population + workforce model explains ${fmt(model.r2 * 100, 0)}% of variation (${fmt(model.n)} practices)` : m.short;
   const t = $("wf-table"); t.replaceChildren();
   const head = t.createTHead().insertRow();
-  ["Staffing measure", `${m.short} by fifth (Q1 lowest → Q5 highest)`, "Q1 → Q5 medians", "ρ", "After population mix (per 1 SD)"].forEach((h, i) => { const th = document.createElement("th"); th.textContent = h; if (i >= 3) th.className = "r"; head.append(th); });
+  ["Staffing measure", `${m.short} by fifth (Q1 lowest → Q5 highest)`, "Q1 → Q5 medians", "ρ", "After population mix (per 1 SD)"].forEach((h, i) => { const th = document.createElement("th"); th.textContent = h; if (i >= 3) th.className = "r"; if (i === 3) th.classList.add("nt"); head.append(th); });
   const tb = t.createTBody();
-  const ysorted = area.map((r) => r.y).sort((a, b) => a - b);
-  const lo = quantile(ysorted, 0.1), hi = quantile(ysorted, 0.9);
-  wf.forEach((c) => {
+  // Pass 1: medians per fifth for every measure, so all rows share one y-scale and can be compared.
+  const rowsData = wf.map((c) => {
     const fx = all.map((r) => r.cov[c.key]).filter((v) => v != null).sort((a, b) => a - b);
     const cuts = [0.2, 0.4, 0.6, 0.8].map((q) => quantile(fx, q));
     const qi = (v) => { const i = cuts.findIndex((x) => v <= x); return i === -1 ? 4 : i; };
     const groups = [0, 1, 2, 3, 4].map((i) => area.filter((r) => r.cov[c.key] != null && qi(r.cov[c.key]) === i).map((r) => r.y).sort((a, b) => a - b));
+    return { c, groups, meds: groups.map((g) => (g.length >= 3 ? quantile(g, 0.5) : NaN)) };
+  });
+  const allMedsRaw = rowsData.flatMap((d) => d.meds).filter(isFinite);
+  const allMeds = allMedsRaw;
+  let lo = Math.min(...allMeds), hi = Math.max(...allMeds); const padY = (hi - lo) * 0.1 || 1; lo -= padY; hi += padY;
+  $("wf-scale").textContent = `${fmt(Math.min(...allMeds), m.d)} to ${fmt(Math.max(...allMeds), m.d)} ${m.short}`;
+  rowsData.forEach(({ c, groups, meds }) => {
     const tr = tb.insertRow(); tr.className = "clickable" + (c.key === state.factor ? " sel" : ""); tr.tabIndex = 0;
     const pick = () => { state.factor = c.key; $("factor").value = c.key; update(); };
     tr.addEventListener("click", pick); tr.addEventListener("keydown", (e) => { if (e.key === "Enter") pick(); });
@@ -699,12 +713,10 @@ function renderWorkforce() {
     const cell = tr.insertCell(); const W = 260, H = 34, svg = sv("svg", { viewBox: `0 0 ${W} ${H}`, width: W, height: H, role: "img", "aria-label": `${m.short} by ${c.label} fifth` }, cell);
     const sx = (i) => 16 + i * (W - 32) / 4, sy = (v) => H - 6 - (Math.min(Math.max(v, lo), hi) - lo) / ((hi - lo) || 1) * (H - 12);
     sv("line", { x1: 4, x2: W - 4, y1: H - 3.5, y2: H - 3.5, stroke: "var(--hair)" }, svg);
-    const meds = groups.map((g) => (g.length >= 3 ? quantile(g, 0.5) : NaN));
     const pts = meds.map((v, i) => [sx(i), sy(v)]).filter(([, y], i) => isFinite(meds[i]));
     if (pts.length > 1) sv("polyline", { points: pts.map((p) => p.join(",")).join(" "), fill: "none", stroke: "var(--series-1)", "stroke-width": 1.5, opacity: 0.5 }, svg);
     groups.forEach((g, i) => {
       if (g.length < 3) return;
-      sv("line", { x1: sx(i), x2: sx(i), y1: sy(quantile(g, 0.25)), y2: sy(quantile(g, 0.75)), stroke: "var(--series-1)", "stroke-width": 2, "stroke-linecap": "round", opacity: 0.45 }, svg);
       sv("circle", { cx: sx(i), cy: sy(meds[i]), r: 4, fill: "var(--series-1)", stroke: "var(--surface)", "stroke-width": 1.5 }, svg);
     });
     td(meds.map((v) => (isFinite(v) ? fmt(v, m.d) : "–")).join(" · "), "num muted");

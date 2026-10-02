@@ -33,25 +33,16 @@ The appointments data is the NHS Digital *Appointments in General Practice* prac
 
 ## Factors included in this build
 
-| Factor | Source |
-|---|---|
-| Deprivation | IMD 2025 practice-weighted score (`data/sources/imd_2025_practice.csv`) |
-| Age | Share of patients under 17: 1 − NDA list size aged 17+ ÷ registered list, March 2025 |
-| CVD comorbidity | QOF 2024-25 prevalence: AF, CHD, heart failure, hypertension, stroke/TIA, PAD |
-| Diabetes | National Diabetes Audit 2024-25: type 2 diabetes and non-diabetic hyperglycaemia registrations per list aged 17+ |
-| Smoking | QOF-recorded current smokers aged 15+, 2024/25 (Fingertips indicator 91280) |
-| Workforce | NHS Digital GP workforce, practice-level return (latest month), when fetched |
-| List size | Registered list, December 2025 (also the rate denominator) |
+| Group | Factors | Source |
+|---|---|---|
+| Deprivation | IMD 2025 score | Practice-weighted IMD 2025 |
+| Age & sex | % aged 0–14, 65+, 75+, 80+; % male; % under 17 | NHS Digital *Patients Registered at a GP Practice*, 5-year bands, July 2026 |
+| Comorbidity | 22 QOF registers: AF, asthma, cancer, CHD, CKD, COPD, dementia, depression, diabetes, epilepsy, heart failure, hypertension, learning disability, serious mental illness, NDH, obesity, osteoporosis, palliative care, PAD, rheumatoid arthritis, stroke/TIA; type 2 diabetes (NDA) | QOF 2024/25 via Fingertips GP profile; National Diabetes Audit 2024-25 |
+| Smoking | Current smokers aged 15+ | QOF 2024/25 (Fingertips 91280) |
+| Workforce | Qualified GP, all-GP, nurse, direct patient care, admin and reception/telephonist FTE per 10,000 patients; patients per qualified GP; partner, locum and GP-in-training shares of GP FTE | NHS Digital GP workforce, practice-level detailed file, 30 November 2025 |
+| Practice | Registered list size | December 2025 (also the rate denominator) |
 
-**Not yet included: % male, full age bands and smoking.** These need two files that weren't available in this build:
-
-- NHS Digital's *Patients Registered at a GP Practice* 5-year age file (`gp-reg-pat-prac-quin-age.csv`)
-- the QOF smoking / full prevalence file
-
-You can add them in either of two ways:
-
-- upload them in the dashboard's **Add your own practice-level data** panel, or
-- drop them into `data/sources/` (any `PREVALENCE_*.csv` / `gp-reg-pat-prac-quin-age*.csv`, or any CSV in `data/sources/extra/`) and rebuild. `build_data.py` picks them up automatically.
+The workforce figures exclude staff employed by PCNs under the ARRS scheme.
 
 ## Definitions
 
@@ -65,14 +56,12 @@ You can add them in either of two ways:
 
 ## Fetching the public source files
 
-`scripts/fetch_nhs_data.py` runs in GitHub Actions (`.github/workflows/fetch-nhs-data.yml`, manual trigger, or automatically when the script changes). It downloads the latest:
+`scripts/fetch_nhs_data.py` runs in GitHub Actions (`.github/workflows/fetch-nhs-data.yml`). It runs on a manual trigger, and automatically when the script changes. It commits slim practice-level CSVs to `data/sources/`, which `build_data.py` picks up.
 
-- GP workforce practice-level file
-- registered patients by 5-year age band
-- QOF raw data
-- Fingertips smoking and GP-profile indicators
+- digital.nhs.uk puts automated clients behind a bot challenge. The script therefore reads the latest **archived** publication pages from the Internet Archive and downloads the `files.digital.nhs.uk` files they link to: GP workforce and registered patients by age.
+- Fingertips supplies QOF prevalence, smoking and fallback age bands.
 
-It then commits slim practice-level CSVs to `data/sources/`, and `build_data.py` picks them up. It falls back to a headless browser when NHS Digital refuses scripted requests.
+The newest workforce month in the archive was November 2025 when this was built. Re-run the workflow to pick up later months as they get archived.
 
 ## Rebuilding
 
@@ -91,8 +80,13 @@ The `site/` folder is fully static, so it can be hosted on GitHub Pages, Vercel 
 ## First findings (June to August 2026, 3-month average, outliers excluded)
 
 - The median practice delivers about **199 same-day appointments per 1,000 patients per month**. The 90th-percentile practice delivers 3.5× the 10th.
-- Same-day access barely tracks deprivation:
-  - the median rises from about 188 in the least-deprived quintile to 207 in the most-deprived
-  - rank correlation ρ ≈ 0.06
-- **Urgent same-day** rates are flat across deprivation quintiles: a median of about 104 per 1,000 in both Q1 and Q5.
-- Taken together, deprivation, age and the disease-prevalence factors explain only about 4% of between-practice variation in same-day rates. Most of the variation is practice-level: how each practice organises access and records its appointments.
+- **Deprivation barely moves same-day access**:
+  - the median rises from about 188 in the least-deprived quintile to 207 in the most-deprived (ρ ≈ 0.06)
+  - urgent same-day access is flat at about 104 per 1,000 in both
+- Smoking, age and disease burden also show weak links (|ρ| < 0.2).
+- **GP staffing shows the clearest link**:
+  - Same-day **GP** appointments rise from a median of 98 to 129 per 1,000 a month (+32%) from the lowest to the highest fifth of qualified GPs per 10,000 patients.
+  - After adjusting for deprivation, age, sex, smoking and the QOF registers, 1 SD more qualified GP FTE (about 1.6 per 10,000) means about 13 more same-day GP appointments per 1,000 a month.
+  - Nurse, admin and reception staffing show little or no link with same-day GP access.
+- More deprived practices have fewer qualified GPs per patient (ρ ≈ −0.17), which partly offsets their higher need.
+- Population and staffing factors together explain only about 6% of between-practice variation. Most of the variation is practice-level: how each practice organises and records access.

@@ -294,15 +294,19 @@ def load_fingertips() -> tuple[pd.DataFrame | None, dict]:
     return out, labels
 
 
-# GP workforce (practice level). Column names follow the NHS Digital GPW CSV.
+# GP workforce (practice level). Column names follow the NHS Digital GPW "Practice Level - Detailed" CSV;
+# each measure is the sum of the listed columns that exist.
 WORKFORCE_FTE = {
     "gp_fte": ["TOTAL_GP_FTE"],
-    "gp_qual_fte": ["TOTAL_GP_EXTGL_FTE", "TOTAL_GP_EXTG_FTE", "TOTAL_GP_EXL_FTE"],
-    "nurse_fte": ["TOTAL_NURSES_FTE", "TOTAL_NURSE_FTE"],
+    "gp_qual_fte": ["TOTAL_GP_EXTG_FTE"],          # excluding GPs in training grades
+    "nurse_fte": ["TOTAL_NURSES_FTE"],
     "dpc_fte": ["TOTAL_DPC_FTE"],
     "admin_fte": ["TOTAL_ADMIN_FTE"],
-    "locum_fte": ["TOTAL_LOCUUM_TRN_FTE", "TOTAL_LOCUM_FTE", "TOTAL_GP_LOCUM_FTE"],
-    "trainee_fte": ["TOTAL_GP_TRN_GR_FTE", "TOTAL_GP_TRAINEE_FTE"],
+    "front_fte": ["TOTAL_ADMIN_RECEPT_FTE", "TOTAL_ADMIN_TELEPH_FTE"],
+    "locum_fte": ["TOTAL_GP_LOCUM_VAC_FTE", "TOTAL_GP_LOCUM_ABS_FTE", "TOTAL_GP_LOCUM_OTH_FTE"],
+    "trainee_fte": ["TOTAL_GP_TRN_GR_ST1_FTE", "TOTAL_GP_TRN_GR_ST2_FTE", "TOTAL_GP_TRN_GR_ST3_FTE",
+                    "TOTAL_GP_TRN_GR_ST4_FTE", "TOTAL_GP_TRN_GR_OTH_FTE", "TOTAL_GP_TRN_GR_F1_2_FTE"],
+    "partner_fte": ["TOTAL_GP_SEN_PTNR_FTE", "TOTAL_GP_PTNR_PROV_FTE"],
 }
 
 
@@ -313,28 +317,28 @@ def load_workforce(list_size: pd.Series) -> pd.DataFrame | None:
     cols = {c.upper(): c for c in wf.columns}
     fte = pd.DataFrame(index=wf.index)
     for key, options in WORKFORCE_FTE.items():
-        col = next((cols[o] for o in options if o in cols), None)
-        if col is not None:
-            fte[key] = wf[col]
-    print("  workforce columns used:", {k: next(o for o in WORKFORCE_FTE[k] if o in cols) for k in fte.columns})
+        present = [cols[o] for o in options if o in cols]
+        if present:
+            fte[key] = wf[present].sum(axis=1, min_count=1)
     pts = wf[cols["TOTAL_PATIENTS"]] if "TOTAL_PATIENTS" in cols else list_size.reindex(wf.index)
     pts = pts.where(pts > 0)
     res = pd.DataFrame(index=wf.index)
-    for key in fte.columns:
-        if key in ("locum_fte", "trainee_fte"):
-            continue
-        res[f"{key}_10k"] = 10000 * fte[key] / pts
+    for key in ("gp_fte", "gp_qual_fte", "nurse_fte", "dpc_fte", "admin_fte", "front_fte"):
+        if key in fte:
+            res[f"{key}_10k"] = 10000 * fte[key] / pts
     if "gp_qual_fte" in fte:
-        res["pts_per_gp"] = pts / fte["gp_qual_fte"].where(fte["gp_qual_fte"] > 0)
+        res["pts_per_gp"] = (pts / fte["gp_qual_fte"].where(fte["gp_qual_fte"] >= 0.5)).where(lambda x: x < 20000)
     if "gp_fte" in fte:
+        gp = fte["gp_fte"].where(fte["gp_fte"] >= 0.5)
         res["gp_fte"] = fte["gp_fte"]
-        for extra in ("locum_fte", "trainee_fte"):
-            if extra in fte:
-                res[f"pct_{extra[:-4]}"] = 100 * fte[extra] / fte["gp_fte"].where(fte["gp_fte"] > 0)
-    # Workforce returns occasionally carry placeholder or wildly implausible values.
+        for extra in ("locum", "trainee", "partner"):
+            if f"{extra}_fte" in fte:
+                res[f"pct_{extra}"] = (100 * fte[f"{extra}_fte"].fillna(0) / gp).clip(upper=100)
+    # Returns occasionally carry placeholder or implausible values.
     for c in res.columns:
         if c.endswith("_10k"):
             res[c] = res[c].where((res[c] >= 0) & (res[c] < 60))
+    print(f"  workforce: {res['gp_fte'].notna().sum() if 'gp_fte' in res else 0} practices with GP FTE")
     return res
 
 
@@ -357,7 +361,9 @@ COVARIATE_META = {
     "prev_ndh": ("Non-diabetic hyperglycaemia (%)", "National Diabetes Audit 2024-25", "Comorbidity", "%"),
     "prev_smok": ("Smoking prevalence, 15+ (%)", "QOF-recorded current smokers (Fingertips 91280)", "Smoking", "%"),
     "gp_fte_10k": ("GP FTE per 10,000 patients", "NHS Digital GP workforce, all GPs inc. trainees and locums", "Workforce", ""),
-    "gp_qual_fte_10k": ("Qualified GP FTE per 10,000 patients", "NHS Digital GP workforce, excluding GPs in training", "Workforce", ""),
+    "gp_qual_fte_10k": ("Qualified GP FTE per 10,000 patients", "NHS Digital GP workforce, excluding GPs in training grades (includes locums)", "Workforce", ""),
+    "front_fte_10k": ("Reception & telephonist FTE per 10,000 patients", "NHS Digital GP workforce", "Workforce", ""),
+    "pct_partner": ("GP partners' share of GP FTE (%)", "NHS Digital GP workforce", "Workforce", "%"),
     "nurse_fte_10k": ("Nurse FTE per 10,000 patients", "NHS Digital GP workforce", "Workforce", ""),
     "dpc_fte_10k": ("Direct patient care FTE per 10,000 patients", "NHS Digital GP workforce (practice-employed; excludes PCN ARRS staff)", "Workforce", ""),
     "admin_fte_10k": ("Admin/non-clinical FTE per 10,000 patients", "NHS Digital GP workforce", "Workforce", ""),
