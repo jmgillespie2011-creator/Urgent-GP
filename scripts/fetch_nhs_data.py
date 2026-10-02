@@ -98,6 +98,37 @@ def links(url: str) -> list[tuple[str, str]]:
     return out
 
 
+def catalogue_files(query: str, title_rx: str, file_rx: str) -> list[tuple[str, str, str]]:
+    """Direct file links for an NHS Digital series via the data.gov.uk catalogue (CKAN), newest first.
+
+    digital.nhs.uk publication pages sit behind a bot challenge that blocks CI runners, but the
+    catalogue lists the underlying files.digital.nhs.uk URLs.
+    """
+    found = []
+    for api in ("https://www.data.gov.uk/api/action/package_search",
+                "https://ckan.publishing.service.gov.uk/api/action/package_search"):
+        try:
+            res = json.loads(get(f"{api}?q={urllib.parse.quote(query)}&rows=20", tries=2))
+        except Exception as e:  # noqa: BLE001
+            print(f"    catalogue {api}: {e}")
+            continue
+        for pkg in res.get("result", {}).get("results", []):
+            if not re.search(title_rx, pkg.get("title", ""), re.I):
+                continue
+            print(f"    dataset: {pkg.get('title')} ({len(pkg.get('resources', []))} files)")
+            for r in pkg.get("resources", []):
+                name, url = r.get("name") or r.get("description") or "", r.get("url") or ""
+                when = r.get("last_modified") or r.get("created") or ""
+                if re.search(file_rx, name + " " + url, re.I):
+                    found.append((when, name, url))
+        if found:
+            break
+    found.sort(reverse=True)
+    for when, name, url in found[:8]:
+        print(f"      {when[:10]}  {name[:70]}  {url}")
+    return found
+
+
 MONTHS = {m: i for i, m in enumerate(
     ["january", "february", "march", "april", "may", "june", "july",
      "august", "september", "october", "november", "december"], 1)}
@@ -156,6 +187,17 @@ def num(v) -> float | None:
 
 # --------------------------------------------------------------------------- workforce
 def fetch_workforce() -> None:
+    cands = catalogue_files("General Practice Workforce", r"general practice workforce|general and personal medical",
+                            r"practice[-_ %20]*level")
+    cands = [c for c in cands if not re.search(r"individual|pcn", c[1] + c[2], re.I)]
+    for when, name, url in cands:
+        try:
+            fname, rows = read_csv_from(get(url), re.compile(r"(?i)practice"))
+            if rows and any(re.fullmatch(r"(?i)prac_code|practice_code", c) for c in rows[0]):
+                return _save_workforce(rows, {"catalogue_file": name, "file": url, "csv": fname, "modified": when})
+            print(f"    {url}: no practice code column in {fname}")
+        except Exception as e:  # noqa: BLE001
+            print(f"    {url}: {e}")
     page = latest_child("general-and-personal-medical-services", r"\d{1,2}-[a-z]+-20\d\d")
     files = [(h, t) for h, t in links(page) if re.search(r"\.(zip|csv)(\?|$)", h, re.I)]
     for h, t in files:
@@ -173,6 +215,10 @@ def fetch_workforce() -> None:
     if not url:
         raise RuntimeError("no practice-level workforce file on " + page)
     name, rows = read_csv_from(get(url), re.compile(r"(?i)practice"))
+    _save_workforce(rows, {"page": page, "file": url, "csv": name})
+
+
+def _save_workforce(rows: list[dict], info: dict) -> None:
     code_col = next(c for c in rows[0] if re.fullmatch(r"(?i)prac_code|practice_code|code", c))
     keep = [c for c in rows[0] if re.match(r"(?i)^total_", c) or c.upper() in {"PRAC_NAME", "PRAC_POSTCODE"}]
     out = []
@@ -181,18 +227,21 @@ def fetch_workforce() -> None:
         if CODE.match(code):
             out.append([code] + [r.get(c, "") for c in keep])
     write(OUT / "workforce_practice.csv", ["practice_code"] + keep, out)
-    manifest["workforce"] = {"page": page, "file": url, "csv": name, "columns": len(keep)}
+    manifest["workforce"] = {**info, "columns": len(keep)}
 
 
 # --------------------------------------------------------------------------- age / sex
 def fetch_age_sex() -> None:
-    page = latest_child("patients-registered-at-a-gp-practice", r"[a-z]+-20\d\d")
-    files = [(h, t) for h, t in links(page) if re.search(r"\.(zip|csv)(\?|$)", h, re.I)]
-    url = next((h for h, t in files if re.search(r"quin", h + t, re.I) and re.search(r"prac", h + t, re.I)), None)
-    if not url:
-        for h, t in files:
-            print(f"    file: {t[:90]} -> {h}")
-        raise RuntimeError("no quinary-age practice file on " + page)
+    cands = catalogue_files("Patients Registered at a GP Practice", r"patients registered", r"quin")
+    cands = [c for c in cands if re.search(r"prac", c[1] + c[2], re.I)] or cands
+    if cands:
+        page, url = "data.gov.uk catalogue", cands[0][2]
+    else:
+        page = latest_child("patients-registered-at-a-gp-practice", r"[a-z]+-20\d\d")
+        files = [(h, t) for h, t in links(page) if re.search(r"\.(zip|csv)(\?|$)", h, re.I)]
+        url = next((h for h, t in files if re.search(r"quin", h + t, re.I) and re.search(r"prac", h + t, re.I)), None)
+        if not url:
+            raise RuntimeError("no quinary-age practice file on " + page)
     name, rows = read_csv_from(get(url), re.compile(r"(?i)quin"))
     code_col = "ORG_CODE" if "ORG_CODE" in rows[0] else "CODE"
     acc = defaultdict(lambda: {"t": 0.0, "m": 0.0, "u15": 0.0, "o65": 0.0, "o80": 0.0, "o75": 0.0})
@@ -222,8 +271,12 @@ def fetch_age_sex() -> None:
 
 # --------------------------------------------------------------------------- QOF
 def fetch_qof() -> None:
-    page = latest_child("quality-and-outcomes-framework-achievement-prevalence-and-exceptions-data", r"20\d\d-\d\d")
-    files = [(h, t) for h, t in links(page) if re.search(r"\.(zip|csv)(\?|$)", h, re.I)]
+    cands = catalogue_files("Quality and Outcomes Framework", r"quality and outcomes framework", r"raw|\.zip")
+    if cands:
+        page, files = "data.gov.uk catalogue", [(c[2], c[1]) for c in cands]
+    else:
+        page = latest_child("quality-and-outcomes-framework-achievement-prevalence-and-exceptions-data", r"20\d\d-\d\d")
+        files = [(h, t) for h, t in links(page) if re.search(r"\.(zip|csv)(\?|$)", h, re.I)]
     for h, t in files:
         print(f"    file: {t[:90]} -> {h}")
     blob = None
@@ -253,7 +306,8 @@ def fetch_qof() -> None:
     groups = sorted(groups)
     write(OUT / "qof_prevalence_practice.csv", ["practice_code"] + [f"prev_{g}" for g in groups],
           [[c] + [v.get(g, "") for g in groups] for c, v in sorted(wide.items())])
-    year = page.rstrip("/").rsplit("/", 1)[-1]
+    ym = re.search(r"(20\d\d)[-_]?(\d\d)", prev_name) or re.search(r"(20\d\d)-(\d\d)", url)
+    year = f"{ym.group(1)}-{ym.group(2)}" if ym else page.rstrip("/").rsplit("/", 1)[-1]
     manifest["qof"] = {"page": page, "file": url, "csv": prev_name, "year": year, "registers": groups}
 
     # QOF smoking fallback: SMOK indicator denominators are the recorded current smokers.
@@ -331,10 +385,13 @@ def fetch_fingertips_profile() -> None:
     name_col = next(c for c in meta[0] if re.fullmatch(r"(?i)indicator", c) or re.fullmatch(r"(?i)indicator name", c))
     inds = [(int(r[id_col]), r[name_col]) for r in meta if (r.get(id_col) or "").isdigit()]
     write(OUT / "fingertips_profile20_indicators.csv", ["indicator_id", "indicator"], inds)
+    for iid, name in inds:
+        if re.search(r"(?i)aged|age |\+|male|female|popul|workforce|fte|gp", name):
+            print(f"      candidate {iid}: {name}")
     wanted = []
     for iid, name in inds:
         n = name.lower()
-        if re.search(r"aged? (65|75|85)\+|65\+ years|75\+ years|85\+ years|aged 0 to 4|aged under 18|under 18|% (male|female)|deprivation score", n) \
+        if re.search(r"(65|75|85)\+|(65|75|85) and over|aged 0 to 4|0-4|under 18|% (male|female)|\bmale\b|deprivation score", n) \
            and not re.search(r"vacc|screen|immunis|flu|uptake|cancer|emergency|admission", n):
             wanted.append((iid, name))
         elif re.search(r"\bqof\b.*prevalence|prevalence.*\bqof\b|: qof prevalence", n):
