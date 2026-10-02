@@ -236,12 +236,74 @@ def load_extra() -> pd.DataFrame | None:
     return pd.concat(frames, axis=1) if frames else None
 
 
+def load_wide(name: str) -> pd.DataFrame | None:
+    """A practice_code + numeric columns CSV written by scripts/fetch_nhs_data.py."""
+    path = SRC / name
+    if not path.exists():
+        return None
+    df = pd.read_csv(path, dtype={"practice_code": str})
+    df.index = norm_code(df.pop("practice_code"))
+    df = df.apply(pd.to_numeric, errors="coerce")
+    print(f"  {name}: {len(df)} practices, {df.shape[1]} columns")
+    return df[~df.index.duplicated()]
+
+
+def fetch_manifest() -> dict:
+    path = SRC / "fetch_manifest.json"
+    return json.loads(path.read_text()) if path.exists() else {}
+
+
+# GP workforce (practice level). Column names follow the NHS Digital GPW CSV.
+WORKFORCE_FTE = {
+    "gp_fte": ["TOTAL_GP_FTE"],
+    "gp_qual_fte": ["TOTAL_GP_EXTGL_FTE", "TOTAL_GP_EXTG_FTE", "TOTAL_GP_EXL_FTE"],
+    "nurse_fte": ["TOTAL_NURSES_FTE", "TOTAL_NURSE_FTE"],
+    "dpc_fte": ["TOTAL_DPC_FTE"],
+    "admin_fte": ["TOTAL_ADMIN_FTE"],
+    "locum_fte": ["TOTAL_LOCUUM_TRN_FTE", "TOTAL_LOCUM_FTE", "TOTAL_GP_LOCUM_FTE"],
+    "trainee_fte": ["TOTAL_GP_TRN_GR_FTE", "TOTAL_GP_TRAINEE_FTE"],
+}
+
+
+def load_workforce(list_size: pd.Series) -> pd.DataFrame | None:
+    wf = load_wide("workforce_practice.csv")
+    if wf is None:
+        return None
+    cols = {c.upper(): c for c in wf.columns}
+    fte = pd.DataFrame(index=wf.index)
+    for key, options in WORKFORCE_FTE.items():
+        col = next((cols[o] for o in options if o in cols), None)
+        if col is not None:
+            fte[key] = wf[col]
+    print("  workforce columns used:", {k: next(o for o in WORKFORCE_FTE[k] if o in cols) for k in fte.columns})
+    pts = wf[cols["TOTAL_PATIENTS"]] if "TOTAL_PATIENTS" in cols else list_size.reindex(wf.index)
+    pts = pts.where(pts > 0)
+    res = pd.DataFrame(index=wf.index)
+    for key in fte.columns:
+        if key in ("locum_fte", "trainee_fte"):
+            continue
+        res[f"{key}_10k"] = 10000 * fte[key] / pts
+    if "gp_qual_fte" in fte:
+        res["pts_per_gp"] = pts / fte["gp_qual_fte"].where(fte["gp_qual_fte"] > 0)
+    if "gp_fte" in fte:
+        res["gp_fte"] = fte["gp_fte"]
+        for extra in ("locum_fte", "trainee_fte"):
+            if extra in fte:
+                res[f"pct_{extra[:-4]}"] = 100 * fte[extra] / fte["gp_fte"].where(fte["gp_fte"] > 0)
+    # Workforce returns occasionally carry placeholder or wildly implausible values.
+    for c in res.columns:
+        if c.endswith("_10k"):
+            res[c] = res[c].where((res[c] >= 0) & (res[c] < 60))
+    return res
+
+
 # --------------------------------------------------------------------------- main
 COVARIATE_META = {
     "imd": ("Deprivation (IMD 2025 score)", "IMD 2025 practice-weighted score", "Deprivation", ""),
     "pct_u17": ("Patients aged under 17 (%)", "Derived: 1 − NDA list 17+ ÷ registered list (Mar 2025)", "Age & sex", "%"),
     "pct_0_14": ("Patients aged 0–14 (%)", "NHS Digital registered patients, 5-year bands", "Age & sex", "%"),
     "pct_65plus": ("Patients aged 65+ (%)", "NHS Digital registered patients, 5-year bands", "Age & sex", "%"),
+    "pct_75plus": ("Patients aged 75+ (%)", "NHS Digital registered patients, 5-year bands", "Age & sex", "%"),
     "pct_80plus": ("Patients aged 80+ (%)", "NHS Digital registered patients, 5-year bands", "Age & sex", "%"),
     "pct_male": ("Male patients (%)", "NHS Digital registered patients, 5-year bands", "Age & sex", "%"),
     "prev_hyp": ("Hypertension prevalence (%)", "QOF 2024-25", "Comorbidity", "%"),
@@ -251,15 +313,23 @@ COVARIATE_META = {
     "prev_stia": ("Stroke/TIA prevalence (%)", "QOF 2024-25", "Comorbidity", "%"),
     "prev_pad": ("PAD prevalence (%)", "QOF 2024-25", "Comorbidity", "%"),
     "prev_t2dm": ("Type 2 diabetes prevalence, 17+ (%)", "National Diabetes Audit 2024-25", "Comorbidity", "%"),
-    "prev_ndh": ("Non-diabetic hyperglycaemia, 17+ (%)", "National Diabetes Audit 2024-25", "Comorbidity", "%"),
-    "prev_smok": ("Smoking prevalence (QOF SMOK)", "QOF prevalence file", "Smoking", "%"),
+    "prev_ndh": ("Non-diabetic hyperglycaemia (%)", "National Diabetes Audit 2024-25", "Comorbidity", "%"),
+    "prev_smok": ("Smoking prevalence, 15+ (%)", "QOF-recorded current smokers (Fingertips 91280)", "Smoking", "%"),
+    "gp_fte_10k": ("GP FTE per 10,000 patients", "NHS Digital GP workforce, all GPs inc. trainees and locums", "Workforce", ""),
+    "gp_qual_fte_10k": ("Qualified GP FTE per 10,000 patients", "NHS Digital GP workforce, excluding GPs in training", "Workforce", ""),
+    "nurse_fte_10k": ("Nurse FTE per 10,000 patients", "NHS Digital GP workforce", "Workforce", ""),
+    "dpc_fte_10k": ("Direct patient care FTE per 10,000 patients", "NHS Digital GP workforce (practice-employed; excludes PCN ARRS staff)", "Workforce", ""),
+    "admin_fte_10k": ("Admin/non-clinical FTE per 10,000 patients", "NHS Digital GP workforce", "Workforce", ""),
+    "pts_per_gp": ("Patients per qualified GP FTE", "NHS Digital GP workforce", "Workforce", ""),
+    "pct_locum": ("Locum share of GP FTE (%)", "NHS Digital GP workforce", "Workforce", "%"),
+    "pct_trainee": ("GPs in training share of GP FTE (%)", "NHS Digital GP workforce", "Workforce", "%"),
     "list_size": ("Registered list size", "NHS Digital, list size used as denominator", "Practice", ""),
 }
 QOF_GROUP_NAMES = {
     "dm": "Diabetes", "ast": "Asthma", "copd": "COPD", "dep": "Depression", "mh": "Serious mental illness",
     "ckd": "CKD", "can": "Cancer", "dem": "Dementia", "ob": "Obesity", "ep": "Epilepsy",
     "ld": "Learning disability", "ost": "Osteoporosis", "ra": "Rheumatoid arthritis", "pc": "Palliative care",
-    "nd": "Non-diabetic hyperglycaemia", "smok": "Smoking",
+    "ndh": "Non-diabetic hyperglycaemia", "cvdpp": "CVD primary prevention", "bp": "Blood pressure", "smok": "Smoking",
 }
 
 
@@ -286,7 +356,42 @@ def main() -> None:
         u17 = load_under17(nda["list_17plus"])
         if u17 is not None:
             cov = cov.join(u17, how="outer")
-    for extra in (load_quinary_age(), load_qof_prevalence_file(), load_extra()):
+    manifest = fetch_manifest()
+    # Newer full QOF prevalence file replaces the CVD-only 2024-25 extract where both exist.
+    qof_full = load_wide("qof_prevalence_practice.csv")
+    qof_year = manifest.get("qof", {}).get("year", "")
+    if qof_full is not None:
+        cov = cov.drop(columns=[c for c in qof_full.columns if c in cov.columns])
+        cov = cov.join(qof_full, how="outer")
+        for c in qof_full.columns:
+            if c in COVARIATE_META:
+                label, _, group, unit = COVARIATE_META[c]
+                COVARIATE_META[c] = (label, f"QOF {qof_year}", group, unit)
+    age = load_wide("age_sex_practice.csv")
+    if age is not None:
+        cov = cov.join(age.drop(columns=["registered_patients"], errors="ignore"), how="outer")
+    smoking = load_wide("smoking_practice.csv")
+    if smoking is not None:
+        cov = cov.join(smoking[["smoking_prev_15plus"]].rename(columns={"smoking_prev_15plus": "prev_smok"}), how="outer")
+        period = manifest.get("smoking", {}).get("period")
+        if period:
+            label, src, group, unit = COVARIATE_META["prev_smok"]
+            COVARIATE_META["prev_smok"] = (label, f"{src}, {period}", group, unit)
+    wf = load_workforce(cov["list_size"])
+    if wf is not None:
+        cov = cov.join(wf, how="outer")
+        wf_page = manifest.get("workforce", {}).get("page", "")
+        when = wf_page.rstrip("/").rsplit("/", 1)[-1].replace("-", " ")
+        for k in list(COVARIATE_META):
+            if COVARIATE_META[k][2] == "Workforce" and when:
+                label, src, group, unit = COVARIATE_META[k]
+                COVARIATE_META[k] = (label, f"{src}, {when}", group, unit)
+    extras = [load_extra()]
+    if age is None:
+        extras.insert(0, load_quinary_age())
+    if qof_full is None:
+        extras.insert(0, load_qof_prevalence_file())
+    for extra in extras:
         if extra is not None:
             cov = cov.combine_first(extra) if set(extra.columns) & set(cov.columns) else cov.join(extra, how="outer")
 
@@ -327,7 +432,7 @@ def main() -> None:
 
     covariates = []
     for col in cov.columns:
-        if col == "list_17plus" or cov[col].notna().sum() < 100:
+        if col in ("list_17plus", "gp_fte") or cov[col].notna().sum() < 100:
             continue
         if col in COVARIATE_META:
             label, source, group, unit = COVARIATE_META[col]
@@ -338,7 +443,7 @@ def main() -> None:
         else:
             label, source, group, unit = (col[2:].replace("_", " ").capitalize(), "Extra file", "Other", "")
         covariates.append({"key": col, "label": label, "source": source, "group": group, "unit": unit})
-    group_order = ["Deprivation", "Age & sex", "Comorbidity", "Smoking", "Practice", "Other"]
+    group_order = ["Deprivation", "Age & sex", "Comorbidity", "Smoking", "Workforce", "Practice", "Other"]
     covariates.sort(key=lambda c: (group_order.index(c["group"]), c["label"]))
 
     out = {
@@ -348,6 +453,7 @@ def main() -> None:
         "urgentCategories": sorted(URGENT_CATEGORIES),
         "covariates": covariates,
         "practices": practices,
+        "sources": manifest,
     }
     OUT_JSON.parent.mkdir(parents=True, exist_ok=True)
     OUT_JSON.write_text(json.dumps(out, separators=(",", ":"), ensure_ascii=False))

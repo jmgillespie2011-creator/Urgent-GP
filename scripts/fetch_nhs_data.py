@@ -21,6 +21,7 @@ import re
 import sys
 import time
 import traceback
+import urllib.error
 import urllib.parse
 import urllib.request
 import zipfile
@@ -31,21 +32,59 @@ ROOT = Path(__file__).resolve().parent.parent
 OUT = ROOT / "data" / "sources"
 BASE = "https://digital.nhs.uk"
 PUB = BASE + "/data-and-information/publications/statistical/"
-UA = {"User-Agent": "Mozilla/5.0 (X11; Linux x86_64) urgent-gp-dashboard data fetch"}
+UA = {
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) "
+                  "Chrome/128.0.0.0 Safari/537.36",
+    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+    "Accept-Language": "en-GB,en;q=0.9",
+}
 CODE = re.compile(r"^[A-Z]\d{5}$")
 manifest: dict[str, dict] = {}
+_browser = {}
 
 
-def get(url: str, tries: int = 3) -> bytes:
+def _browser_get(url: str) -> bytes:
+    """Fetch through headless Chromium, for sites that refuse non-browser clients."""
+    if "ctx" not in _browser:
+        from playwright.sync_api import sync_playwright  # installed by the workflow
+        pw = sync_playwright().start()
+        b = pw.chromium.launch()
+        _browser.update(pw=pw, b=b, ctx=b.new_context(user_agent=UA["User-Agent"], locale="en-GB"))
+        _browser["page"] = _browser["ctx"].new_page()
+    host = urllib.parse.urlparse(url).netloc
+    if host not in _browser.setdefault("warmed", set()):
+        # Land on the site once so any bot challenge sets its cookies.
+        _browser["page"].goto(f"https://{host}/", wait_until="domcontentloaded", timeout=90000)
+        _browser["page"].wait_for_timeout(4000)
+        _browser["warmed"].add(host)
+    if re.search(r"\.(zip|csv|xlsx?)(\?|$)", url, re.I):
+        r = _browser["ctx"].request.get(url, timeout=300000)
+        if not r.ok:
+            raise RuntimeError(f"browser GET {url}: HTTP {r.status}")
+        return r.body()
+    resp = _browser["page"].goto(url, wait_until="domcontentloaded", timeout=90000)
+    _browser["page"].wait_for_timeout(1500)
+    if resp is not None and resp.status >= 400:
+        raise RuntimeError(f"browser GET {url}: HTTP {resp.status}")
+    return _browser["page"].content().encode()
+
+
+def get(url: str, tries: int = 2) -> bytes:
     for i in range(tries):
         try:
             req = urllib.request.Request(url, headers=UA)
             with urllib.request.urlopen(req, timeout=180) as r:
                 return r.read()
+        except urllib.error.HTTPError as e:
+            body = e.read()[:200]
+            print(f"    GET {url} -> HTTP {e.code} {body!r}")
+            if e.code in (403, 429, 503):
+                break
         except Exception as e:  # noqa: BLE001
             print(f"    GET {url} failed ({e}); attempt {i + 1}/{tries}")
             time.sleep(3 * (i + 1))
-    raise RuntimeError(f"could not fetch {url}")
+    print(f"    retrying {url} in headless Chromium")
+    return _browser_get(url)
 
 
 def links(url: str) -> list[tuple[str, str]]:
@@ -260,11 +299,80 @@ def fetch_smoking() -> None:
     raise RuntimeError(f"Fingertips smoking prevalence unavailable ({last})")
 
 
+# --------------------------------------------------------------------------- Fingertips GP profile
+FT = "https://fingertips.phe.org.uk/api"
+
+
+def fingertips_indicator(ind_id: int) -> tuple[str, str, dict[str, float]]:
+    _, rows = read_csv_from(get(f"{FT}/all_data/csv/by_indicator_id?indicator_ids={ind_id}"
+                                f"&child_area_type_id=7&parent_area_type_id=15", tries=2))
+    rows = [r for r in rows if r.get("Area Type", "").startswith("GP") and CODE.match((r.get("Area Code") or "").upper())
+            and num(r.get("Value")) is not None]
+    if not rows:
+        return "", "", {}
+    # One breakdown per practice: prefer Persons / all ages / no category.
+    def rank(r):
+        return ((r.get("Sex") or "Persons") != "Persons", bool(r.get("Category")), r.get("Age") or "")
+    latest = sorted({r["Time period"] for r in rows})[-1]
+    vals: dict[str, tuple] = {}
+    for r in rows:
+        if r["Time period"] != latest:
+            continue
+        code = r["Area Code"].upper()
+        if code not in vals or rank(r) < vals[code][0]:
+            vals[code] = (rank(r), num(r["Value"]))
+    return rows[0].get("Indicator Name", ""), latest, {c: v for c, (_, v) in vals.items()}
+
+
+def fetch_fingertips_profile() -> None:
+    """GP practice profile (profile 20): age structure and QOF prevalence, used when NHS Digital is unreachable."""
+    _, meta = read_csv_from(get(f"{FT}/indicator_metadata/csv/by_profile_id?profile_id=20", tries=2))
+    id_col = next(c for c in meta[0] if re.fullmatch(r"(?i)indicator id", c))
+    name_col = next(c for c in meta[0] if re.fullmatch(r"(?i)indicator", c) or re.fullmatch(r"(?i)indicator name", c))
+    inds = [(int(r[id_col]), r[name_col]) for r in meta if (r.get(id_col) or "").isdigit()]
+    write(OUT / "fingertips_profile20_indicators.csv", ["indicator_id", "indicator"], inds)
+    wanted = []
+    for iid, name in inds:
+        n = name.lower()
+        if re.search(r"aged? (65|75|85)\+|65\+ years|75\+ years|85\+ years|aged 0 to 4|aged under 18|under 18|% (male|female)|deprivation score", n) \
+           and not re.search(r"vacc|screen|immunis|flu|uptake|cancer|emergency|admission", n):
+            wanted.append((iid, name))
+        elif re.search(r"\bqof\b.*prevalence|prevalence.*\bqof\b|: qof prevalence", n):
+            wanted.append((iid, name))
+    print(f"    {len(wanted)} profile-20 indicators selected:")
+    cols, data, meta_out = [], defaultdict(dict), []
+    for iid, name in wanted:
+        try:
+            label, period, vals = fingertips_indicator(iid)
+        except Exception as e:  # noqa: BLE001
+            print(f"      {iid} {name}: failed ({e})")
+            continue
+        if len(vals) < 1000:
+            print(f"      {iid} {name}: only {len(vals)} practices, skipped")
+            continue
+        key = f"ft_{iid}"
+        cols.append(key)
+        meta_out.append({"key": key, "indicator_id": iid, "name": label or name, "period": period, "n": len(vals)})
+        for c, v in vals.items():
+            data[c][key] = v
+        print(f"      {iid} {label or name} [{period}] {len(vals)} practices")
+    if not cols:
+        raise RuntimeError("no Fingertips profile indicators fetched")
+    write(OUT / "fingertips_practice.csv", ["practice_code"] + cols,
+          [[c] + [v.get(k, "") for k in cols] for c, v in sorted(data.items())])
+    (OUT / "fingertips_practice_meta.json").write_text(json.dumps(meta_out, indent=2))
+    manifest["fingertips_profile"] = {"profile_id": 20, "indicators": len(cols)}
+
+
 def main() -> int:
     OUT.mkdir(parents=True, exist_ok=True)
+    old = OUT / "fetch_manifest.json"
+    if old.exists():  # keep earlier successes; this run's results overwrite per source
+        manifest.update({k: v for k, v in json.loads(old.read_text()).items() if not k.endswith("_error")})
     ok = 0
-    for name, fn in [("workforce", fetch_workforce), ("age/sex", fetch_age_sex),
-                     ("QOF", fetch_qof), ("smoking", fetch_smoking)]:
+    steps = [("workforce", fetch_workforce), ("age/sex", fetch_age_sex), ("QOF", fetch_qof),
+             ("smoking", fetch_smoking), ("fingertips", fetch_fingertips_profile)]
+    for name, fn in steps:
         print(f"== {name}")
         try:
             fn()
@@ -274,7 +382,10 @@ def main() -> int:
             manifest[name + "_error"] = traceback.format_exc(limit=1).strip().splitlines()[-1]
     manifest["fetched_utc"] = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
     (OUT / "fetch_manifest.json").write_text(json.dumps(manifest, indent=2))
-    print(f"{ok}/4 sources fetched")
+    print(f"{ok}/{len(steps)} sources fetched")
+    if "b" in _browser:
+        _browser["b"].close()
+        _browser["pw"].stop()
     return 0 if ok else 1
 
 

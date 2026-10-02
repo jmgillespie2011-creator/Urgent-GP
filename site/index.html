@@ -193,8 +193,25 @@ th.sortable:hover { color: var(--ink); }
       <h2>What lines up with the variation?</h2>
       <p id="model-note"></p>
     </div>
+    <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center">
+      <span class="muted" style="font-size:0.8rem">Adjust for:</span>
+      <div class="seg" role="group" aria-label="Model preset">
+        <button type="button" id="preset-pop" aria-pressed="true">Population mix</button>
+        <button type="button" id="preset-wf" aria-pressed="false">Population + workforce</button>
+      </div>
+    </div>
     <p class="muted" style="font-size:0.82rem">Unadjusted: Spearman rank correlation with the access measure. Adjusted: change in the measure per 1 standard deviation of the factor, holding the other ticked factors constant (linear model, 95% CI). Click a row to plot it.</p>
     <div class="tbl-wrap"><table id="model-table"></table></div>
+  </section>
+
+  <section class="card" id="wf-card" hidden>
+    <div class="card-head">
+      <h2>Workforce and access</h2>
+      <p id="wf-note"></p>
+    </div>
+    <div class="tiles" id="wf-tiles"></div>
+    <p class="muted" style="font-size:0.82rem">Each row splits English practices into fifths by a staffing measure and shows the median practice's access in each fifth (dot) with the middle 50% (line), for the area selected above. "After population mix" is the effect per 1 SD of that staffing measure once deprivation, age and disease burden are held constant, with the other staffing measures also in the model. Practice-level returns exclude staff employed by PCNs through the ARRS scheme.</p>
+    <div class="tbl-wrap"><table id="wf-table"></table></div>
   </section>
 
   <section class="card">
@@ -251,7 +268,8 @@ th.sortable:hover { color: var(--ink); }
       <li>Denominators use the December 2025 registered list. Practices that merged or opened since may show inflated or missing rates.</li>
       <li>August is a holiday month with one bank holiday, so its volumes run about 15% below June and July.</li>
       <li>Correlation is not causation. Disease prevalences are strongly linked to age and to each other, so adjusted coefficients for related factors (e.g. hypertension and CHD) share the same signal and can flip sign.</li>
-      <li>Age and sex: this build has a proxy for age (share of patients under 17). For full age bands, % male and smoking, load the NHS Digital quinary-age file and a QOF smoking extract above.</li>
+      <li id="agesex-note">Age and sex: this build has a proxy for age (share of patients under 17). For full age bands, % male and smoking, load the NHS Digital quinary-age file and a QOF smoking extract above.</li>
+      <li>Workforce: practice-level returns from the NHS Digital GP workforce collection, a single month's snapshot. Staff employed by PCNs (ARRS roles such as clinical pharmacists, paramedics and physician associates) are not attributed to practices, so practices in PCNs that deliver same-day hubs may look under-staffed for the appointments they record. Practices that did not submit a full return are estimated or missing.</li>
     </ul>
     <p class="muted" id="provenance"></p>
   </section>
@@ -277,8 +295,11 @@ const METRICS = [
   { key: "pct_urg_sd", label: "Share of urgent-type appointments seen same day (%)", short: "% urgent same day", num: "urg_sd", den: "urg", d: 1 },
   { key: "pct_sd_f2f", label: "Share of same-day appointments face-to-face (%)", short: "% same-day F2F", num: "sd_f2f", den: "sd", d: 1 },
   { key: "dna_pct", label: "Did-not-attend rate (%)", short: "DNA %", num: "dna", den: "total", d: 1 },
+  { key: "gp_per_fte", label: "GP appointments per GP FTE per month", short: "GP appts / GP FTE", num: "gp", fte: "gp_fte", d: 0, needs: "gp_fte" },
+  { key: "sd_gp_per_fte", label: "Same-day GP appointments per GP FTE per month", short: "Same-day GP / GP FTE", num: "sd_gp", fte: "gp_fte", d: 0, needs: "gp_fte" },
 ];
 
+const GROUP_ORDER = ["Deprivation", "Age & sex", "Comorbidity", "Smoking", "Workforce", "Practice", "Other"];
 const state = {
   data: null, metric: "sd_rate", period: "avg", factor: "imd",
   region: "", icb: "", pcn: "", qc: true,
@@ -363,6 +384,7 @@ function sumCounts(p, field) {
 function metricValue(p, m) {
   const num = sumCounts(p, m.num); if (!num) return null;
   if (m.per) { const L = p.v.list_size; return L > 0 ? (num.s / num.n) / L * 1000 : null; }
+  if (m.fte) { const F = p.v[m.fte]; return F >= 0.5 ? (num.s / num.n) / F : null; }
   const den = sumCounts(p, m.den); return den && den.s > 0 ? 100 * num.s / den.s : null;
 }
 function qcPass(p) {
@@ -642,6 +664,59 @@ function renderModel() {
   $("model-note").textContent = model ? `Model fitted on ${fmt(model.n)} English practices · explains ${fmt(model.r2 * 100, 0)}% of variation (R²) · residual SD ${fmt(model.residSd, m.d)}` : "Tick at least one factor to fit the model.";
 }
 
+// ---------------------------------------------------------------- workforce panel
+function renderWorkforce() {
+  const wf = COV.filter((c) => c.group === "Workforce" && coverage(c.key) > 0.5);
+  $("wf-card").hidden = !wf.length; if (!wf.length) return;
+  const { m, all, area } = view;
+  const med = (k) => quantile(area.map((r) => r.cov[k]).filter((v) => v != null).sort((a, b) => a - b), 0.5);
+  const T = $("wf-tiles"); T.replaceChildren();
+  const tkeys = [["gp_qual_fte_10k", "Qualified GP FTE per 10,000", 2], ["pts_per_gp", "Patients per qualified GP", 0], ["dpc_fte_10k", "Other clinical FTE per 10,000", 2]];
+  tkeys.forEach(([k, l, d]) => { if (wf.some((c) => c.key === k)) T.append(tile(`${areaLabel()}: ${l}`, fmt(med(k), d), `England median ${fmt(quantile(all.map((r) => r.cov[k]).filter((v) => v != null).sort((a, b) => a - b), 0.5), d)}`)); });
+  const fteVals = area.map((r) => { const F = r.p.v.gp_fte, g = sumCounts(r.p, "gp"); return F >= 0.5 && g ? g.s / g.n / F : null; }).filter((v) => v != null && isFinite(v)).sort((a, b) => a - b);
+  if (fteVals.length) T.append(tile("GP appointments per GP FTE per month", fmt(quantile(fteVals, 0.5), 0), `Median practice · middle 50% ${fmt(quantile(fteVals, 0.25), 0)}–${fmt(quantile(fteVals, 0.75), 0)}`));
+  // Model: population factors + all core workforce measures.
+  const popKeys = COV.filter((c) => c.group !== "Workforce" && c.key !== "list_size" && coverage(c.key) >= 0.9).map((c) => c.key).filter((k) => !(k === "pct_u17" && COV.some((c) => c.key === "pct_65plus")));
+  const wfKeys = wf.map((c) => c.key).filter((k) => ["gp_qual_fte_10k", "nurse_fte_10k", "dpc_fte_10k", "admin_fte_10k"].includes(k));
+  const model = fitModel(all.filter((r) => wfKeys.every((k) => r.cov[k] != null)), [...popKeys, ...wfKeys]);
+  $("wf-note").textContent = model ? `${m.short} · population + workforce model explains ${fmt(model.r2 * 100, 0)}% of variation (${fmt(model.n)} practices)` : m.short;
+  const t = $("wf-table"); t.replaceChildren();
+  const head = t.createTHead().insertRow();
+  ["Staffing measure", `${m.short} by fifth (Q1 lowest → Q5 highest)`, "Q1 → Q5 medians", "ρ", "After population mix (per 1 SD)"].forEach((h, i) => { const th = document.createElement("th"); th.textContent = h; if (i >= 3) th.className = "r"; head.append(th); });
+  const tb = t.createTBody();
+  const ysorted = area.map((r) => r.y).sort((a, b) => a - b);
+  const lo = quantile(ysorted, 0.1), hi = quantile(ysorted, 0.9);
+  wf.forEach((c) => {
+    const fx = all.map((r) => r.cov[c.key]).filter((v) => v != null).sort((a, b) => a - b);
+    const cuts = [0.2, 0.4, 0.6, 0.8].map((q) => quantile(fx, q));
+    const qi = (v) => { const i = cuts.findIndex((x) => v <= x); return i === -1 ? 4 : i; };
+    const groups = [0, 1, 2, 3, 4].map((i) => area.filter((r) => r.cov[c.key] != null && qi(r.cov[c.key]) === i).map((r) => r.y).sort((a, b) => a - b));
+    const tr = tb.insertRow(); tr.className = "clickable" + (c.key === state.factor ? " sel" : ""); tr.tabIndex = 0;
+    const pick = () => { state.factor = c.key; $("factor").value = c.key; update(); };
+    tr.addEventListener("click", pick); tr.addEventListener("keydown", (e) => { if (e.key === "Enter") pick(); });
+    const td = (text, cls) => { const d = tr.insertCell(); d.textContent = text; if (cls) d.className = cls; return d; };
+    td(c.label);
+    const cell = tr.insertCell(); const W = 260, H = 34, svg = sv("svg", { viewBox: `0 0 ${W} ${H}`, width: W, height: H, role: "img", "aria-label": `${m.short} by ${c.label} fifth` }, cell);
+    const sx = (i) => 16 + i * (W - 32) / 4, sy = (v) => H - 6 - (Math.min(Math.max(v, lo), hi) - lo) / ((hi - lo) || 1) * (H - 12);
+    sv("line", { x1: 4, x2: W - 4, y1: H - 3.5, y2: H - 3.5, stroke: "var(--hair)" }, svg);
+    const meds = groups.map((g) => (g.length >= 3 ? quantile(g, 0.5) : NaN));
+    const pts = meds.map((v, i) => [sx(i), sy(v)]).filter(([, y], i) => isFinite(meds[i]));
+    if (pts.length > 1) sv("polyline", { points: pts.map((p) => p.join(",")).join(" "), fill: "none", stroke: "var(--series-1)", "stroke-width": 1.5, opacity: 0.5 }, svg);
+    groups.forEach((g, i) => {
+      if (g.length < 3) return;
+      sv("line", { x1: sx(i), x2: sx(i), y1: sy(quantile(g, 0.25)), y2: sy(quantile(g, 0.75)), stroke: "var(--series-1)", "stroke-width": 2, "stroke-linecap": "round", opacity: 0.45 }, svg);
+      sv("circle", { cx: sx(i), cy: sy(meds[i]), r: 4, fill: "var(--series-1)", stroke: "var(--surface)", "stroke-width": 1.5 }, svg);
+    });
+    td(meds.map((v) => (isFinite(v) ? fmt(v, m.d) : "–")).join(" · "), "num muted");
+    const pairs = area.filter((r) => r.cov[c.key] != null);
+    const rho = pairs.length >= 20 ? spearman(pairs.map((r) => r.cov[c.key]), pairs.map((r) => r.y)) : NaN;
+    td(isFinite(rho) ? fmt(rho, 2) : "–", "r");
+    const j = model ? model.keys.indexOf(c.key) : -1;
+    if (j >= 0) { const b = model.beta[j + 1], se = model.se[j + 1], dd = m.d === 0 ? 1 : 2; td(`${b >= 0 ? "+" : ""}${fmt(b, dd)} (${fmt(b - 1.96 * se, dd)} to ${fmt(b + 1.96 * se, dd)})`, "r"); }
+    else td("–", "r muted");
+  });
+}
+
 // ---------------------------------------------------------------- comparison
 function renderCompare() {
   const chips = $("chips"); chips.replaceChildren();
@@ -657,7 +732,8 @@ function renderCompare() {
   const t = $("cmp-table"); t.replaceChildren();
   const { m, all, model } = view;
   const byCode = new Map(all.map((r) => [r.p.c, r]));
-  const covShown = COV.filter((c) => c.key !== "list_size").slice(0, 8);
+  const preferred = ["imd", "pct_65plus", "pct_male", "pct_u17", "prev_smok", "prev_dm", "prev_t2dm", "prev_hyp", "prev_copd", "prev_dep", "gp_qual_fte_10k", "pts_per_gp", "dpc_fte_10k"];
+  const covShown = preferred.map(covDef).filter(Boolean).filter((c, i, a) => !(c.key === "pct_u17" && a.some((x) => x.key === "pct_65plus")) && !(c.key === "prev_t2dm" && a.some((x) => x.key === "prev_dm"))).slice(0, 9);
   const head = t.createTHead().insertRow();
   const cols = ["Practice", "PCN", "List size", m.short, "England percentile", "Expected", "vs expected", ...covShown.map((c) => c.label.replace(/ \(.*\)$/, "").replace(" prevalence", "").replace("Deprivation", "IMD"))];
   cols.forEach((h, i) => { const th = document.createElement("th"); th.textContent = h; if (i >= 2) th.className = "r"; head.append(th); });
@@ -857,7 +933,7 @@ function setupUpload() {
         msgs.push(`${file.name}: added ${keys.length} factor${keys.length > 1 ? "s" : ""}`);
       } catch (err) { msgs.push(`${file.name}: ${err.message}`); }
     }
-    const order = ["Deprivation", "Age & sex", "Comorbidity", "Smoking", "Practice", "Other"];
+    const order = GROUP_ORDER;
     COV.sort((a, b) => order.indexOf(a.group) - order.indexOf(b.group));
     $("upload-status").textContent = msgs.join(" · ");
     fillFactorSelect(); update();
@@ -882,7 +958,7 @@ function fillAreas() {
   uniq(P.filter((x) => x.icb === state.icb).map((x) => x.pcn)).forEach((v) => opt(p, v, titleCase(v))); p.value = state.pcn;
 }
 function setupControls() {
-  const ms = $("metric"); METRICS.forEach((m) => opt(ms, m.key, m.label)); ms.value = state.metric;
+  const ms = $("metric"); METRICS.filter((m) => !m.needs || P.some((p) => p.v[m.needs] != null)).forEach((m) => opt(ms, m.key, m.label)); ms.value = state.metric;
   ms.addEventListener("change", () => { state.metric = ms.value; update(); });
   const seg = $("period");
   const periods = [...months().map((mk, i) => [String(i), MONTH_NAMES[+mk.slice(5) - 1] + " " + mk.slice(0, 4)]), ["avg", `${months().length}-month average`]];
@@ -904,6 +980,9 @@ function setupControls() {
   cv.addEventListener("pointermove", (ev) => { const q = nearest(ev); if (!q) { hideTip(); cv.style.cursor = "default"; return; } cv.style.cursor = "pointer"; showTip(ev, practiceTipRows(q.r), q.r.p.n, `${q.r.p.c} · ${titleCase(q.r.p.pcn)}`); });
   cv.addEventListener("pointerleave", hideTip);
   cv.addEventListener("click", (ev) => { const q = nearest(ev); if (q && !state.selected.includes(q.r.p.c)) { state.selected.push(q.r.p.c); update(); } });
+  const presetBtns = [["preset-pop", "population"], ["preset-wf", "workforce"]];
+  presetBtns.forEach(([id, kind]) => $(id).addEventListener("click", () => { setModelPreset(kind); presetBtns.forEach(([i]) => $(i).setAttribute("aria-pressed", String(i === id))); update(); }));
+  $("preset-wf").hidden = !COV.some((c) => c.group === "Workforce");
   setupSearch(); setupUpload();
   let rt; addEventListener("resize", () => { clearTimeout(rt); rt = setTimeout(() => { renderScatter(); renderQuintiles(); }, 120); });
   const redraw = () => { renderScatter(); renderQuintiles(); };
@@ -911,9 +990,23 @@ function setupControls() {
   new MutationObserver(redraw).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
 }
 
+function coverage(k) { return P.filter((p) => p.v[k] != null).length / Math.max(1, P.length); }
+// Population preset: the factors a practice cannot change. Workforce is a lever, so it is opt-in:
+// with it ticked, "expected" means "expected for this population AND this staffing".
+function setModelPreset(kind) {
+  state.inModel = new Set();
+  COV.forEach((c) => {
+    if (c.key === "list_size" || coverage(c.key) < 0.9) return;
+    if (c.group === "Workforce" && kind !== "workforce") return;
+    if (c.group === "Workforce" && !["gp_qual_fte_10k", "nurse_fte_10k", "dpc_fte_10k", "admin_fte_10k"].includes(c.key)) return;
+    state.inModel.add(c.key);
+  });
+  // Overlapping age measures: prefer the full age bands when present.
+  if (state.inModel.has("pct_65plus")) { state.inModel.delete("pct_u17"); state.inModel.delete("pct_80plus"); state.inModel.delete("pct_75plus"); }
+}
 function update() {
   compute();
-  renderTiles(); renderScatter(); renderQuintiles(); renderModel(); renderCompare(); renderAll();
+  renderTiles(); renderScatter(); renderQuintiles(); renderModel(); renderWorkforce(); renderCompare(); renderAll();
   try { localStorage.setItem("gpsda", JSON.stringify({ metric: state.metric, factor: state.factor, period: state.period })); } catch {}
 }
 
@@ -928,10 +1021,11 @@ async function boot() {
   P = state.data.practices; COV = state.data.covariates.slice();
   try { const s = JSON.parse(localStorage.getItem("gpsda") || "{}"); if (METRICS.some((m) => m.key === s.metric)) state.metric = s.metric; if (COV.some((c) => c.key === s.factor)) state.factor = s.factor; if (s.period === "avg" || state.data.months[+s.period]) state.period = s.period; } catch {}
   // Default model: every factor with good coverage except list size.
-  COV.forEach((c) => { const cover = P.filter((p) => p.v[c.key] != null).length / P.length; if (cover >= 0.9 && c.key !== "list_size") state.inModel.add(c.key); });
+  setModelPreset("population");
   const ms = state.data.months, last = ms[ms.length - 1], first = ms[0];
   $("lede").textContent = `How urgent and same-day appointment rates vary between ${fmt(P.length)} practices in England (${MONTH_NAMES[+first.slice(5) - 1]}–${MONTH_NAMES[+last.slice(5) - 1]} ${last.slice(0, 4)}), and how much of that variation lines up with deprivation, age structure and disease burden.`;
   $("provenance").textContent = `Data built ${state.data.generated}. Appointments: NHS England / NHS Digital, Appointments in General Practice practice-level crosstab. Urgent categories: ${state.data.urgentCategories.join(", ")}.`;
+  if (COV.some((c) => c.key === "pct_65plus")) $("agesex-note").textContent = "Age and sex come from the NHS Digital registered-patients 5-year band file; the under-17 share is kept as an alternative measure.";
   setupControls(); update();
 }
 boot();
