@@ -24,6 +24,11 @@ The appointments data is the NHS Digital *Appointments in General Practice* prac
   - an adjusted linear model (effect per 1 SD, with 95% CI) whose factors you can tick on or off
 - **Compare practices**: search for a practice (or add its whole PCN). Each one is shown against its England percentile and against the value the model *expects* for its population mix.
 - **All-practices table**: sortable, filterable and copyable as CSV.
+- **Workforce and access**: GP, nurse, direct-patient-care and admin FTE per 10,000 patients, and patients per GP. For each measure the panel shows:
+  - median access in each fifth of practices by staffing
+  - its effect once population mix is held constant
+
+  Also added: two output measures (GP appointments and same-day GP appointments per GP FTE per month), and a model preset that adds staffing to the population factors.
 - **Add your own data**: upload any practice-level CSV, for example smoking prevalence, NHS Digital's 5-year age band file or a Fingertips export. Its numeric columns become new factors. Files are processed in the browser only.
 
 ## Factors included in this build
@@ -34,6 +39,8 @@ The appointments data is the NHS Digital *Appointments in General Practice* prac
 | Age | Share of patients under 17: 1 − NDA list size aged 17+ ÷ registered list, March 2025 |
 | CVD comorbidity | QOF 2024-25 prevalence: AF, CHD, heart failure, hypertension, stroke/TIA, PAD |
 | Diabetes | National Diabetes Audit 2024-25: type 2 diabetes and non-diabetic hyperglycaemia registrations per list aged 17+ |
+| Smoking | QOF-recorded current smokers aged 15+, 2024/25 (Fingertips indicator 91280) |
+| Workforce | NHS Digital GP workforce, practice-level return (latest month), when fetched |
 | List size | Registered list, December 2025 (also the rate denominator) |
 
 **Not yet included: % male, full age bands and smoking.** These need two files that weren't available in this build:
@@ -55,6 +62,17 @@ You can add them in either of two ways:
   - a list size under 1,000
   - more than 2,000 or fewer than 100 appointments per 1,000 patients a month
   - more than 40% of appointments in unmapped categories
+
+## Fetching the public source files
+
+`scripts/fetch_nhs_data.py` runs in GitHub Actions (`.github/workflows/fetch-nhs-data.yml`, manual trigger, or automatically when the script changes). It downloads the latest:
+
+- GP workforce practice-level file
+- registered patients by 5-year age band
+- QOF raw data
+- Fingertips smoking and GP-profile indicators
+
+It then commits slim practice-level CSVs to `data/sources/`, and `build_data.py` picks them up. It falls back to a headless browser when NHS Digital refuses scripted requests.
 
 ## Rebuilding
 

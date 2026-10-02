@@ -253,6 +253,47 @@ def fetch_manifest() -> dict:
     return json.loads(path.read_text()) if path.exists() else {}
 
 
+FT_RULES = [  # (regex on Fingertips indicator name, key, label, group)
+    (r"aged? 65\+|65\+ years", "pct_65plus", "Patients aged 65+ (%)", "Age & sex"),
+    (r"aged? 75\+|75\+ years", "pct_75plus", "Patients aged 75+ (%)", "Age & sex"),
+    (r"aged? 85\+|85\+ years", "pct_85plus", "Patients aged 85+ (%)", "Age & sex"),
+    (r"under 18", "pct_u18", "Patients aged under 18 (%)", "Age & sex"),
+    (r"aged 0 to 4", "pct_0_4", "Patients aged 0–4 (%)", "Age & sex"),
+    (r"^% male|\bmale\b.*%", "pct_male", "Male patients (%)", "Age & sex"),
+]
+FT_QOF = {"diabetes": "dm", "asthma": "ast", "copd": "copd", "depression": "dep", "mental health": "mh",
+          "ckd": "ckd", "chronic kidney": "ckd", "cancer": "can", "dementia": "dem", "obesity": "ob",
+          "epilepsy": "ep", "learning disab": "ld", "osteoporosis": "ost", "rheumatoid": "ra",
+          "palliative": "pc", "hypertension": "hyp", "chd": "chd", "coronary": "chd", "heart failure": "hf",
+          "atrial fibrillation": "af", "stroke": "stia", "peripheral arterial": "pad", "pad": "pad",
+          "non-diabetic hyperglycaemia": "ndh", "ndh": "ndh"}
+
+
+def load_fingertips() -> tuple[pd.DataFrame | None, dict]:
+    """Fingertips GP profile indicators -> named factors (age bands, QOF prevalence)."""
+    wide = load_wide("fingertips_practice.csv")
+    meta_path = SRC / "fingertips_practice_meta.json"
+    if wide is None or not meta_path.exists():
+        return None, {}
+    out, labels = pd.DataFrame(index=wide.index), {}
+    for m in json.loads(meta_path.read_text()):
+        name, key = m["name"], None
+        low = name.lower()
+        for rx, k, label, group in FT_RULES:
+            if re.search(rx, low):
+                key, labels[k] = k, (label, f"Fingertips GP profile: {name} ({m['period']})", group, "%")
+                break
+        if key is None and "prevalence" in low and "qof" in low:
+            g = next((v for kw, v in FT_QOF.items() if kw in low), None)
+            if g:
+                key = f"prev_{g}"
+                labels[key] = (f"{QOF_GROUP_NAMES.get(g, g.upper())} prevalence (%)",
+                               f"QOF via Fingertips ({m['period']})", "Comorbidity", "%")
+        if key and key not in out.columns and m["key"] in wide.columns:
+            out[key] = wide[m["key"]]
+    return out, labels
+
+
 # GP workforce (practice level). Column names follow the NHS Digital GPW CSV.
 WORKFORCE_FTE = {
     "gp_fte": ["TOTAL_GP_FTE"],
@@ -325,7 +366,7 @@ COVARIATE_META = {
     "pct_trainee": ("GPs in training share of GP FTE (%)", "NHS Digital GP workforce", "Workforce", "%"),
     "list_size": ("Registered list size", "NHS Digital, list size used as denominator", "Practice", ""),
 }
-QOF_GROUP_NAMES = {
+QOF_GROUP_NAMES = {  # noqa: also used by load_fingertips
     "dm": "Diabetes", "ast": "Asthma", "copd": "COPD", "dep": "Depression", "mh": "Serious mental illness",
     "ckd": "CKD", "can": "Cancer", "dem": "Dementia", "ob": "Obesity", "ep": "Epilepsy",
     "ld": "Learning disability", "ost": "Osteoporosis", "ra": "Rheumatoid arthritis", "pc": "Palliative care",
@@ -377,6 +418,14 @@ def main() -> None:
         if period:
             label, src, group, unit = COVARIATE_META["prev_smok"]
             COVARIATE_META["prev_smok"] = (label, f"{src}, {period}", group, unit)
+    ft, ft_labels = load_fingertips()
+    if ft is not None:
+        add = [c for c in ft.columns if c not in cov.columns]
+        cov = cov.join(ft[add], how="outer")
+        for c in add:
+            if c not in COVARIATE_META or c.startswith("pct_"):
+                COVARIATE_META[c] = ft_labels[c]
+        print("  Fingertips factors added:", ", ".join(add) or "none")
     wf = load_workforce(cov["list_size"])
     if wf is not None:
         cov = cov.join(wf, how="outer")
