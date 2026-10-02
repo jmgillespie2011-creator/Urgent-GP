@@ -86,7 +86,7 @@ The `site/` folder is fully static, so it can be hosted on GitHub Pages, Vercel 
 - Smoking, age and disease burden also show weak links (|ρ| < 0.2).
 - **GP staffing shows the clearest link**:
   - Same-day **GP** appointments rise from a median of 98 to 129 per 1,000 a month (+32%) from the lowest to the highest fifth of qualified GPs per 10,000 patients.
-  - After adjusting for deprivation, age, sex, smoking and the QOF registers, 1 SD more qualified GP FTE (about 1.6 per 10,000) means about 13 more same-day GP appointments per 1,000 a month.
+  - After adjusting for deprivation, age, sex, smoking and the QOF registers, 1 SD more qualified GP FTE (about 1.8 per 10,000) means about 13 more same-day GP appointments per 1,000 a month.
   - Nurse, admin and reception staffing show little or no link with same-day GP access.
 - More deprived practices have fewer qualified GPs per patient (ρ ≈ −0.17), which partly offsets their higher need.
 - Population and staffing factors together explain only about 6% of between-practice variation. Most of the variation is practice-level: how each practice organises and records access.
