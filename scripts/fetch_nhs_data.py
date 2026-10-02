@@ -225,13 +225,24 @@ def fetch_workforce() -> None:
     files.sort(key=lambda f: not re.search(r"detailed", f[0] + f[1], re.I))
     for url, _text in files:
         try:
-            fname, rows = read_csv_from(get_file(url), re.compile(r"(?i)practice"))
+            blob = get_file(url)
         except Exception as e:  # noqa: BLE001
             print(f"    {url}: {e}")
             continue
-        if rows and any(re.fullmatch(r"(?i)prac_code|practice_code", c) for c in rows[0]):
-            return _save_workforce(rows, {"page": page, "file": url, "csv": fname})
-        print(f"    {url}: {fname} has no practice code column")
+        # The zip holds several CSVs; the wide "Detailed" one has a TOTAL_* column per staff group.
+        z = zipfile.ZipFile(io.BytesIO(blob)) if blob[:2] == b"PK" else None
+        names = [n for n in z.namelist() if n.lower().endswith(".csv")] if z else ["download.csv"]
+        print(f"    {url}: {names}")
+        for name in sorted(names, key=lambda n: not re.search(r"(?i)detailed", n)):
+            text = z.read(name).decode("utf-8-sig", "replace") if z else blob.decode("utf-8-sig", "replace")
+            rows = list(csv.DictReader(io.StringIO(text)))
+            if not rows:
+                continue
+            totals = [c for c in rows[0] if re.match(r"(?i)^total_", c)]
+            has_code = any(re.fullmatch(r"(?i)prac_code|practice_code", c) for c in rows[0])
+            print(f"      {name}: {len(rows)} rows, {len(totals)} TOTAL_ columns")
+            if has_code and len(totals) >= 10:
+                return _save_workforce(rows, {"page": page, "file": url, "csv": name})
     raise RuntimeError("no usable practice-level workforce file")
 
 
@@ -481,9 +492,12 @@ def main() -> int:
     OUT.mkdir(parents=True, exist_ok=True)
     old = OUT / "fetch_manifest.json"
     if old.exists():  # keep earlier successes; this run's results overwrite per source
-        manifest.update({k: v for k, v in json.loads(old.read_text()).items() if not k.endswith("_error")})
+        manifest.update({k: v for k, v in json.loads(old.read_text()).items()
+                         if not k.endswith("_error") and k != "workforce"})
     ok = 0
-    steps = [("workforce", fetch_workforce), ("age/sex", fetch_age_sex), ("QOF", fetch_qof),
+    # QOF prevalence comes from Fingertips (fetch_fingertips_profile); fetch_qof() is kept for the
+    # official raw files when digital.nhs.uk is reachable: python -c "import fetch_nhs_data as f; f.fetch_qof()".
+    steps = [("workforce", fetch_workforce), ("age/sex", fetch_age_sex),
              ("smoking", fetch_smoking), ("fingertips", fetch_fingertips_profile)]
     for name, fn in steps:
         print(f"== {name}")
