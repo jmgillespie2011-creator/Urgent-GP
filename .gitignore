@@ -1,0 +1,4 @@
+# Large upstream downloads: re-fetch from NHS Digital (see README)
+data/raw/
+__pycache__/
+*.pyc

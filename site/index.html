@@ -1,0 +1,942 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}[hidden]{display:none!important}img{max-width:100%}</style>
+</head>
+<body>
+<title>GP Same-Day Access Explorer</title>
+<meta name="description" content="Compare urgent and same-day GP appointment rates across practices in England against deprivation, age, comorbidity and smoking.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: one control row scopes everything; summary tiles, then the scatter + quintile pair,
+   then "what explains it" and practice comparison, then the full table and methods. */
+:root {
+  --bg: #f6f7f5;
+  --surface: #fcfcfb;
+  --ink: #101614;
+  --ink-2: #4b5552;
+  --muted: #7d8784;
+  --hair: #e0e3df;
+  --axis: #c3c8c3;
+  --accent: #0f6e63;          /* UI accent: deep teal */
+  --accent-wash: #e3f0ed;
+  --series-1: #2a78d6;        /* practices */
+  --series-2: #eb6834;        /* highlighted practices */
+  --faint: #c9cec9;           /* out-of-area practices */
+  --pos: #2a78d6;             /* diverging: above */
+  --neg: #e34948;             /* diverging: below */
+  --mid: #f0efec;
+  --ring: rgba(11,11,11,0.10);
+  --shadow: 0 1px 2px rgba(16,22,20,0.06);
+  --font-ui: "Public Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0f1312; --surface: #171c1b; --ink: #f3f5f4; --ink-2: #c3c9c6; --muted: #8b9592;
+    --hair: #2a302e; --axis: #3a413f; --accent: #5cc3b3; --accent-wash: #16302c;
+    --series-1: #3987e5; --series-2: #d95926; --faint: #333a38; --pos: #3987e5; --neg: #e66767;
+    --mid: #383835; --ring: rgba(255,255,255,0.10); --shadow: none; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0f1312; --surface: #171c1b; --ink: #f3f5f4; --ink-2: #c3c9c6; --muted: #8b9592;
+  --hair: #2a302e; --axis: #3a413f; --accent: #5cc3b3; --accent-wash: #16302c;
+  --series-1: #3987e5; --series-2: #d95926; --faint: #333a38; --pos: #3987e5; --neg: #e66767;
+  --mid: #383835; --ring: rgba(255,255,255,0.10); --shadow: none; color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--ink); font-family: var(--font-ui); font-size: 14px; line-height: 1.5; }
+.wrap { max-width: 1320px; margin: 0 auto; padding-inline: 20px; padding-block: 24px 48px; display: grid; gap: 20px; }
+h1, h2, h3 { margin: 0; text-wrap: balance; }
+h1 { font-size: 1.75rem; font-weight: 700; letter-spacing: -0.01em; }
+h2 { font-size: 1.05rem; font-weight: 600; }
+h3 { font-size: 0.9rem; font-weight: 600; }
+p { margin: 0; }
+.eyebrow { font-size: 0.72rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent); }
+.sub { color: var(--ink-2); max-width: 75ch; }
+.muted { color: var(--muted); }
+.mono { font-family: var(--font-mono); font-size: 0.85em; }
+.num { font-variant-numeric: tabular-nums; }
+header.top { display: grid; gap: 6px; }
+
+/* Controls */
+.controls { display: flex; flex-wrap: wrap; gap: 12px 16px; align-items: end; background: var(--surface); border: 1px solid var(--ring); border-radius: 10px; padding: 14px 16px; box-shadow: var(--shadow); }
+@media (min-width: 1100px) and (min-height: 760px) { .controls { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; } }
+.ctl { display: grid; gap: 4px; min-width: 0; }
+.ctl label, .ctl .lbl { font-size: 0.72rem; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; color: var(--muted); }
+select, input[type="search"], input[type="text"] { font: inherit; color: var(--ink); background: var(--bg); border: 1px solid var(--axis); border-radius: 6px; padding: 6px 8px; max-width: 100%; }
+select { min-width: 0; max-width: 300px; }
+select:focus-visible, input:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+.seg { display: inline-flex; border: 1px solid var(--axis); border-radius: 6px; overflow: hidden; }
+.seg button { font: inherit; border: 0; background: var(--bg); color: var(--ink-2); padding: 6px 10px; cursor: pointer; border-left: 1px solid var(--axis); }
+.seg button:first-child { border-left: 0; }
+.seg button[aria-pressed="true"] { background: var(--accent); color: var(--surface); font-weight: 600; }
+.check { display: inline-flex; gap: 6px; align-items: center; font-size: 0.85rem; color: var(--ink-2); cursor: pointer; }
+button.btn { font: inherit; font-size: 0.85rem; border: 1px solid var(--axis); background: var(--surface); color: var(--ink); border-radius: 6px; padding: 5px 10px; cursor: pointer; }
+button.btn:hover { background: var(--accent-wash); }
+
+/* Tiles */
+.tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; }
+.tile { background: var(--surface); border: 1px solid var(--ring); border-radius: 10px; padding: 14px 16px; display: grid; gap: 2px; align-content: start; }
+.tile .k { font-size: 0.75rem; color: var(--muted); font-weight: 600; }
+.tile .v { font-size: 1.6rem; font-weight: 700; letter-spacing: -0.01em; }
+.tile .d { font-size: 0.8rem; color: var(--ink-2); }
+
+/* Cards */
+.grid2 { display: grid; grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr); gap: 16px; }
+@media (max-width: 960px) { .grid2 { grid-template-columns: minmax(0, 1fr); } }
+.card { background: var(--surface); border: 1px solid var(--ring); border-radius: 10px; padding: 16px; display: grid; gap: 10px; align-content: start; min-width: 0; box-shadow: var(--shadow); }
+.card-head { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 6px 12px; align-items: baseline; }
+.card-head p { font-size: 0.82rem; color: var(--ink-2); }
+.chart { position: relative; width: 100%; }
+.chart canvas, .chart svg { display: block; width: 100%; }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: 0.78rem; color: var(--ink-2); }
+.legend span { display: inline-flex; align-items: center; gap: 6px; }
+.sw { width: 9px; height: 9px; border-radius: 50%; display: inline-block; }
+.sw.line { width: 14px; height: 2px; border-radius: 1px; }
+
+.tip { position: fixed; pointer-events: none; z-index: 20; background: var(--surface); color: var(--ink); border: 1px solid var(--ring); border-radius: 8px; padding: 8px 10px; font-size: 0.8rem; box-shadow: 0 4px 16px rgba(0,0,0,0.12); max-width: 300px; display: grid; gap: 2px; }
+.tip strong { font-size: 0.95rem; }
+.tip .row { display: flex; justify-content: space-between; gap: 12px; }
+.tip .row span:first-child { color: var(--muted); }
+
+/* Tables */
+.tbl-wrap { overflow-x: auto; border: 1px solid var(--hair); border-radius: 8px; }
+table { border-collapse: collapse; width: 100%; font-size: 0.82rem; }
+th, td { text-align: left; padding: 7px 10px; border-bottom: 1px solid var(--hair); white-space: nowrap; }
+th { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted); font-weight: 600; background: var(--surface); position: sticky; top: 0; }
+td.r, th.r { text-align: right; font-variant-numeric: tabular-nums; }
+tbody tr:last-child td { border-bottom: 0; }
+tbody tr.clickable { cursor: pointer; }
+tbody tr.clickable:hover, tbody tr.sel { background: var(--accent-wash); }
+th.sortable { cursor: pointer; }
+th.sortable:hover { color: var(--ink); }
+.wrapcell { white-space: normal; min-width: 180px; }
+
+.pill { display: inline-flex; align-items: center; gap: 4px; border-radius: 999px; padding: 1px 8px; font-size: 0.75rem; font-weight: 600; border: 1px solid var(--axis); color: var(--ink-2); }
+.pill.up { border-color: var(--pos); color: var(--pos); }
+.pill.down { border-color: var(--neg); color: var(--neg); }
+.rhobar { display: inline-block; position: relative; width: 120px; height: 10px; background: var(--mid); border-radius: 2px; vertical-align: middle; }
+.rhobar i { position: absolute; top: 0; bottom: 0; border-radius: 2px; }
+.rhobar b { position: absolute; left: 50%; top: -2px; bottom: -2px; width: 1px; background: var(--axis); }
+
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip { display: inline-flex; align-items: center; gap: 6px; border: 1px solid var(--series-2); border-radius: 999px; padding: 2px 4px 2px 10px; font-size: 0.8rem; }
+.chip button { border: 0; background: transparent; color: var(--ink-2); cursor: pointer; font: inherit; padding: 0 6px; border-radius: 999px; }
+.chip button:hover { background: var(--accent-wash); }
+.search-wrap { position: relative; max-width: 420px; }
+.search-wrap input { width: 100%; }
+.suggest { position: absolute; left: 0; right: 0; top: 100%; z-index: 10; background: var(--surface); border: 1px solid var(--axis); border-radius: 6px; margin-top: 2px; max-height: 260px; overflow-y: auto; box-shadow: 0 4px 16px rgba(0,0,0,0.12); }
+.suggest div { padding: 6px 10px; cursor: pointer; display: flex; justify-content: space-between; gap: 10px; }
+.suggest div:hover, .suggest div.act { background: var(--accent-wash); }
+
+.notes { display: grid; gap: 8px; color: var(--ink-2); font-size: 0.85rem; max-width: 95ch; }
+.notes h3 { color: var(--ink); margin-top: 6px; }
+.notes ul { margin: 0; padding-left: 18px; display: grid; gap: 4px; }
+.notes code { font-family: var(--font-mono); font-size: 0.85em; background: var(--mid); padding: 0 4px; border-radius: 3px; }
+.drop { border: 1px dashed var(--axis); border-radius: 8px; padding: 12px; display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.status { font-size: 0.8rem; color: var(--ink-2); }
+.loading { padding: 40px; text-align: center; color: var(--muted); }
+.pager { display: flex; gap: 8px; align-items: center; justify-content: flex-end; font-size: 0.8rem; color: var(--ink-2); }
+@media (max-width: 600px) {
+  .wrap { padding-inline: 16px; }
+  h1 { font-size: 1.4rem; }
+  select { max-width: 100%; }
+}
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <span class="eyebrow">Appointments in General Practice · England</span>
+    <h1>GP Same-Day Access Explorer</h1>
+    <p class="sub" id="lede">How urgent and same-day appointment rates vary between practices, and how much of that variation lines up with deprivation, age structure and disease burden.</p>
+  </header>
+
+  <section class="controls" aria-label="Filters">
+    <div class="ctl"><label for="metric">Access measure</label><select id="metric"></select></div>
+    <div class="ctl"><span class="lbl" id="period-lbl">Period</span><div class="seg" id="period" role="group" aria-labelledby="period-lbl"></div></div>
+    <div class="ctl"><label for="factor">Compare against</label><select id="factor"></select></div>
+    <div class="ctl"><label for="region">Region</label><select id="region"></select></div>
+    <div class="ctl"><label for="icb">ICB</label><select id="icb"></select></div>
+    <div class="ctl"><label for="pcn">PCN</label><select id="pcn"></select></div>
+    <label class="check" title="Excludes practices with list size under 1,000, more than 2,000 or fewer than 100 appointments per 1,000 patients a month, or over 40% of appointments in unmapped categories."><input type="checkbox" id="qc" checked> Exclude data-quality outliers</label>
+  </section>
+
+  <section class="tiles" id="tiles" aria-live="polite"><div class="loading">Loading 6,000+ practices…</div></section>
+
+  <section class="grid2">
+    <article class="card">
+      <div class="card-head">
+        <h2 id="scatter-title">Practices</h2>
+        <p id="scatter-note"></p>
+      </div>
+      <div class="legend" id="scatter-legend"></div>
+      <div class="chart" id="scatter-box"><canvas id="scatter" aria-label="Scatter plot of practices" role="img"></canvas></div>
+    </article>
+    <article class="card">
+      <div class="card-head">
+        <h2 id="quint-title">By quintile</h2>
+      </div>
+      <p class="muted" id="quint-note" style="font-size:0.82rem"></p>
+      <div class="chart" id="quint-box"></div>
+    </article>
+  </section>
+
+  <section class="card">
+    <div class="card-head">
+      <h2>What lines up with the variation?</h2>
+      <p id="model-note"></p>
+    </div>
+    <p class="muted" style="font-size:0.82rem">Unadjusted: Spearman rank correlation with the access measure. Adjusted: change in the measure per 1 standard deviation of the factor, holding the other ticked factors constant (linear model, 95% CI). Click a row to plot it.</p>
+    <div class="tbl-wrap"><table id="model-table"></table></div>
+  </section>
+
+  <section class="card">
+    <div class="card-head">
+      <h2>Compare practices</h2>
+      <p>Expected values come from the adjusted model above, so they account for each practice's deprivation, age and disease mix.</p>
+    </div>
+    <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center">
+      <div class="search-wrap">
+        <input type="search" id="psearch" placeholder="Add a practice: name, code or PCN" autocomplete="off" aria-label="Search practices">
+        <div class="suggest" id="suggest" hidden></div>
+      </div>
+      <button class="btn" id="add-pcn" type="button" disabled>Add the rest of its PCN</button>
+      <button class="btn" id="clear-sel" type="button">Clear</button>
+    </div>
+    <div class="chips" id="chips"></div>
+    <div class="tbl-wrap"><table id="cmp-table"></table></div>
+  </section>
+
+  <section class="card">
+    <div class="card-head">
+      <h2>All practices in view</h2>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+        <input type="search" id="tsearch" placeholder="Filter table" aria-label="Filter table">
+        <button class="btn" id="copy-csv" type="button">Copy as CSV</button>
+      </div>
+    </div>
+    <div class="tbl-wrap" style="max-height:520px;overflow-y:auto"><table id="all-table"></table></div>
+    <div class="pager" id="pager"></div>
+  </section>
+
+  <section class="card">
+    <div class="card-head"><h2>Add your own practice-level data</h2></div>
+    <p class="sub" style="font-size:0.85rem">Load a CSV with a practice code column (e.g. <span class="mono">practice_code</span>, <span class="mono">ORG_CODE</span>, <span class="mono">Area Code</span>) plus numeric columns, such as QOF smoking prevalence, % aged 65+ or % male. Each numeric column becomes a factor you can compare against and include in the model. NHS Digital's 5-year age band file (<span class="mono">gp-reg-pat-prac-quin-age.csv</span>) and Fingertips long-format exports are recognised and converted automatically. Files stay in your browser.</p>
+    <div class="drop">
+      <input type="file" id="upload" accept=".csv,text/csv" multiple aria-label="Upload CSV">
+      <span class="status" id="upload-status">No extra data loaded.</span>
+    </div>
+  </section>
+
+  <section class="card notes">
+    <h2>Definitions and caveats</h2>
+    <h3>Access measures</h3>
+    <ul>
+      <li><b>Same-day</b>: appointments where the time between booking and appointment is "Same Day". Rates are per 1,000 registered patients per month; the 3-month view is the monthly average.</li>
+      <li><b>Urgent-type</b>: national categories <i>General Consultation Acute</i>, <i>Clinical Triage</i>, <i>Unplanned Clinical Activity</i> and <i>Walk-in</i>. <b>Urgent same-day</b> is those categories booked and delivered on the same day.</li>
+      <li>All appointment statuses are counted (attended, DNA and unknown), matching how NHS Digital reports appointment volumes. DNA rate is DNAs as a share of all appointments.</li>
+    </ul>
+    <h3>Factors</h3>
+    <ul id="factor-notes"></ul>
+    <h3>Things to keep in mind</h3>
+    <ul>
+      <li>The appointments data is management information from practice systems. Recording of booking dates, staff types and categories varies between practices; 12% of appointments nationally sit in unmapped categories, which mostly affects the urgent-type measures.</li>
+      <li>Denominators use the December 2025 registered list. Practices that merged or opened since may show inflated or missing rates.</li>
+      <li>August is a holiday month with one bank holiday, so its volumes run about 15% below June and July.</li>
+      <li>Correlation is not causation. Disease prevalences are strongly linked to age and to each other, so adjusted coefficients for related factors (e.g. hypertension and CHD) share the same signal and can flip sign.</li>
+      <li>Age and sex: this build has a proxy for age (share of patients under 17). For full age bands, % male and smoking, load the NHS Digital quinary-age file and a QOF smoking extract above.</li>
+    </ul>
+    <p class="muted" id="provenance"></p>
+  </section>
+</div>
+<div class="tip" id="tip" hidden></div>
+
+<script>
+(() => {
+"use strict";
+const $ = (id) => document.getElementById(id);
+const fmt = (v, d = 0) => v == null || !isFinite(v) ? "–" : v.toLocaleString("en-GB", { minimumFractionDigits: d, maximumFractionDigits: d });
+const MONTH_NAMES = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+const titleCase = (s) => (s || "").toLowerCase().replace(/\b([a-z])/g, (m) => m.toUpperCase()).replace(/\bPcn\b/g, "PCN").replace(/\bNhs\b/g, "NHS").replace(/\bIcb\b/g, "ICB");
+
+// Access measures derived from the per-month counts.
+const METRICS = [
+  { key: "sd_rate", label: "Same-day appointments per 1,000 patients", short: "Same-day /1,000", num: "sd", per: true, d: 0 },
+  { key: "urg_sd_rate", label: "Urgent same-day appointments per 1,000 patients", short: "Urgent same-day /1,000", num: "urg_sd", per: true, d: 0 },
+  { key: "sd_gp_rate", label: "Same-day GP appointments per 1,000 patients", short: "Same-day GP /1,000", num: "sd_gp", per: true, d: 0 },
+  { key: "tot_rate", label: "All appointments per 1,000 patients", short: "All appts /1,000", num: "total", per: true, d: 0 },
+  { key: "gp_rate", label: "GP appointments per 1,000 patients", short: "GP appts /1,000", num: "gp", per: true, d: 0 },
+  { key: "pct_sd", label: "Share of appointments booked same day (%)", short: "% same day", num: "sd", den: "total", d: 1 },
+  { key: "pct_urg_sd", label: "Share of urgent-type appointments seen same day (%)", short: "% urgent same day", num: "urg_sd", den: "urg", d: 1 },
+  { key: "pct_sd_f2f", label: "Share of same-day appointments face-to-face (%)", short: "% same-day F2F", num: "sd_f2f", den: "sd", d: 1 },
+  { key: "dna_pct", label: "Did-not-attend rate (%)", short: "DNA %", num: "dna", den: "total", d: 1 },
+];
+
+const state = {
+  data: null, metric: "sd_rate", period: "avg", factor: "imd",
+  region: "", icb: "", pcn: "", qc: true,
+  selected: [], inModel: new Set(), extra: [],
+  sortAll: { key: "metric", dir: -1 }, page: 0, tsearch: "",
+};
+
+let P = [];          // practice records
+let COV = [];        // covariate descriptors
+let view = null;     // computed view for current state
+
+// ---------------------------------------------------------------- stats helpers
+function quantile(sorted, p) {
+  if (!sorted.length) return NaN;
+  const i = (sorted.length - 1) * p, lo = Math.floor(i), hi = Math.ceil(i);
+  return sorted[lo] + (sorted[hi] - sorted[lo]) * (i - lo);
+}
+function ranks(a) {
+  const idx = a.map((v, i) => i).sort((x, y) => a[x] - a[y]);
+  const r = new Array(a.length);
+  for (let i = 0; i < idx.length;) {
+    let j = i; while (j + 1 < idx.length && a[idx[j + 1]] === a[idx[i]]) j++;
+    const avg = (i + j) / 2 + 1; for (let k = i; k <= j; k++) r[idx[k]] = avg; i = j + 1;
+  }
+  return r;
+}
+function pearson(x, y) {
+  const n = x.length; if (n < 3) return NaN;
+  let mx = 0, my = 0; for (let i = 0; i < n; i++) { mx += x[i]; my += y[i]; } mx /= n; my /= n;
+  let sxy = 0, sxx = 0, syy = 0;
+  for (let i = 0; i < n; i++) { const dx = x[i] - mx, dy = y[i] - my; sxy += dx * dy; sxx += dx * dx; syy += dy * dy; }
+  return sxy / Math.sqrt(sxx * syy);
+}
+const spearman = (x, y) => pearson(ranks(x), ranks(y));
+function invert(M) {
+  const n = M.length, A = M.map((r, i) => [...r, ...Array.from({ length: n }, (_, j) => (i === j ? 1 : 0))]);
+  for (let c = 0; c < n; c++) {
+    let p = c; for (let r = c + 1; r < n; r++) if (Math.abs(A[r][c]) > Math.abs(A[p][c])) p = r;
+    if (Math.abs(A[p][c]) < 1e-12) return null;
+    [A[c], A[p]] = [A[p], A[c]];
+    const d = A[c][c]; for (let j = 0; j < 2 * n; j++) A[c][j] /= d;
+    for (let r = 0; r < n; r++) if (r !== c) { const f = A[r][c]; if (f) for (let j = 0; j < 2 * n; j++) A[r][j] -= f * A[c][j]; }
+  }
+  return A.map((r) => r.slice(n));
+}
+// OLS of y on z-scored covariates. Missing covariate values are median-imputed.
+function fitModel(rows, keys) {
+  if (!keys.length || rows.length < keys.length + 10) return null;
+  const stats = keys.map((k) => {
+    const v = rows.map((r) => r.cov[k]).filter((x) => x != null && isFinite(x)).sort((a, b) => a - b);
+    const med = quantile(v, 0.5), mean = v.reduce((s, x) => s + x, 0) / v.length;
+    const sd = Math.sqrt(v.reduce((s, x) => s + (x - mean) ** 2, 0) / (v.length - 1)) || 1;
+    return { k, med, mean, sd };
+  });
+  const z = (r) => [1, ...stats.map((s) => { const v = r.cov[s.k]; return ((v == null || !isFinite(v) ? s.med : v) - s.mean) / s.sd; })];
+  const p = keys.length + 1, XtX = Array.from({ length: p }, () => new Array(p).fill(0)), Xty = new Array(p).fill(0);
+  const X = rows.map(z);
+  rows.forEach((r, i) => { const x = X[i]; for (let a = 0; a < p; a++) { Xty[a] += x[a] * r.y; for (let b = a; b < p; b++) XtX[a][b] += x[a] * x[b]; } });
+  for (let a = 0; a < p; a++) for (let b = 0; b < a; b++) XtX[a][b] = XtX[b][a];
+  const inv = invert(XtX); if (!inv) return null;
+  const beta = inv.map((row) => row.reduce((s, v, j) => s + v * Xty[j], 0));
+  let ssr = 0, sst = 0; const my = rows.reduce((s, r) => s + r.y, 0) / rows.length;
+  rows.forEach((r, i) => { const f = X[i].reduce((s, v, j) => s + v * beta[j], 0); ssr += (r.y - f) ** 2; sst += (r.y - my) ** 2; });
+  const dof = rows.length - p, sigma2 = ssr / dof;
+  const se = inv.map((row, i) => Math.sqrt(row[i] * sigma2));
+  return {
+    keys, beta, se, r2: 1 - ssr / sst, n: rows.length, residSd: Math.sqrt(sigma2),
+    predict: (cov) => z({ cov }).reduce((s, v, j) => s + v * beta[j], 0),
+  };
+}
+
+// ---------------------------------------------------------------- data access
+function months() { return state.data.months; }
+function sumCounts(p, field) {
+  const arr = p.k[field]; if (!arr) return null;
+  if (state.period === "avg") {
+    let s = 0, n = 0; arr.forEach((v) => { if (v != null) { s += v; n++; } });
+    return n ? { s, n } : null;
+  }
+  const v = arr[+state.period]; return v == null ? null : { s: v, n: 1 };
+}
+function metricValue(p, m) {
+  const num = sumCounts(p, m.num); if (!num) return null;
+  if (m.per) { const L = p.v.list_size; return L > 0 ? (num.s / num.n) / L * 1000 : null; }
+  const den = sumCounts(p, m.den); return den && den.s > 0 ? 100 * num.s / den.s : null;
+}
+function qcPass(p) {
+  const L = p.v.list_size; if (!(L >= 1000)) return false;
+  const tot = sumCounts(p, "total"), un = sumCounts(p, "unmapped");
+  if (!tot) return false;
+  const rate = tot.s / tot.n / L * 1000;
+  if (rate > 2000 || rate < 100) return false;
+  if (un && tot.s > 0 && un.s / tot.s > 0.4) return false;
+  return true;
+}
+const metricDef = () => METRICS.find((m) => m.key === state.metric);
+const covDef = (k) => COV.find((c) => c.key === k);
+function covValue(p, k) {
+  const v = p.v[k]; return v == null || !isFinite(v) ? null : v;
+}
+function inArea(p) {
+  return (!state.region || p.reg === state.region) && (!state.icb || p.icb === state.icb) && (!state.pcn || p.pcn === state.pcn);
+}
+function areaLabel() {
+  if (state.pcn) return titleCase(state.pcn);
+  if (state.icb) return state.icb.replace(" Integrated Care Board", " ICB");
+  if (state.region) return state.region;
+  return "England";
+}
+
+// ---------------------------------------------------------------- compute view
+function compute() {
+  const m = metricDef();
+  const all = [];
+  for (const p of P) {
+    if (state.qc && !qcPass(p)) continue;
+    const y = metricValue(p, m); if (y == null || !isFinite(y)) continue;
+    const cov = {}; COV.forEach((c) => { cov[c.key] = covValue(p, c.key); });
+    all.push({ p, y, cov, area: inArea(p) });
+  }
+  const area = all.filter((r) => r.area);
+  const ysAll = all.map((r) => r.y).sort((a, b) => a - b);
+  const ysArea = area.map((r) => r.y).sort((a, b) => a - b);
+  // National quintile cut points for the chosen factor so groups mean the same thing in every area.
+  const fx = all.map((r) => r.cov[state.factor]).filter((v) => v != null).sort((a, b) => a - b);
+  const cuts = [0.2, 0.4, 0.6, 0.8].map((q) => quantile(fx, q));
+  const quint = (v) => v == null ? null : cuts.findIndex((c) => v <= c) === -1 ? 4 : cuts.findIndex((c) => v <= c);
+  // Correlations (within area) and model (national fit, so expected values are comparable everywhere).
+  const corr = COV.map((c) => {
+    const pairs = area.filter((r) => r.cov[c.key] != null);
+    const rho = pairs.length >= 20 ? spearman(pairs.map((r) => r.cov[c.key]), pairs.map((r) => r.y)) : NaN;
+    const cover = all.filter((r) => r.cov[c.key] != null).length / Math.max(1, all.length);
+    return { c, rho, n: pairs.length, cover };
+  });
+  const keys = COV.map((c) => c.key).filter((k) => state.inModel.has(k));
+  const model = fitModel(all, keys);
+  if (model) all.forEach((r) => { r.exp = model.predict(r.cov); r.z = (r.y - r.exp) / model.residSd; });
+  view = { m, all, area, ysAll, ysArea, cuts, quint, corr, model, rank: (y) => {
+    // percentile within England (0–100)
+    let lo = 0, hi = ysAll.length; while (lo < hi) { const mid = (lo + hi) >> 1; if (ysAll[mid] < y) lo = mid + 1; else hi = mid; }
+    return 100 * lo / Math.max(1, ysAll.length - 1);
+  } };
+}
+
+// ---------------------------------------------------------------- rendering: tiles
+function tile(k, v, d) {
+  const el = document.createElement("div"); el.className = "tile";
+  const a = document.createElement("span"); a.className = "k"; a.textContent = k;
+  const b = document.createElement("span"); b.className = "v num"; b.textContent = v;
+  const c = document.createElement("span"); c.className = "d"; c.textContent = d;
+  el.append(a, b, c); return el;
+}
+function renderTiles() {
+  const { m, ysArea, ysAll, area, corr, quint } = view;
+  const t = $("tiles"); t.replaceChildren();
+  const med = quantile(ysArea, 0.5), q1 = quantile(ysArea, 0.25), q3 = quantile(ysArea, 0.75);
+  const natMed = quantile(ysAll, 0.5);
+  const sub = state.region || state.icb || state.pcn ? `England median ${fmt(natMed, m.d)}` : `Middle 50% of practices: ${fmt(q1, m.d)}–${fmt(q3, m.d)}`;
+  t.append(tile(`${areaLabel()}: median practice`, fmt(med, m.d), sub));
+  const p90 = quantile(ysArea, 0.9), p10 = quantile(ysArea, 0.1);
+  t.append(tile("Spread (90th ÷ 10th percentile)", isFinite(p90 / p10) ? `${fmt(p90 / p10, 1)}×` : "–", `${fmt(p10, m.d)} at the 10th vs ${fmt(p90, m.d)} at the 90th`));
+  const f = covDef(state.factor), cr = corr.find((x) => x.c.key === state.factor);
+  const g = [0, 4].map((qi) => area.filter((r) => quint(r.cov[state.factor]) === qi).map((r) => r.y).sort((a, b) => a - b));
+  const gap = quantile(g[1], 0.5) - quantile(g[0], 0.5);
+  const sign = gap > 0 ? "+" : "";
+  t.append(tile(`Top vs bottom quintile of ${shortFactor(f)}`, isFinite(gap) ? `${sign}${fmt(gap, m.d)}` : "–", `Median ${fmt(quantile(g[1], 0.5), m.d)} vs ${fmt(quantile(g[0], 0.5), m.d)} (national quintiles)`));
+  t.append(tile("Rank correlation (ρ)", cr && isFinite(cr.rho) ? fmt(cr.rho, 2) : "–", `${strength(cr?.rho)} · ${fmt(area.length)} practices`));
+}
+function strength(r) {
+  if (r == null || !isFinite(r)) return "Not enough practices";
+  const a = Math.abs(r);
+  const s = a < 0.1 ? "No meaningful link" : a < 0.3 ? "Weak" : a < 0.5 ? "Moderate" : "Strong";
+  return a < 0.1 ? s : `${s}, ${r > 0 ? "rises" : "falls"} with factor`;
+}
+function shortFactor(f) { return f ? f.label.replace(/ \(.*\)$/, "").replace(/,.*$/, "").toLowerCase().replace("imd 2025 score", "IMD") : ""; }
+
+// ---------------------------------------------------------------- rendering: scatter (canvas)
+const css = (n) => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+let scatterPts = [];
+function renderScatter() {
+  const { m, all } = view; const f = covDef(state.factor);
+  $("scatter-title").textContent = `${m.short} vs ${f.label.replace(/ \(%\)$/, " (%)")}`;
+  const box = $("scatter-box"), cv = $("scatter");
+  const W = box.clientWidth, H = Math.max(300, Math.min(460, W * 0.62));
+  const dpr = window.devicePixelRatio || 1;
+  cv.width = W * dpr; cv.height = H * dpr; cv.style.height = H + "px";
+  const ctx = cv.getContext("2d"); ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.clearRect(0, 0, W, H);
+  const pts = all.filter((r) => r.cov[state.factor] != null);
+  const xs = pts.map((r) => r.cov[state.factor]).sort((a, b) => a - b), ys = pts.map((r) => r.y).sort((a, b) => a - b);
+  const x0 = Math.min(quantile(xs, 0.002), 0 <= quantile(xs, 0.002) && quantile(xs, 0.002) < quantile(xs, 0.5) * 0.25 ? 0 : quantile(xs, 0.002));
+  const x1 = quantile(xs, 0.998), y1 = quantile(ys, 0.995) * 1.04, y0 = Math.min(0, quantile(ys, 0.001));
+  const padL = 48, padR = 12, padT = 10, padB = 38;
+  const sx = (v) => padL + (Math.min(Math.max(v, x0), x1) - x0) / (x1 - x0 || 1) * (W - padL - padR);
+  const sy = (v) => H - padB - (Math.min(Math.max(v, y0), y1) - y0) / (y1 - y0 || 1) * (H - padT - padB);
+  // grid + ticks
+  ctx.font = `11px ${css("--font-ui")}`; ctx.fillStyle = css("--muted"); ctx.strokeStyle = css("--hair"); ctx.lineWidth = 1;
+  niceTicks(y0, y1, 5).forEach((t) => { const y = Math.round(sy(t)) + 0.5; ctx.beginPath(); ctx.moveTo(padL, y); ctx.lineTo(W - padR, y); ctx.stroke(); ctx.textAlign = "right"; ctx.textBaseline = "middle"; ctx.fillText(fmt(t, t % 1 ? 1 : 0), padL - 6, y); });
+  niceTicks(x0, x1, W < 500 ? 4 : 7).forEach((t) => { const x = sx(t); ctx.textAlign = "center"; ctx.textBaseline = "top"; ctx.fillText(fmt(t, t % 1 ? 1 : 0), x, H - padB + 6); });
+  ctx.strokeStyle = css("--axis"); ctx.beginPath(); ctx.moveTo(padL, H - padB + 0.5); ctx.lineTo(W - padR, H - padB + 0.5); ctx.stroke();
+  ctx.fillStyle = css("--ink-2"); ctx.textAlign = "center"; ctx.textBaseline = "bottom"; ctx.fillText(f.label, padL + (W - padL - padR) / 2, H - 2);
+  // points: out-of-area faint first, then in-area
+  const faint = css("--faint"), s1 = css("--series-1"), s2 = css("--series-2"), surf = css("--surface");
+  const anyArea = state.region || state.icb || state.pcn;
+  scatterPts = [];
+  const draw = (r, color, rad, alpha, ring) => {
+    const x = sx(r.cov[state.factor]), y = sy(r.y);
+    ctx.globalAlpha = alpha; ctx.beginPath(); ctx.arc(x, y, rad, 0, Math.PI * 2); ctx.fillStyle = color; ctx.fill();
+    if (ring) { ctx.globalAlpha = 1; ctx.lineWidth = 2; ctx.strokeStyle = surf; ctx.stroke(); }
+    scatterPts.push({ x, y, r });
+  };
+  const dense = pts.length > 1500;
+  pts.forEach((r) => { if (anyArea && !r.area) draw(r, faint, 2.2, 0.8, false); });
+  pts.forEach((r) => { if (!anyArea || r.area) draw(r, s1, anyArea ? 3.2 : 2.4, dense && !anyArea ? 0.35 : 0.7, false); });
+  // binned-median trend for the area (or England)
+  const base = pts.filter((r) => !anyArea || r.area);
+  const nb = Math.max(4, Math.min(12, Math.floor(base.length / 60)));
+  if (base.length >= 40) {
+    const sorted = [...base].sort((a, b) => a.cov[state.factor] - b.cov[state.factor]);
+    const line = [];
+    for (let b = 0; b < nb; b++) {
+      const seg = sorted.slice(Math.floor(b * sorted.length / nb), Math.floor((b + 1) * sorted.length / nb));
+      if (!seg.length) continue;
+      line.push([quantile(seg.map((r) => r.cov[state.factor]), 0.5), quantile(seg.map((r) => r.y).sort((a, b) => a - b), 0.5)]);
+    }
+    ctx.globalAlpha = 1; ctx.lineJoin = "round";
+    ctx.strokeStyle = surf; ctx.lineWidth = 5; ctx.beginPath(); line.forEach(([x, y], i) => (i ? ctx.lineTo(sx(x), sy(y)) : ctx.moveTo(sx(x), sy(y)))); ctx.stroke();
+    ctx.strokeStyle = css("--ink"); ctx.lineWidth = 2; ctx.beginPath(); line.forEach(([x, y], i) => (i ? ctx.lineTo(sx(x), sy(y)) : ctx.moveTo(sx(x), sy(y)))); ctx.stroke();
+  }
+  // selected practices on top with labels
+  const sel = pts.filter((r) => state.selected.includes(r.p.c));
+  sel.forEach((r) => draw(r, s2, 5, 1, true));
+  ctx.globalAlpha = 1; ctx.font = `600 11px ${css("--font-ui")}`; ctx.textAlign = "left"; ctx.textBaseline = "middle";
+  if (sel.length <= 6) sel.forEach((r) => {
+    const x = sx(r.cov[state.factor]), y = sy(r.y), label = r.p.n.length > 24 ? r.p.n.slice(0, 23) + "…" : r.p.n;
+    const tw = ctx.measureText(label).width, lx = x + 8 + tw > W - padR ? x - 8 - tw : x + 8;
+    ctx.lineWidth = 3; ctx.strokeStyle = surf; ctx.strokeText(label, lx, y); ctx.fillStyle = css("--ink"); ctx.fillText(label, lx, y);
+  });
+  const clipped = pts.filter((r) => r.y > y1 || r.cov[state.factor] > x1 || r.cov[state.factor] < x0).length;
+  $("scatter-note").textContent = `${fmt(base.length)} practices${anyArea ? " in " + areaLabel() : ""}${clipped ? ` · ${clipped} beyond the axis shown at the edge` : ""}`;
+  const leg = $("scatter-legend"); leg.replaceChildren();
+  const item = (cls, color, text) => { const s = document.createElement("span"); const i = document.createElement("i"); i.className = "sw " + cls; i.style.background = color; s.append(i, document.createTextNode(text)); leg.append(s); };
+  item("", s1, anyArea ? areaLabel() : "Practice");
+  if (anyArea) item("", faint, "Rest of England");
+  item("line", css("--ink"), "Median trend");
+  if (sel.length) item("", s2, "Selected");
+}
+function niceTicks(a, b, n) {
+  const span = b - a; if (!(span > 0)) return [a];
+  const step0 = span / n, mag = 10 ** Math.floor(Math.log10(step0)), err = step0 / mag;
+  const step = (err >= 7.5 ? 10 : err >= 3.5 ? 5 : err >= 1.5 ? 2 : 1) * mag;
+  const out = []; for (let t = Math.ceil(a / step) * step; t <= b + 1e-9; t += step) out.push(+t.toFixed(10));
+  return out;
+}
+function showTip(ev, rows, title, sub) {
+  const t = $("tip"); t.replaceChildren();
+  const s = document.createElement("strong"); s.textContent = title; t.append(s);
+  if (sub) { const d = document.createElement("span"); d.className = "muted"; d.textContent = sub; t.append(d); }
+  rows.forEach(([k, v]) => { const r = document.createElement("div"); r.className = "row"; const a = document.createElement("span"); a.textContent = k; const b = document.createElement("span"); b.className = "num"; b.textContent = v; r.append(a, b); t.append(r); });
+  t.hidden = false;
+  const w = t.offsetWidth, h = t.offsetHeight;
+  let x = ev.clientX + 14, y = ev.clientY + 14;
+  if (x + w > innerWidth - 8) x = ev.clientX - w - 14;
+  if (y + h > innerHeight - 8) y = ev.clientY - h - 14;
+  t.style.left = Math.max(8, x) + "px"; t.style.top = Math.max(8, y) + "px";
+}
+const hideTip = () => { $("tip").hidden = true; };
+function nearest(ev) {
+  const rect = $("scatter").getBoundingClientRect(), mx = ev.clientX - rect.left, my = ev.clientY - rect.top;
+  let best = null, bd = 18 * 18;
+  for (let i = scatterPts.length - 1; i >= 0; i--) { const q = scatterPts[i], d = (q.x - mx) ** 2 + (q.y - my) ** 2; if (d < bd) { bd = d; best = q; } }
+  return best;
+}
+function practiceTipRows(r) {
+  const m = view.m, f = covDef(state.factor);
+  const rows = [[m.short, fmt(r.y, m.d)], [f.label.replace(/ \(%\)$/, ""), fmt(r.cov[state.factor], f.unit === "%" ? 1 : f.key === "list_size" ? 0 : 1) + (f.unit === "%" ? "%" : "")], ["List size", fmt(r.p.v.list_size)]];
+  if (r.exp != null) rows.push(["Expected (model)", fmt(r.exp, m.d)]);
+  return rows;
+}
+
+// ---------------------------------------------------------------- rendering: quintile dot + IQR chart (SVG)
+const SVGNS = "http://www.w3.org/2000/svg";
+const sv = (tag, attrs, parent) => { const e = document.createElementNS(SVGNS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); if (parent) parent.append(e); return e; };
+function renderQuintiles() {
+  const { m, area, all, quint, cuts } = view; const f = covDef(state.factor);
+  $("quint-title").textContent = `${m.short} by ${shortFactor(f)} quintile`;
+  const fd = f.unit === "%" ? 1 : f.key === "list_size" ? 0 : 1;
+  const anyArea = state.region || state.icb || state.pcn;
+  const src = area;
+  const groups = [0, 1, 2, 3, 4].map((qi) => src.filter((r) => quint(r.cov[state.factor]) === qi).map((r) => r.y).sort((a, b) => a - b));
+  const natGroups = [0, 1, 2, 3, 4].map((qi) => all.filter((r) => quint(r.cov[state.factor]) === qi).map((r) => r.y).sort((a, b) => a - b));
+  const lowName = f.key === "imd" ? "least deprived" : "lowest", highName = f.key === "imd" ? "most deprived" : "highest";
+  $("quint-note").textContent = `Dot = median practice, line = middle 50%. Quintiles are cut on all English practices (Q1 ${lowName}, Q5 ${highName}).${anyArea ? " Hollow ring = England median." : ""}`;
+  const box = $("quint-box"); box.replaceChildren();
+  const W = box.clientWidth || 380, H = 320, padL = 44, padR = 10, padT = 22, padB = 54;
+  const svg = sv("svg", { viewBox: `0 0 ${W} ${H}`, width: W, height: H, role: "img", "aria-label": "Median by quintile" }, box);
+  const allv = groups.flatMap((g) => [quantile(g, 0.25), quantile(g, 0.75)]).concat(natGroups.flatMap((g) => [quantile(g, 0.25), quantile(g, 0.75)])).filter(isFinite);
+  let y0 = Math.min(...allv), y1 = Math.max(...allv); const pad = (y1 - y0) * 0.15 || 1; y0 = Math.max(0, y0 - pad); y1 += pad;
+  const sy = (v) => H - padB - (v - y0) / (y1 - y0) * (H - padT - padB);
+  const bw = (W - padL - padR) / 5;
+  niceTicks(y0, y1, 5).forEach((t) => {
+    sv("line", { x1: padL, x2: W - padR, y1: sy(t), y2: sy(t), stroke: "var(--hair)", "stroke-width": 1 }, svg);
+    const tx = sv("text", { x: padL - 6, y: sy(t), "text-anchor": "end", "dominant-baseline": "middle", fill: "var(--muted)", "font-size": 11 }, svg); tx.textContent = fmt(t, t % 1 ? 1 : 0);
+  });
+  sv("line", { x1: padL, x2: W - padR, y1: H - padB + 0.5, y2: H - padB + 0.5, stroke: "var(--axis)" }, svg);
+  const edges = [null, ...cuts, null];
+  groups.forEach((g, i) => {
+    const cx = padL + bw * (i + 0.5);
+    const lab = sv("text", { x: cx, y: H - padB + 16, "text-anchor": "middle", fill: "var(--ink-2)", "font-size": 11, "font-weight": 600 }, svg);
+    lab.textContent = `Q${i + 1}`;
+    const rng = sv("text", { x: cx, y: H - padB + 30, "text-anchor": "middle", fill: "var(--muted)", "font-size": 10, visibility: bw < 70 ? "hidden" : "visible" }, svg);
+    rng.textContent = i === 0 ? `≤${fmt(edges[1], fd)}` : i === 4 ? `>${fmt(edges[4], fd)}` : `${fmt(edges[i], fd)}–${fmt(edges[i + 1], fd)}`;
+    if (anyArea) {
+      const nm = quantile(natGroups[i], 0.5);
+      if (isFinite(nm)) sv("circle", { cx, cy: sy(nm), r: 6, fill: "none", stroke: "var(--muted)", "stroke-width": 1.5 }, svg);
+    }
+    if (g.length < 3) {
+      const t = sv("text", { x: cx, y: sy((y0 + y1) / 2), "text-anchor": "middle", fill: "var(--muted)", "font-size": 10 }, svg); t.textContent = g.length ? `n=${g.length}` : "none";
+      return;
+    }
+    const q1 = quantile(g, 0.25), q2 = quantile(g, 0.5), q3 = quantile(g, 0.75);
+    sv("line", { x1: cx, x2: cx, y1: sy(q1), y2: sy(q3), stroke: "var(--series-1)", "stroke-width": 2, "stroke-linecap": "round" }, svg);
+    sv("circle", { cx, cy: sy(q2), r: 5.5, fill: "var(--series-1)", stroke: "var(--surface)", "stroke-width": 2 }, svg);
+    const vl = sv("text", { x: cx + 10, y: sy(q2), "dominant-baseline": "middle", fill: "var(--ink)", "font-size": 11, "font-weight": 600 }, svg); vl.textContent = fmt(q2, m.d);
+    const n = sv("text", { x: cx, y: H - padB + 44, "text-anchor": "middle", fill: "var(--muted)", "font-size": 10 }, svg); n.textContent = `n=${g.length}`;
+    const hit = sv("rect", { x: cx - bw / 2, y: padT, width: bw, height: H - padT - padB, fill: "transparent", tabindex: 0 }, svg);
+    const tipRows = [["Median", fmt(q2, m.d)], ["Middle 50%", `${fmt(q1, m.d)}–${fmt(q3, m.d)}`], ["Practices", fmt(g.length)]];
+    if (anyArea) tipRows.push(["England median", fmt(quantile(natGroups[i], 0.5), m.d)]);
+    hit.addEventListener("pointermove", (ev) => showTip(ev, tipRows, `Quintile ${i + 1}`, rng.textContent + (f.unit === "%" ? "%" : "")));
+    hit.addEventListener("pointerleave", hideTip);
+    hit.addEventListener("focus", () => { const b = hit.getBoundingClientRect(); showTip({ clientX: b.right, clientY: b.top }, tipRows, `Quintile ${i + 1}`, rng.textContent); });
+    hit.addEventListener("blur", hideTip);
+  });
+}
+
+// ---------------------------------------------------------------- model table
+function renderModel() {
+  const { corr, model, m } = view;
+  const t = $("model-table"); t.replaceChildren();
+  const thead = t.createTHead().insertRow();
+  ["Factor", "Group", "Coverage", "Unadjusted ρ", "", "Adjusted effect per 1 SD", "In model"].forEach((h, i) => { const th = document.createElement("th"); th.textContent = h; if ([2, 3, 5].includes(i)) th.className = "r"; thead.append(th); });
+  const tb = t.createTBody();
+  corr.forEach(({ c, rho, cover }) => {
+    const tr = tb.insertRow(); tr.className = "clickable" + (c.key === state.factor ? " sel" : "");
+    tr.tabIndex = 0;
+    const pick = () => { state.factor = c.key; $("factor").value = c.key; update(); };
+    tr.addEventListener("click", (e) => { if (e.target.tagName !== "INPUT") pick(); });
+    tr.addEventListener("keydown", (e) => { if (e.key === "Enter") pick(); });
+    const td = (text, cls) => { const d = tr.insertCell(); d.textContent = text; if (cls) d.className = cls; return d; };
+    td(c.label); td(c.group, "muted"); td(`${fmt(cover * 100)}%`, "r");
+    td(isFinite(rho) ? fmt(rho, 2) : "–", "r");
+    const bar = tr.insertCell(); const rb = document.createElement("span"); rb.className = "rhobar"; const i = document.createElement("i"); const mid = document.createElement("b");
+    if (isFinite(rho)) { const w = Math.min(1, Math.abs(rho)) * 50; i.style.left = rho >= 0 ? "50%" : `${50 - w}%`; i.style.width = `${w}%`; i.style.background = rho >= 0 ? "var(--pos)" : "var(--neg)"; }
+    rb.append(i, mid); bar.append(rb);
+    const j = model ? model.keys.indexOf(c.key) : -1;
+    if (j >= 0) { const b = model.beta[j + 1], se = model.se[j + 1]; td(`${b >= 0 ? "+" : ""}${fmt(b, m.d === 0 ? 1 : 2)}  (${fmt(b - 1.96 * se, m.d === 0 ? 1 : 2)} to ${fmt(b + 1.96 * se, m.d === 0 ? 1 : 2)})`, "r"); }
+    else td("–", "r muted");
+    const cb = tr.insertCell(); const inp = document.createElement("input"); inp.type = "checkbox"; inp.checked = state.inModel.has(c.key); inp.setAttribute("aria-label", `Include ${c.label} in model`);
+    inp.addEventListener("change", () => { inp.checked ? state.inModel.add(c.key) : state.inModel.delete(c.key); update(); });
+    cb.append(inp);
+  });
+  $("model-note").textContent = model ? `Model fitted on ${fmt(model.n)} English practices · explains ${fmt(model.r2 * 100, 0)}% of variation (R²) · residual SD ${fmt(model.residSd, m.d)}` : "Tick at least one factor to fit the model.";
+}
+
+// ---------------------------------------------------------------- comparison
+function renderCompare() {
+  const chips = $("chips"); chips.replaceChildren();
+  state.selected.forEach((code) => {
+    const p = P.find((x) => x.c === code); if (!p) return;
+    const c = document.createElement("span"); c.className = "chip"; c.append(document.createTextNode(`${p.n} `));
+    const code_ = document.createElement("span"); code_.className = "mono muted"; code_.textContent = p.c; c.append(code_);
+    const b = document.createElement("button"); b.type = "button"; b.textContent = "×"; b.setAttribute("aria-label", `Remove ${p.n}`);
+    b.addEventListener("click", () => { state.selected = state.selected.filter((x) => x !== code); update(); });
+    c.append(b); chips.append(c);
+  });
+  $("add-pcn").disabled = !state.selected.length;
+  const t = $("cmp-table"); t.replaceChildren();
+  const { m, all, model } = view;
+  const byCode = new Map(all.map((r) => [r.p.c, r]));
+  const covShown = COV.filter((c) => c.key !== "list_size").slice(0, 8);
+  const head = t.createTHead().insertRow();
+  const cols = ["Practice", "PCN", "List size", m.short, "England percentile", "Expected", "vs expected", ...covShown.map((c) => c.label.replace(/ \(.*\)$/, "").replace(" prevalence", "").replace("Deprivation", "IMD"))];
+  cols.forEach((h, i) => { const th = document.createElement("th"); th.textContent = h; if (i >= 2) th.className = "r"; head.append(th); });
+  const tb = t.createTBody();
+  if (!state.selected.length) {
+    const tr = tb.insertRow(); const td = tr.insertCell(); td.colSpan = cols.length; td.className = "muted"; td.style.whiteSpace = "normal";
+    td.textContent = "Search above to add practices. They are highlighted on the scatter plot, and each one is compared with what the model expects for its population.";
+    return;
+  }
+  // England medians row for reference
+  const medRow = tb.insertRow();
+  const mc = (text, cls) => { const d = medRow.insertCell(); d.textContent = text; if (cls) d.className = cls; };
+  mc("England median", "muted"); mc(""); mc(fmt(quantile(all.map((r) => r.p.v.list_size).sort((a, b) => a - b), 0.5)), "r muted"); mc(fmt(quantile(view.ysAll, 0.5), m.d), "r muted"); mc("50", "r muted"); mc(""); mc("");
+  covShown.forEach((c) => mc(fmt(quantile(all.map((r) => r.cov[c.key]).filter((v) => v != null).sort((a, b) => a - b), 0.5), 1), "r muted"));
+  state.selected.forEach((code) => {
+    const p = P.find((x) => x.c === code); const r = byCode.get(code);
+    const tr = tb.insertRow();
+    const td = (text, cls) => { const d = tr.insertCell(); d.textContent = text; if (cls) d.className = cls; return d; };
+    const n = td(p.n, "wrapcell"); const cc = document.createElement("div"); cc.className = "mono muted"; cc.textContent = p.c; n.append(cc);
+    td(titleCase(p.pcn), "wrapcell muted");
+    td(fmt(p.v.list_size), "r");
+    if (!r) { td("excluded", "r muted"); td("–", "r"); td("–", "r"); td("–", "r"); }
+    else {
+      td(fmt(r.y, m.d), "r"); td(fmt(view.rank(r.y), 0), "r"); td(model ? fmt(r.exp, m.d) : "–", "r");
+      const d = tr.insertCell(); d.className = "r";
+      if (model) {
+        const pill = document.createElement("span"); pill.className = "pill";
+        const diff = r.y - r.exp, pct = r.exp ? 100 * diff / r.exp : NaN;
+        if (r.z > 1) { pill.classList.add("up"); pill.textContent = `▲ ${fmt(pct, 0)}% higher`; }
+        else if (r.z < -1) { pill.classList.add("down"); pill.textContent = `▼ ${fmt(Math.abs(pct), 0)}% lower`; }
+        else { pill.textContent = "≈ as expected"; }
+        d.append(pill);
+      } else d.textContent = "–";
+    }
+    covShown.forEach((c) => td(fmt(p.v[c.key], 1), "r"));
+  });
+}
+function setupSearch() {
+  const inp = $("psearch"), box = $("suggest");
+  let act = -1, list = [];
+  const close = () => { box.hidden = true; act = -1; };
+  const choose = (p) => { if (!state.selected.includes(p.c)) state.selected.push(p.c); inp.value = ""; close(); update(); };
+  inp.addEventListener("input", () => {
+    const q = inp.value.trim().toLowerCase(); box.replaceChildren(); act = -1;
+    if (q.length < 2) return close();
+    list = P.filter((p) => p.c.toLowerCase().startsWith(q) || p.n.toLowerCase().includes(q) || p.pcn.toLowerCase().includes(q)).slice(0, 12);
+    list.forEach((p, i) => {
+      const d = document.createElement("div"); d.setAttribute("role", "option");
+      const a = document.createElement("span"); a.textContent = p.n; const b = document.createElement("span"); b.className = "mono muted"; b.textContent = `${p.c} · ${titleCase(p.pcn)}`;
+      d.append(a, b); d.addEventListener("mousedown", (e) => { e.preventDefault(); choose(p); }); box.append(d);
+    });
+    box.hidden = !list.length;
+  });
+  inp.addEventListener("keydown", (e) => {
+    const items = [...box.children];
+    if (e.key === "ArrowDown") { act = Math.min(items.length - 1, act + 1); }
+    else if (e.key === "ArrowUp") { act = Math.max(0, act - 1); }
+    else if (e.key === "Enter" && list[act >= 0 ? act : 0]) { choose(list[act >= 0 ? act : 0]); return; }
+    else if (e.key === "Escape") return close(); else return;
+    e.preventDefault(); items.forEach((el, i) => el.classList.toggle("act", i === act));
+  });
+  inp.addEventListener("blur", () => setTimeout(close, 120));
+  $("add-pcn").addEventListener("click", () => {
+    const last = P.find((p) => p.c === state.selected[state.selected.length - 1]); if (!last) return;
+    P.filter((p) => p.pcn === last.pcn).forEach((p) => { if (!state.selected.includes(p.c)) state.selected.push(p.c); });
+    update();
+  });
+  $("clear-sel").addEventListener("click", () => { state.selected = []; update(); });
+}
+
+// ---------------------------------------------------------------- all practices table
+const PAGE = 100;
+function tableRows() {
+  const { area } = view; const q = state.tsearch.toLowerCase();
+  let rows = area.filter((r) => !q || r.p.n.toLowerCase().includes(q) || r.p.c.toLowerCase().includes(q) || r.p.pcn.toLowerCase().includes(q));
+  const { key, dir } = state.sortAll;
+  const val = (r) => key === "metric" ? r.y : key === "exp" ? r.exp : key === "diff" ? (r.exp ? (r.y - r.exp) / r.exp : null) : key === "name" ? r.p.n : key === "pcn" ? r.p.pcn : key === "list" ? r.p.v.list_size : r.cov[key];
+  rows = rows.slice().sort((a, b) => { const x = val(a), y = val(b); if (x == null) return 1; if (y == null) return -1; return (x < y ? -1 : x > y ? 1 : 0) * dir; });
+  return rows;
+}
+function renderAll() {
+  const { m, model } = view; const t = $("all-table"); t.replaceChildren();
+  const covCols = COV.filter((c) => c.key !== "list_size");
+  const cols = [["name", "Practice"], ["pcn", "PCN"], ["list", "List size"], ["metric", m.short], ...(model ? [["exp", "Expected"], ["diff", "vs expected"]] : []), ...covCols.map((c) => [c.key, c.label.replace(/ \(.*\)$/, "").replace(" prevalence", "").replace("Deprivation", "IMD")])];
+  const head = t.createTHead().insertRow();
+  cols.forEach(([k, h], i) => {
+    const th = document.createElement("th"); th.className = "sortable" + (i >= 2 ? " r" : ""); th.tabIndex = 0;
+    th.textContent = h + (state.sortAll.key === k ? (state.sortAll.dir > 0 ? " ↑" : " ↓") : "");
+    th.setAttribute("aria-sort", state.sortAll.key === k ? (state.sortAll.dir > 0 ? "ascending" : "descending") : "none");
+    const go = () => { state.sortAll = { key: k, dir: state.sortAll.key === k ? -state.sortAll.dir : (i < 2 ? 1 : -1) }; state.page = 0; renderAll(); };
+    th.addEventListener("click", go); th.addEventListener("keydown", (e) => { if (e.key === "Enter") go(); });
+    head.append(th);
+  });
+  const rows = tableRows(); const pages = Math.max(1, Math.ceil(rows.length / PAGE)); state.page = Math.min(state.page, pages - 1);
+  const tb = t.createTBody();
+  rows.slice(state.page * PAGE, (state.page + 1) * PAGE).forEach((r) => {
+    const tr = tb.insertRow(); tr.className = "clickable" + (state.selected.includes(r.p.c) ? " sel" : ""); tr.title = "Click to add to comparison";
+    tr.addEventListener("click", () => { if (!state.selected.includes(r.p.c)) { state.selected.push(r.p.c); update(); } });
+    const td = (text, cls) => { const d = tr.insertCell(); d.textContent = text; if (cls) d.className = cls; return d; };
+    const n = td(r.p.n); n.append(Object.assign(document.createElement("span"), { className: "mono muted", textContent: "  " + r.p.c }));
+    td(titleCase(r.p.pcn), "muted"); td(fmt(r.p.v.list_size), "r"); td(fmt(r.y, m.d), "r");
+    if (model) { td(fmt(r.exp, m.d), "r"); const d = (r.y - r.exp) / r.exp * 100; td(isFinite(d) ? `${d > 0 ? "+" : ""}${fmt(d, 0)}%` : "–", "r"); }
+    covCols.forEach((c) => td(fmt(r.cov[c.key], 1), "r"));
+  });
+  const pg = $("pager"); pg.replaceChildren();
+  const info = document.createElement("span"); info.textContent = `${fmt(rows.length)} practices · page ${state.page + 1} of ${pages}`;
+  const prev = Object.assign(document.createElement("button"), { className: "btn", type: "button", textContent: "Previous", disabled: state.page === 0 });
+  const next = Object.assign(document.createElement("button"), { className: "btn", type: "button", textContent: "Next", disabled: state.page >= pages - 1 });
+  prev.addEventListener("click", () => { state.page--; renderAll(); }); next.addEventListener("click", () => { state.page++; renderAll(); });
+  pg.append(info, prev, next);
+}
+function csvText() {
+  const { m, model } = view; const covCols = COV.filter((c) => c.key !== "list_size");
+  const esc = (s) => /[",\n]/.test(String(s)) ? `"${String(s).replace(/"/g, '""')}"` : String(s);
+  const head = ["practice_code", "practice_name", "pcn", "icb", "region", "list_size", m.key, ...(model ? ["expected"] : []), ...covCols.map((c) => c.key)];
+  const lines = [head.join(",")];
+  tableRows().forEach((r) => lines.push([r.p.c, r.p.n, r.p.pcn, r.p.icb, r.p.reg, r.p.v.list_size, r.y.toFixed(3), ...(model ? [r.exp.toFixed(3)] : []), ...covCols.map((c) => r.cov[c.key] ?? "")].map(esc).join(",")));
+  return lines.join("\n");
+}
+
+// ---------------------------------------------------------------- upload extra data
+function parseCSV(text) {
+  const rows = []; let row = [], f = "", q = false;
+  for (let i = 0; i < text.length; i++) {
+    const ch = text[i];
+    if (q) { if (ch === '"') { if (text[i + 1] === '"') { f += '"'; i++; } else q = false; } else f += ch; }
+    else if (ch === '"') q = true; else if (ch === ",") { row.push(f); f = ""; }
+    else if (ch === "\n" || ch === "\r") { if (ch === "\r" && text[i + 1] === "\n") i++; row.push(f); rows.push(row); row = []; f = ""; }
+    else f += ch;
+  }
+  if (f || row.length) { row.push(f); rows.push(row); }
+  return rows.filter((r) => r.some((c) => c.trim() !== ""));
+}
+const codeRe = /^[A-Z]\d{5}$/;
+function ingest(name, text) {
+  const rows = parseCSV(text);
+  const hi = rows.findIndex((r) => r.some((c) => /code/i.test(c)));
+  if (hi < 0) throw new Error("no column with 'code' in its name");
+  const head = rows[hi].map((h) => h.trim()), body = rows.slice(hi + 1);
+  const H = (re) => head.findIndex((h) => re.test(h));
+  const out = {}; // key -> {label, values: Map}
+  const add = (key, label, code, v) => { if (!out[key]) out[key] = { label, values: new Map() }; out[key].values.set(code, v); };
+  // NHS Digital quinary age file
+  if (H(/^AGE_GROUP_5$/i) >= 0 && H(/^SEX$/i) >= 0) {
+    const ci = H(/^(ORG_CODE|CODE)$/i), si = H(/^SEX$/i), ai = H(/^AGE_GROUP_5$/i), ni = H(/^NUMBER_OF_PATIENTS$/i);
+    const acc = new Map();
+    body.forEach((r) => {
+      const code = (r[ci] || "").trim().toUpperCase(), sex = r[si], age = r[ai], n = +r[ni];
+      if (!codeRe.test(code) || age === "ALL" || !(sex === "MALE" || sex === "FEMALE") || !isFinite(n)) return;
+      const lo = parseInt(age, 10); const a = acc.get(code) || { t: 0, o65: 0, o80: 0, u15: 0, m: 0 };
+      a.t += n; if (lo >= 65) a.o65 += n; if (lo >= 80) a.o80 += n; if (lo < 15) a.u15 += n; if (sex === "MALE") a.m += n; acc.set(code, a);
+    });
+    acc.forEach((a, code) => { if (!a.t) return; add("pct_65plus", "Patients aged 65+ (%)", code, 100 * a.o65 / a.t); add("pct_80plus", "Patients aged 80+ (%)", code, 100 * a.o80 / a.t); add("pct_0_14", "Patients aged 0–14 (%)", code, 100 * a.u15 / a.t); add("pct_male", "Male patients (%)", code, 100 * a.m / a.t); });
+    return { out, group: "Age & sex" };
+  }
+  // Fingertips long format
+  if (H(/^Indicator Name$/i) >= 0 && H(/^Area Code$/i) >= 0 && H(/^Value$/i) >= 0) {
+    const ii = H(/^Indicator Name$/i), ci = H(/^Area Code$/i), vi = H(/^Value$/i), ti = H(/^Time period$/i), xi = H(/^Sex$/i), gi = H(/^Age$/i);
+    const latest = new Map();
+    body.forEach((r) => {
+      const code = (r[ci] || "").trim().toUpperCase(), v = parseFloat(r[vi]); if (!codeRe.test(code) || !isFinite(v)) return;
+      const label = [r[ii], xi >= 0 && r[xi] && r[xi] !== "Persons" ? r[xi] : "", gi >= 0 && r[gi] && r[gi] !== "All ages" ? r[gi] : ""].filter(Boolean).join(", ");
+      const key = "fx_" + label.toLowerCase().replace(/[^a-z0-9]+/g, "_").slice(0, 40), tp = ti >= 0 ? r[ti] : "";
+      const k2 = key + "|" + code, prev = latest.get(k2);
+      if (!prev || tp > prev.tp) latest.set(k2, { key, label, code, v, tp });
+    });
+    latest.forEach(({ key, label, code, v }) => add(key, label, code, v));
+    return { out, group: /smok/i.test(text.slice(0, 5000)) ? "Smoking" : "Other" };
+  }
+  // generic: code column + numeric columns
+  const ci = H(/(practice|gp|org|prac|area).*code|^code$/i); if (ci < 0) throw new Error("no practice code column found");
+  head.forEach((h, j) => {
+    if (j === ci) return;
+    const vals = body.map((r) => parseFloat(r[j])); const ok = vals.filter(isFinite).length;
+    if (ok < body.length * 0.5) return;
+    const key = "u_" + h.toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_|_$/g, "");
+    body.forEach((r, i) => { const code = (r[ci] || "").trim().toUpperCase(); if (codeRe.test(code) && isFinite(vals[i])) add(key, h, code, vals[i]); });
+  });
+  return { out, group: /smok/i.test(head.join(" ")) ? "Smoking" : "Other" };
+}
+function setupUpload() {
+  $("upload").addEventListener("change", async (e) => {
+    const msgs = [];
+    for (const file of e.target.files) {
+      try {
+        const { out, group } = ingest(file.name, await file.text());
+        const keys = Object.keys(out); if (!keys.length) throw new Error("no numeric practice-level columns found");
+        const byCode = new Map(P.map((p) => [p.c, p]));
+        keys.forEach((k) => {
+          let matched = 0;
+          out[k].values.forEach((v, code) => { const p = byCode.get(code); if (p) { p.v[k] = v; matched++; } });
+          const label = out[k].label;
+          const grp = /smok/i.test(label) ? "Smoking" : /age|male|female|sex/i.test(label) && group !== "Smoking" ? "Age & sex" : group;
+          if (!COV.find((c) => c.key === k)) COV.push({ key: k, label, source: file.name, group: grp, unit: /%|percent|prevalence|proportion/i.test(label) ? "%" : "" });
+          if (matched > P.length * 0.5) state.inModel.add(k);
+        });
+        msgs.push(`${file.name}: added ${keys.length} factor${keys.length > 1 ? "s" : ""}`);
+      } catch (err) { msgs.push(`${file.name}: ${err.message}`); }
+    }
+    const order = ["Deprivation", "Age & sex", "Comorbidity", "Smoking", "Practice", "Other"];
+    COV.sort((a, b) => order.indexOf(a.group) - order.indexOf(b.group));
+    $("upload-status").textContent = msgs.join(" · ");
+    fillFactorSelect(); update();
+  });
+}
+
+// ---------------------------------------------------------------- controls
+function opt(sel, value, text) { const o = document.createElement("option"); o.value = value; o.textContent = text; sel.append(o); }
+function fillFactorSelect() {
+  const s = $("factor"); s.replaceChildren(); let og = null, g = null;
+  COV.forEach((c) => { if (c.group !== g) { og = document.createElement("optgroup"); og.label = c.group; s.append(og); g = c.group; } const o = document.createElement("option"); o.value = c.key; o.textContent = c.label; og.append(o); });
+  s.value = state.factor;
+  const ul = $("factor-notes"); ul.replaceChildren();
+  COV.forEach((c) => { const li = document.createElement("li"); const b = document.createElement("b"); b.textContent = c.label; li.append(b, document.createTextNode(`: ${c.source}`)); ul.append(li); });
+}
+function fillAreas() {
+  const r = $("region"), i = $("icb"), p = $("pcn");
+  const uniq = (arr) => [...new Set(arr.filter(Boolean))].sort();
+  r.replaceChildren(); opt(r, "", "All England"); uniq(P.map((x) => x.reg)).forEach((v) => opt(r, v, v)); r.value = state.region;
+  i.replaceChildren(); opt(i, "", "All ICBs"); uniq(P.filter((x) => !state.region || x.reg === state.region).map((x) => x.icb)).forEach((v) => opt(i, v, v.replace("NHS ", "").replace(" Integrated Care Board", ""))); i.value = state.icb;
+  p.replaceChildren(); opt(p, "", state.icb ? "All PCNs" : "Choose an ICB first"); p.disabled = !state.icb;
+  uniq(P.filter((x) => x.icb === state.icb).map((x) => x.pcn)).forEach((v) => opt(p, v, titleCase(v))); p.value = state.pcn;
+}
+function setupControls() {
+  const ms = $("metric"); METRICS.forEach((m) => opt(ms, m.key, m.label)); ms.value = state.metric;
+  ms.addEventListener("change", () => { state.metric = ms.value; update(); });
+  const seg = $("period");
+  const periods = [...months().map((mk, i) => [String(i), MONTH_NAMES[+mk.slice(5) - 1] + " " + mk.slice(0, 4)]), ["avg", `${months().length}-month average`]];
+  periods.forEach(([v, t]) => { const b = document.createElement("button"); b.type = "button"; b.textContent = t; b.dataset.v = v; b.setAttribute("aria-pressed", String(v === state.period)); b.addEventListener("click", () => { state.period = v; [...seg.children].forEach((c) => c.setAttribute("aria-pressed", String(c.dataset.v === v))); update(); }); seg.append(b); });
+  fillFactorSelect(); $("factor").addEventListener("change", (e) => { state.factor = e.target.value; update(); });
+  fillAreas();
+  $("region").addEventListener("change", (e) => { state.region = e.target.value; state.icb = ""; state.pcn = ""; fillAreas(); update(); });
+  $("icb").addEventListener("change", (e) => { state.icb = e.target.value; state.pcn = ""; if (state.icb) state.region = P.find((x) => x.icb === state.icb).reg; fillAreas(); update(); });
+  $("pcn").addEventListener("change", (e) => { state.pcn = e.target.value; update(); });
+  $("qc").addEventListener("change", (e) => { state.qc = e.target.checked; update(); });
+  $("tsearch").addEventListener("input", (e) => { state.tsearch = e.target.value; state.page = 0; renderAll(); });
+  $("copy-csv").addEventListener("click", async (e) => {
+    const btn = e.currentTarget, text = csvText();
+    try { await navigator.clipboard.writeText(text); btn.textContent = `Copied ${fmt(text.split("\n").length - 1)} rows`; }
+    catch { btn.textContent = "Copy blocked by browser"; }
+    setTimeout(() => (btn.textContent = "Copy as CSV"), 2500);
+  });
+  const cv = $("scatter");
+  cv.addEventListener("pointermove", (ev) => { const q = nearest(ev); if (!q) { hideTip(); cv.style.cursor = "default"; return; } cv.style.cursor = "pointer"; showTip(ev, practiceTipRows(q.r), q.r.p.n, `${q.r.p.c} · ${titleCase(q.r.p.pcn)}`); });
+  cv.addEventListener("pointerleave", hideTip);
+  cv.addEventListener("click", (ev) => { const q = nearest(ev); if (q && !state.selected.includes(q.r.p.c)) { state.selected.push(q.r.p.c); update(); } });
+  setupSearch(); setupUpload();
+  let rt; addEventListener("resize", () => { clearTimeout(rt); rt = setTimeout(() => { renderScatter(); renderQuintiles(); }, 120); });
+  const redraw = () => { renderScatter(); renderQuintiles(); };
+  matchMedia("(prefers-color-scheme: dark)").addEventListener("change", redraw);
+  new MutationObserver(redraw).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+}
+
+function update() {
+  compute();
+  renderTiles(); renderScatter(); renderQuintiles(); renderModel(); renderCompare(); renderAll();
+  try { localStorage.setItem("gpsda", JSON.stringify({ metric: state.metric, factor: state.factor, period: state.period })); } catch {}
+}
+
+async function boot() {
+  try {
+    const res = await fetch("data/practices.json"); if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    state.data = await res.json();
+  } catch (err) {
+    $("tiles").replaceChildren(Object.assign(document.createElement("div"), { className: "loading", textContent: `Could not load practice data (${err.message}). If you opened this file directly, serve the site folder over HTTP.` }));
+    return;
+  }
+  P = state.data.practices; COV = state.data.covariates.slice();
+  try { const s = JSON.parse(localStorage.getItem("gpsda") || "{}"); if (METRICS.some((m) => m.key === s.metric)) state.metric = s.metric; if (COV.some((c) => c.key === s.factor)) state.factor = s.factor; if (s.period === "avg" || state.data.months[+s.period]) state.period = s.period; } catch {}
+  // Default model: every factor with good coverage except list size.
+  COV.forEach((c) => { const cover = P.filter((p) => p.v[c.key] != null).length / P.length; if (cover >= 0.9 && c.key !== "list_size") state.inModel.add(c.key); });
+  const ms = state.data.months, last = ms[ms.length - 1], first = ms[0];
+  $("lede").textContent = `How urgent and same-day appointment rates vary between ${fmt(P.length)} practices in England (${MONTH_NAMES[+first.slice(5) - 1]}–${MONTH_NAMES[+last.slice(5) - 1]} ${last.slice(0, 4)}), and how much of that variation lines up with deprivation, age structure and disease burden.`;
+  $("provenance").textContent = `Data built ${state.data.generated}. Appointments: NHS England / NHS Digital, Appointments in General Practice practice-level crosstab. Urgent categories: ${state.data.urgentCategories.join(", ")}.`;
+  setupControls(); update();
+}
+boot();
+})();
+</script>
+
+</body>
+</html>
