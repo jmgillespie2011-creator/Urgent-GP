@@ -283,7 +283,7 @@ def load_fingertips() -> tuple[pd.DataFrame | None, dict]:
             if re.search(rx, low):
                 key, labels[k] = k, (label, f"Fingertips GP profile: {name} ({m['period']})", group, "%")
                 break
-        if key is None and "prevalence" in low and "qof" in low:
+        if key is None and "prevalence" in low and "qof" in low and "lvsd" not in low:
             g = next((v for kw, v in FT_QOF.items() if kw in low), None)
             if g:
                 key = f"prev_{g}"

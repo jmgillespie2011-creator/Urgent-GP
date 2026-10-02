@@ -98,37 +98,6 @@ def links(url: str) -> list[tuple[str, str]]:
     return out
 
 
-def catalogue_files(query: str, title_rx: str, file_rx: str) -> list[tuple[str, str, str]]:
-    """Direct file links for an NHS Digital series via the data.gov.uk catalogue (CKAN), newest first.
-
-    digital.nhs.uk publication pages sit behind a bot challenge that blocks CI runners, but the
-    catalogue lists the underlying files.digital.nhs.uk URLs.
-    """
-    found = []
-    for api in ("https://www.data.gov.uk/api/action/package_search",
-                "https://ckan.publishing.service.gov.uk/api/action/package_search"):
-        try:
-            res = json.loads(get(f"{api}?q={urllib.parse.quote(query)}&rows=20", tries=2))
-        except Exception as e:  # noqa: BLE001
-            print(f"    catalogue {api}: {e}")
-            continue
-        for pkg in res.get("result", {}).get("results", []):
-            if not re.search(title_rx, pkg.get("title", ""), re.I):
-                continue
-            print(f"    dataset: {pkg.get('title')} ({len(pkg.get('resources', []))} files)")
-            for r in pkg.get("resources", []):
-                name, url = r.get("name") or r.get("description") or "", r.get("url") or ""
-                when = r.get("last_modified") or r.get("created") or ""
-                if re.search(file_rx, name + " " + url, re.I):
-                    found.append((when, name, url))
-        if found:
-            break
-    found.sort(reverse=True)
-    for when, name, url in found[:8]:
-        print(f"      {when[:10]}  {name[:70]}  {url}")
-    return found
-
-
 MONTHS = {m: i for i, m in enumerate(
     ["january", "february", "march", "april", "may", "june", "july",
      "august", "september", "october", "november", "december"], 1)}
@@ -185,37 +154,85 @@ def num(v) -> float | None:
         return None
 
 
+# --------------------------------------------------------------------------- Internet Archive discovery
+WAYBACK = "https://web.archive.org"
+
+
+def archived_files(series: str, slug_rx: str, file_rx: str) -> tuple[str, list[tuple[str, str]]]:
+    """Newest archived publication page in a series and its (file URL, link text) pairs.
+
+    digital.nhs.uk answers CI runners with a bot challenge, so publication pages are read from the
+    Internet Archive, which keeps the original files.digital.nhs.uk download links.
+    """
+    prefix = PUB.replace("https://", "") + series + "/"
+    cdx = json.loads(get(f"{WAYBACK}/cdx/search/cdx?url={urllib.parse.quote(prefix)}*&output=json"
+                         f"&filter=statuscode:200&fl=timestamp,original&limit=20000", tries=3))
+    pages: dict[str, tuple[str, str]] = {}
+    for ts, orig in cdx[1:]:
+        m = re.search(series + r"/(" + slug_rx + r")/?$", orig.split("?")[0])
+        if m and ts > pages.get(m.group(1), ("", ""))[0]:
+            pages[m.group(1)] = (ts, orig)
+    if not pages:
+        raise RuntimeError(f"no archived pages for {series}")
+
+    def key(slug: str):
+        y = re.findall(r"(20\d\d)", slug)
+        mo = next((MONTHS[w] for w in re.findall(r"[a-z]+", slug) if w in MONTHS), 0)
+        return (int(y[-1]) if y else 0, mo, slug)
+
+    for slug in sorted(pages, key=key, reverse=True)[:4]:
+        ts, orig = pages[slug]
+        html = get(f"{WAYBACK}/web/{ts}id_/{orig}", tries=3).decode("utf-8", "replace")
+        files = []
+        for m in re.finditer(r'<a\b[^>]*href="([^"]+)"[^>]*>(.*?)</a>', html, re.S | re.I):
+            href = re.sub(r"^(https?://web\.archive\.org)?/web/\d+[a-z_]*/", "", m.group(1).replace("&amp;", "&"))
+            href = urllib.parse.urljoin("https://digital.nhs.uk/", href)
+            text = re.sub(r"<[^>]+>|\s+", " ", m.group(2)).strip()
+            if "files.digital.nhs.uk" in href and re.search(file_rx, href + " " + text, re.I):
+                files.append((href, text))
+        print(f"    archived page {slug} ({ts}): {len(files)} matching files")
+        for h, t in files[:12]:
+            print(f"      {t[:70]} -> {h}")
+        if files:
+            return f"{PUB}{series}/{slug}", files
+    raise RuntimeError(f"no matching files on archived {series} pages")
+
+
+def is_data(b: bytes) -> bool:
+    return b[:2] == b"PK" or (b[:200].count(b",") > 2 and b"<html" not in b[:500].lower())
+
+
+def get_file(url: str) -> bytes:
+    """files.digital.nhs.uk download, falling back to the Internet Archive's copy."""
+    try:
+        b = get(url, tries=2)
+        if is_data(b):
+            return b
+        print(f"    {url}: response is not a data file")
+    except Exception as e:  # noqa: BLE001
+        print(f"    {url}: {e}")
+    b = get(f"{WAYBACK}/web/2026id_/{url}", tries=3)
+    if not is_data(b):
+        raise RuntimeError(f"archive copy of {url} is not a data file")
+    return b
+
+
 # --------------------------------------------------------------------------- workforce
 def fetch_workforce() -> None:
-    cands = catalogue_files("General Practice Workforce", r"general practice workforce|general and personal medical",
-                            r"practice[-_ %20]*level")
-    cands = [c for c in cands if not re.search(r"individual|pcn", c[1] + c[2], re.I)]
-    for when, name, url in cands:
+    page, files = archived_files("general-and-personal-medical-services", r"\d{1,2}-[a-z]+-20\d\d",
+                                 r"practice[-_ %20]*level|prac")
+    files = [f for f in files if not re.search(r"individual|pcn|xlsx", f[0] + " " + f[1], re.I)]
+    files.sort(key=lambda f: not re.search(r"detailed", f[0] + f[1], re.I))
+    for url, _text in files:
         try:
-            fname, rows = read_csv_from(get(url), re.compile(r"(?i)practice"))
-            if rows and any(re.fullmatch(r"(?i)prac_code|practice_code", c) for c in rows[0]):
-                return _save_workforce(rows, {"catalogue_file": name, "file": url, "csv": fname, "modified": when})
-            print(f"    {url}: no practice code column in {fname}")
+            fname, rows = read_csv_from(get_file(url), re.compile(r"(?i)practice"))
         except Exception as e:  # noqa: BLE001
             print(f"    {url}: {e}")
-    page = latest_child("general-and-personal-medical-services", r"\d{1,2}-[a-z]+-20\d\d")
-    files = [(h, t) for h, t in links(page) if re.search(r"\.(zip|csv)(\?|$)", h, re.I)]
-    for h, t in files:
-        print(f"    file: {t[:90]} -> {h}")
-
-    def pick(words):
-        for h, t in files:
-            s = (h + " " + t).lower()
-            if all(w in s for w in words):
-                return h
-        return None
-
-    url = (pick(["practice", "level", "detailed"]) or pick(["practice", "detailed"])
-           or pick(["practice", "level"]) or pick(["practice"]))
-    if not url:
-        raise RuntimeError("no practice-level workforce file on " + page)
-    name, rows = read_csv_from(get(url), re.compile(r"(?i)practice"))
-    _save_workforce(rows, {"page": page, "file": url, "csv": name})
+            continue
+        if rows and any(re.fullmatch(r"(?i)prac_code|practice_code", c) for c in rows[0]):
+            return _save_workforce(rows, {"page": page, "file": url, "csv": fname})
+        print(f"    {url}: {fname} has no practice code column")
+    raise RuntimeError("no usable practice-level workforce file")
 
 
 def _save_workforce(rows: list[dict], info: dict) -> None:
@@ -226,35 +243,34 @@ def _save_workforce(rows: list[dict], info: dict) -> None:
         code = (r.get(code_col) or "").strip().upper()
         if CODE.match(code):
             out.append([code] + [r.get(c, "") for c in keep])
+    if len(out) < 5000:
+        raise RuntimeError(f"workforce file has only {len(out)} practices")
     write(OUT / "workforce_practice.csv", ["practice_code"] + keep, out)
     manifest["workforce"] = {**info, "columns": len(keep)}
 
 
 # --------------------------------------------------------------------------- age / sex
 def fetch_age_sex() -> None:
-    cands = catalogue_files("Patients Registered at a GP Practice", r"patients registered", r"quin")
-    cands = [c for c in cands if re.search(r"prac", c[1] + c[2], re.I)] or cands
-    if cands:
-        page, url = "data.gov.uk catalogue", cands[0][2]
-    else:
-        page = latest_child("patients-registered-at-a-gp-practice", r"[a-z]+-20\d\d")
-        files = [(h, t) for h, t in links(page) if re.search(r"\.(zip|csv)(\?|$)", h, re.I)]
-        url = next((h for h, t in files if re.search(r"quin", h + t, re.I) and re.search(r"prac", h + t, re.I)), None)
-        if not url:
-            raise RuntimeError("no quinary-age practice file on " + page)
-    name, rows = read_csv_from(get(url), re.compile(r"(?i)quin"))
+    try:
+        page, files = archived_files("patients-registered-at-a-gp-practice", r"[a-z]+-20\d\d", r"quin")
+        url = next((h for h, t in files if re.search(r"prac", h + t, re.I)), files[0][0])
+        name, rows = read_csv_from(get_file(url), re.compile(r"(?i)quin"))
+        _save_quinary(rows, {"page": page, "file": url, "csv": name})
+    except Exception as e:  # noqa: BLE001
+        print(f"    NHS Digital age file unavailable ({e}); using Fingertips age bands")
+        fetch_age_fingertips()
+
+
+def _save_quinary(rows: list[dict], info: dict) -> None:
     code_col = "ORG_CODE" if "ORG_CODE" in rows[0] else "CODE"
     acc = defaultdict(lambda: {"t": 0.0, "m": 0.0, "u15": 0.0, "o65": 0.0, "o80": 0.0, "o75": 0.0})
     for r in rows:
         code, sex, age = (r.get(code_col) or "").strip().upper(), r.get("SEX"), str(r.get("AGE_GROUP_5", ""))
         n = num(r.get("NUMBER_OF_PATIENTS"))
-        if not CODE.match(code) or sex not in ("MALE", "FEMALE") or age.upper() == "ALL" or n is None:
-            continue
         m = re.match(r"(\d+)", age)
-        if not m:
+        if not CODE.match(code) or sex not in ("MALE", "FEMALE") or not m or n is None:
             continue
-        lo = int(m.group(1))
-        a = acc[code]
+        lo, a = int(m.group(1)), acc[code]
         a["t"] += n
         a["m"] += n if sex == "MALE" else 0
         a["u15"] += n if lo < 15 else 0
@@ -263,29 +279,69 @@ def fetch_age_sex() -> None:
         a["o80"] += n if lo >= 80 else 0
     out = [[c, int(a["t"]), *(round(100 * a[k] / a["t"], 3) for k in ("u15", "o65", "o75", "o80", "m"))]
            for c, a in sorted(acc.items()) if a["t"] > 0]
-    write(OUT / "age_sex_practice.csv",
-          ["practice_code", "registered_patients", "pct_0_14", "pct_65plus", "pct_75plus", "pct_80plus", "pct_male"], out)
-    extract = rows[0].get("EXTRACT_DATE", "")
-    manifest["age_sex"] = {"page": page, "file": url, "csv": name, "extract_date": extract}
+    if len(out) < 5000:
+        raise RuntimeError(f"only {len(out)} practices in age file")
+    write(OUT / "age_sex_practice.csv", AGE_HEADER, out)
+    manifest["age_sex"] = {**info, "extract_date": rows[0].get("EXTRACT_DATE", "")}
+
+
+AGE_HEADER = ["practice_code", "registered_patients", "pct_0_14", "pct_65plus", "pct_75plus", "pct_80plus", "pct_male"]
+
+
+def fetch_age_fingertips() -> None:
+    """Fingertips 93468: share of each practice's registered population by age group (and sex)."""
+    _, rows = read_csv_from(get("https://fingertips.phe.org.uk/api/all_data/csv/by_indicator_id?indicator_ids=93468"
+                                "&child_area_type_id=7&parent_area_type_id=15", tries=2))
+    rows = [r for r in rows if r.get("Area Type", "").startswith("GP") and CODE.match((r.get("Area Code") or "").upper())]
+    latest = sorted({r["Time period"] for r in rows})[-1]
+    rows = [r for r in rows if r["Time period"] == latest]
+    print("    ages:", sorted({r.get("Age") or "" for r in rows})[:30])
+    print("    sexes:", sorted({r.get("Sex") or "" for r in rows}),
+          "category types:", sorted({r.get("Category Type") or "" for r in rows})[:6])
+    acc: dict[str, dict] = defaultdict(lambda: defaultdict(float))
+    for r in rows:
+        m = re.match(r"(\d+)", r.get("Age") or "")
+        if r.get("Category Type") or not m:
+            continue
+        cnt, den, val = num(r.get("Count")), num(r.get("Denominator")), num(r.get("Value"))
+        n = cnt if cnt is not None else (val / 100 * den if val is not None and den else None)
+        if n is not None:
+            acc[r["Area Code"].upper()][(r.get("Sex") or "Persons", int(m.group(1)))] += n
+    out = []
+    for code, d in sorted(acc.items()):
+        has_persons = any(s == "Persons" for s, _ in d)
+
+        def tot(pred, sex=None):
+            return sum(v for (s, lo), v in d.items()
+                       if (s == sex if sex else (s == "Persons" if has_persons else s in ("Male", "Female"))) and pred(lo))
+        t = tot(lambda lo: True)
+        if t <= 0:
+            continue
+        male, female = tot(lambda lo: True, "Male"), tot(lambda lo: True, "Female")
+        has80 = any(lo == 80 for _, lo in d)
+        out.append([code, int(t), round(100 * tot(lambda lo: lo < 15) / t, 3), round(100 * tot(lambda lo: lo >= 65) / t, 3),
+                    round(100 * tot(lambda lo: lo >= 75) / t, 3), round(100 * tot(lambda lo: lo >= 80) / t, 3) if has80 else "",
+                    round(100 * male / (male + female), 3) if male + female else ""])
+    if len(out) < 5000:
+        raise RuntimeError(f"Fingertips age bands: only {len(out)} practices")
+    write(OUT / "age_sex_practice.csv", AGE_HEADER, out)
+    manifest["age_sex"] = {"source": "Fingertips indicator 93468", "period": latest}
 
 
 # --------------------------------------------------------------------------- QOF
 def fetch_qof() -> None:
-    cands = catalogue_files("Quality and Outcomes Framework", r"quality and outcomes framework", r"raw|\.zip")
-    if cands:
-        page, files = "data.gov.uk catalogue", [(c[2], c[1]) for c in cands]
-    else:
-        page = latest_child("quality-and-outcomes-framework-achievement-prevalence-and-exceptions-data", r"20\d\d-\d\d")
-        files = [(h, t) for h, t in links(page) if re.search(r"\.(zip|csv)(\?|$)", h, re.I)]
-    for h, t in files:
-        print(f"    file: {t[:90]} -> {h}")
-    blob = None
-    for h, t in files:
-        if re.search(r"raw|csv", h + " " + t, re.I) and h.lower().endswith(".zip"):
-            b = get(h)
-            if b[:2] == b"PK" and any(re.search(r"(?i)prevalence", n) for n in zipfile.ZipFile(io.BytesIO(b)).namelist()):
-                blob, url = b, h
-                break
+    page, files = archived_files("quality-and-outcomes-framework-achievement-prevalence-and-exceptions-data",
+                                 r"20\d\d-\d\d", r"\.zip")
+    blob = url = None
+    for h, t in sorted(files, key=lambda f: not re.search(r"raw|csv", f[0] + " " + f[1], re.I)):
+        try:
+            b = get_file(h)
+        except Exception as e:  # noqa: BLE001
+            print(f"    {h}: {e}")
+            continue
+        if b[:2] == b"PK" and any(re.search(r"(?i)prevalence", n) for n in zipfile.ZipFile(io.BytesIO(b)).namelist()):
+            blob, url = b, h
+            break
     if blob is None:
         raise RuntimeError("no QOF raw-data zip with a prevalence CSV on " + page)
     z = zipfile.ZipFile(io.BytesIO(blob))
