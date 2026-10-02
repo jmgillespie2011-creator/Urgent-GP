@@ -1,0 +1,170 @@
+[
+  {
+    "key": "ft_94240",
+    "indicator_id": 94240,
+    "name": "Deprivation score (IMD 2025)",
+    "period": "2025",
+    "n": 6143
+  },
+  {
+    "key": "ft_276",
+    "indicator_id": 276,
+    "name": "Cancer: QOF prevalence",
+    "period": "2024/25",
+    "n": 6168
+  },
+  {
+    "key": "ft_273",
+    "indicator_id": 273,
+    "name": "CHD: QOF prevalence",
+    "period": "2024/25",
+    "n": 6168
+  },
+  {
+    "key": "ft_849",
+    "indicator_id": 849,
+    "name": "Heart failure with LVSD: QOF prevalence",
+    "period": "2024/25",
+    "n": 6168
+  },
+  {
+    "key": "ft_212",
+    "indicator_id": 212,
+    "name": "Stroke: QOF prevalence",
+    "period": "2024/25",
+    "n": 6168
+  },
+  {
+    "key": "ft_92590",
+    "indicator_id": 92590,
+    "name": "PAD: QOF prevalence",
+    "period": "2024/25",
+    "n": 6168
+  },
+  {
+    "key": "ft_262",
+    "indicator_id": 262,
+    "name": "Heart Failure: QOF prevalence",
+    "period": "2024/25",
+    "n": 6168
+  },
+  {
+    "key": "ft_280",
+    "indicator_id": 280,
+    "name": "Atrial fibrillation: QOF prevalence",
+    "period": "2024/25",
+    "n": 6168
+  },
+  {
+    "key": "ft_219",
+    "indicator_id": 219,
+    "name": "Hypertension: QOF prevalence",
+    "period": "2024/25",
+    "n": 6168
+  },
+  {
+    "key": "ft_94136",
+    "indicator_id": 94136,
+    "name": "Obesity: QOF prevalence (new definition)",
+    "period": "2024/25",
+    "n": 6168
+  },
+  {
+    "key": "ft_91280",
+    "indicator_id": 91280,
+    "name": "Smoking: QOF prevalence",
+    "period": "2024/25",
+    "n": 6162
+  },
+  {
+    "key": "ft_241",
+    "indicator_id": 241,
+    "name": "Diabetes: QOF prevalence",
+    "period": "2024/25",
+    "n": 6168
+  },
+  {
+    "key": "ft_93797",
+    "indicator_id": 93797,
+    "name": "Non-Diabetic Hyperglycaemia (NDH): QOF prevalence",
+    "period": "2024/25",
+    "n": 6168
+  },
+  {
+    "key": "ft_848",
+    "indicator_id": 848,
+    "name": "Depression: QOF prevalence",
+    "period": "2024/25",
+    "n": 6168
+  },
+  {
+    "key": "ft_247",
+    "indicator_id": 247,
+    "name": "Dementia: QOF prevalence",
+    "period": "2024/25",
+    "n": 6168
+  },
+  {
+    "key": "ft_90581",
+    "indicator_id": 90581,
+    "name": "Mental Health: QOF prevalence",
+    "period": "2024/25",
+    "n": 6168
+  },
+  {
+    "key": "ft_90933",
+    "indicator_id": 90933,
+    "name": "Asthma: QOF prevalence",
+    "period": "2024/25",
+    "n": 6168
+  },
+  {
+    "key": "ft_258",
+    "indicator_id": 258,
+    "name": "CKD: QOF prevalence",
+    "period": "2024/25",
+    "n": 6168
+  },
+  {
+    "key": "ft_253",
+    "indicator_id": 253,
+    "name": "COPD: QOF prevalence",
+    "period": "2024/25",
+    "n": 6168
+  },
+  {
+    "key": "ft_224",
+    "indicator_id": 224,
+    "name": "Epilepsy: QOF prevalence",
+    "period": "2024/25",
+    "n": 6168
+  },
+  {
+    "key": "ft_200",
+    "indicator_id": 200,
+    "name": "Learning disability: QOF prevalence",
+    "period": "2024/25",
+    "n": 6168
+  },
+  {
+    "key": "ft_294",
+    "indicator_id": 294,
+    "name": "Palliative/supportive care: QOF prevalence",
+    "period": "2024/25",
+    "n": 6168
+  },
+  {
+    "key": "ft_90443",
+    "indicator_id": 90443,
+    "name": "Osteoporosis: QOF prevalence",
+    "period": "2024/25",
+    "n": 6168
+  },
+  {
+    "key": "ft_91269",
+    "indicator_id": 91269,
+    "name": "Rheumatoid Arthritis: QOF prevalence",
+    "period": "2024/25",
+    "n": 6168
+  }
+]

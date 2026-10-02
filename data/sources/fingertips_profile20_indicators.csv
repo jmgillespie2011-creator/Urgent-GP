@@ -1,0 +1,98 @@
+indicator_id,indicator
+93468,Proportion of GP registered populations by age group
+295,% QOF points achieved
+650,Life expectancy - MSOA based
+94240,Deprivation score (IMD 2025)
+276,Cancer: QOF prevalence
+359,% reporting cancer in the last 5 years
+93922,CAN004 - Patients with cancer reviewed within 12 months of diagnosis (denominator incl. PCAs)
+93923,CAN005 - Patients with cancer who had an opportunity for a discussion within 3 months of diagnosis (denominator incl. PCAs)
+93717,"CS005 - Women (25-49 yrs), with a record of cervical screening in the last 3.5 yrs (denominator incl. PCAs)"
+93718,"CS006 - Women (50-64 yrs), with a record of cervical screening in the last 5.5 yrs (denominator incl. PCAs)"
+273,CHD: QOF prevalence
+849,Heart failure with LVSD: QOF prevalence
+90999,"CHD005 - For patients with CHD, a record that aspirin, APT or ACT is taken exists (denominator incl. PCAs)"
+93705,"CHD008 - Last BP reading of patients (<80 yrs, with CHD) in the last 12 months is <= 140/90 mmHg (denominator incl. PCAs)"
+93706,"CHD009 - Last BP reading of patients (80+ yrs, with CHD) in the last 12 months is <= 150/90 mmHg (denominator incl. PCAs)"
+212,Stroke: QOF prevalence
+92590,PAD: QOF prevalence
+91013,STIA007 - For patients with stroke a record exists that an anti-platelet agent or an anti-coagulant is taken (denominator incl. PCAs)
+93707,"STIA010 - Last BP reading of patients (<80 yrs, with a history of stroke or TIA) in the last 12 months is <= 140/90 mmHg (denominator incl. PCAs)"
+93708,"STIA011 - Last BP reading of patients (80+ yrs, with a history of stroke or TIA) in the last 12 months is <= 150/90 mmHg (denominator incl. PCAs)"
+262,Heart Failure: QOF prevalence
+91005,HF003 - Heart failure w LVSD: treated with ACE-I or ARB (denominator incl. PCAs)
+93793,HF005 - Patients' heart failure diagnosis confirmed by an ECG or specialist assessment (denominator incl. PCAs)
+93794,HF006 - Patients with heart failure due to LVSD treated with beta-blockers (denominator incl. PCAs)
+93795,"HF007 - Patients with heart failure who had a review in the last 12 months, including the assessment of functional capacity (denominator incl. PCAs)"
+280,Atrial fibrillation: QOF prevalence
+92587,AF006 - Stroke risk of patients with AF assessed with CHA2DS2-VASc (denominator incl. PCAs)
+92594,AF007 - Patients with AF who are treated w anti-coag. therapy (CHADS2DS2-VASc >=2) (denominator incl. PCAs)
+219,Hypertension: QOF prevalence
+91262,"BP002 - Patients (aged 45+ yrs), who have a record of blood pressure in the last 5 yrs (denominator incl. PCAs)"
+93709,"HYP003 - Last BP reading of patients (<80 yrs, with hypertension), in the last 12 months is <= 140/90 mmHg (denominator incl. PCAs)"
+93710,"HYP007 - Last BP reading of patients (80+ yrs, with hypertension), in the last 12 months is <= 150/90 mmHg (denominator incl. PCAs)"
+94136,Obesity: QOF prevalence (new definition)
+91280,Smoking: QOF prevalence
+90452,% active smokers (GPPS)
+90453,% former smokers (GPPS)
+90616,SMOK002 - Smoking status of patients with certain conditions recorded in the last 12 months (denominator incl. PCAs)
+90619,SMOK004 - Record of offer of support and treatment in the last 24 months for smokers aged 15+ yrs (denominator incl. PCAs)
+90617,SMOK005 - Smoking cessation support and treatment offered to patients with certain conditions (denominator incl. PCAs)
+241,Diabetes: QOF prevalence
+93797,Non-Diabetic Hyperglycaemia (NDH): QOF prevalence
+93796,NDH001 - Patients on the Non-Diabetic Hyperglycaemia register who have had an HbA1c or fasting blood glucose test in the preceding 12 months (denominator incl. PCAs)
+90700,DM006 - Patients with diabetes and proteinuria/micro-albuminuria treated with ACE inhibitors (denominator incl. PCAs)
+90694,DM012 - Patients with diabetes who had a foot examination and risk classification (denominator incl. PCAs)
+91238,DM014 - Newly diagnosed patients with diabetes referred for an education programme within 9 months (denominator incl. PCAs)
+93711,DM019 - Last BP in patients with diabetes is <= 140/80 mmHg (denominator incl. PCAs)
+93712,DM020 - IFCC-HbA1c <= 58 mmol/mol in patients with diabetes without frailty (denominator incl. PCAs)
+93713,DM021 - IFCC-HbA1c <= 75 mmol/mol in patients with diabetes and frailty (denominator incl. PCAs)
+93714,"DM022 - Patients with diabetes (40+ yrs, no history of CVD) treated with a statin (denominator incl. PCAs)"
+93715,DM023 - Patients with diabetes and a history of CVD (excl. haem. stroke) treated with a statin (denominator incl. PCAs)
+93438,% who have a positive experience of their GP practice
+94126,% of patients who had a good experience when contacting their GP practice
+94129,% of patients whose needs were met at their last GP practice appointment
+1942,% satisfied with phone access
+94128,% of face-to-face appointments
+94127,% of patients who felt the waiting time for their appointment was acceptable
+94118,% with a long-standing health condition (2024 definition)
+352,% with caring responsibility
+354,% reporting to be unemployed
+383,% reporting Alzheimer's disease or dementia
+93444,% reporting a long-term mental health problem
+94119,"% reporting a joint problem, such as arthritis"
+93443,% reporting learning disability
+94130,% of patients reporting to suffer from 'long Covid'
+355,% reporting blindness or partial sight
+356,% reporting deafness or hearing loss
+848,Depression: QOF prevalence
+90646,Depression: QOF incidence - new diagnosis
+91243,DEP004 - Newly diagnosed patients with depression who had a review 10-56 days after diagnosis (denominator incl. PCAs)
+247,Dementia: QOF prevalence
+91215,DEM004 - Dementia care plan has been reviewed in the last 12 months (denominator incl. PCAs)
+90581,Mental Health: QOF prevalence
+90600,MH002 - Patients with severe mental health issues having a comprehensive care plan (denominator incl. PCAs)
+90603,MH003 - Record of a BP check in the last 12 months for patients on the MH register (denominator incl. PCAs)
+93719,MH006 - Record of BMI in the last 12 months for patients on the MH register (denominator incl. PCAs)
+93919,MH007 - Patients with psychosis who have a current record of alcohol consumption
+93920,MH011 - Patients with psychosis who have a current record of a lipid profile
+93921,MH012 - Patients with psychosis who have a current record of blood glucose or HbA1c
+90933,Asthma: QOF prevalence
+258,CKD: QOF prevalence
+253,COPD: QOF prevalence
+224,Epilepsy: QOF prevalence
+200,Learning disability: QOF prevalence
+294,Palliative/supportive care: QOF prevalence
+90443,Osteoporosis: QOF prevalence
+91269,Rheumatoid Arthritis: QOF prevalence
+93716,"COPD008 - Patients with COPD with a MRC dyspnoea score >=3  in the last 12 months, who have had an offer of referral to a pulm. rehab. clinic (denominator incl. PCAs)"
+93792,COPD010 - Patients with COPD who had a review in the last 12 months (denominator incl. PCAs)
+93790,AST007 - Patients with Asthma: review in the last 12 months (denominator incl. PCAs)
+93791,AST008 - Patients with Asthma (6-19 yrs): Second-hand smoking status recorded in the last 12 months (denominator incl. PCAs)
+92163,Total number of prescribed antibiotic items per 1000 registered patients by quarter
+91900,Total number of prescribed antibiotic items per STAR-PU by quarter - GP
+91898,"Percentage of broad-spectrum prescribed antibiotic items (cephalosporin, quinolone and co-amoxiclav class) by quarter"
+93924,VI001 - Babies who received at least 3 doses of a DTaP vaccine before the age of 8 months
+93925,VI002 - Children who received at least 1 dose of MMR vaccine between the ages of 1 and 1.5 yrs
+93926,"VI003 - Children, aged 5, who received a reinforcing dose of DTaP/IPV and at least 2 doses of an MMR vaccine between the ages of 1 and 5 yrs"
+93927,"VI004 - Patients, aged 80, who received a shingles vaccine between the ages of 70 and 79 yrs"
