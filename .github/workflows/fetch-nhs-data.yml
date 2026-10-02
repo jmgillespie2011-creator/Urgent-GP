@@ -1,0 +1,40 @@
+name: Fetch NHS practice data
+
+# Downloads the latest public practice-level files (GP workforce, registered
+# patients by age/sex, QOF prevalence, smoking prevalence) and commits slim CSVs
+# to data/sources/. Runs on the GitHub runner because the NHS sites are not
+# reachable from every development environment.
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - scripts/fetch_nhs_data.py
+      - .github/workflows/fetch-nhs-data.yml
+
+permissions:
+  contents: write
+
+concurrency:
+  group: fetch-nhs-data-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Fetch
+        run: python scripts/fetch_nhs_data.py
+      - name: Commit updated sources
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/sources
+          if git diff --cached --quiet; then echo "No changes"; exit 0; fi
+          git commit -m "Update NHS practice-level source data"
+          git push
