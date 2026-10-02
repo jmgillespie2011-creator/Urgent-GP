@@ -4,12 +4,22 @@
     "indicator": "Smoking: QOF prevalence",
     "period": "2024/25"
   },
-  "fetched_utc": "2026-10-02T22:07:24Z",
-  "workforce_error": "RuntimeError: browser GET https://digital.nhs.uk/data-and-information/publications/statistical/general-and-personal-medical-services: HTTP 403",
-  "age/sex_error": "RuntimeError: browser GET https://digital.nhs.uk/data-and-information/publications/statistical/patients-registered-at-a-gp-practice: HTTP 403",
-  "QOF_error": "RuntimeError: browser GET https://digital.nhs.uk/data-and-information/publications/statistical/quality-and-outcomes-framework-achievement-prevalence-and-exceptions-data: HTTP 403",
+  "fetched_utc": "2026-10-02T22:39:06Z",
   "fingertips_profile": {
     "profile_id": 20,
     "indicators": 24
-  }
+  },
+  "workforce": {
+    "page": "https://digital.nhs.uk/data-and-information/publications/statistical/general-and-personal-medical-services/31-december-2025",
+    "file": "https://files.digital.nhs.uk/9F/0225CE/GPWPracticeCSV.122025.zip",
+    "csv": "3 General Practice \u2013 December 2025 Practice Level - High level.csv",
+    "columns": 1
+  },
+  "age_sex": {
+    "page": "https://digital.nhs.uk/data-and-information/publications/statistical/patients-registered-at-a-gp-practice/july-2026",
+    "file": "https://files.digital.nhs.uk/BB/362F1A/gp-reg-pat-prac-quin-age.zip",
+    "csv": "gp-reg-pat-prac-quin-age.csv",
+    "extract_date": "2026-07-01"
+  },
+  "QOF_error": "json.decoder.JSONDecodeError: Expecting value: line 1 column 1 (char 0)"
 }
