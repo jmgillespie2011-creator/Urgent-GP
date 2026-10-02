@@ -1,0 +1,11 @@
+{
+  "workforce_error": "RuntimeError: could not fetch https://digital.nhs.uk/data-and-information/publications/statistical/general-and-personal-medical-services",
+  "age/sex_error": "RuntimeError: could not fetch https://digital.nhs.uk/data-and-information/publications/statistical/patients-registered-at-a-gp-practice",
+  "QOF_error": "RuntimeError: could not fetch https://digital.nhs.uk/data-and-information/publications/statistical/quality-and-outcomes-framework-achievement-prevalence-and-exceptions-data",
+  "smoking": {
+    "source": "https://fingertips.phe.org.uk/api/all_data/csv/by_indicator_id?indicator_ids=91280&child_area_type_id=7&parent_area_type_id=15",
+    "indicator": "Smoking: QOF prevalence",
+    "period": "2024/25"
+  },
+  "fetched_utc": "2026-10-02T22:01:52Z"
+}
