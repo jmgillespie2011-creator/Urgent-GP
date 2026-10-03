@@ -23,14 +23,24 @@ The appointments data is the NHS Digital *Appointments in General Practice* prac
 
 ## The page
 
-The page opens with an evidence-led case for GPs in deprived areas, **"Fewer GPs, more same-day care, where need is greatest"**. It has four sections:
+`site/index.html` (built from `site/page.html`) is an advocacy page, read top to bottom:
 
-- **Need:** illness burden in the most vs least deprived fifth of practices.
-- **Workload:** same-day appointments per GP.
-- **The lever:** the adjusted link between GP staffing and same-day access.
-- **The pipeline:** which practices train new GPs.
+1. **Hero:** the claim and four headline numbers.
+2. **Four beats:**
+   - more illness, fewer doctors
+   - GPs working harder
+   - core funding 19% below 2008/09 in real terms
+   - what more GPs would buy
+3. **Four asks.**
+4. **Your practice in numbers:**
+   - staffing and same-day workload against England
+   - the practice's share of the funding gap, the salaried GPs it would pay for, and the extra same-day appointments they could deliver
+   - totals for its PCN and ICB
+   - a paragraph to copy into a letter
+5. **Every practice:** pick an ICB, one of three access measures, and one comparison (deprivation, GPs per patient, older patients or funding gap). Shows area totals, one scatter chart, and a table sorted by funding gap.
+6. **Evidence:** folded sections on strength of evidence, the funding method, definitions and the strongest correlations.
 
-These are followed by four policy asks, a "your practice in numbers" lookup that produces a paragraph for letters to an MP, ICB or patient participation group, and an evidence-and-limits section. Every number in it comes from `scripts/build_story.py` (`site/data/story.json`). The full explorer follows below it.
+The full analyst explorer, with every measure and month, the adjustable multivariable model and CSV upload, is at `site/explorer.html` (built from `site/dashboard.html`), linked from the page footer.
 
 ## What the explorer does
 
@@ -101,7 +111,8 @@ pip install pandas openpyxl
 python3 scripts/build_data.py      # -> site/data/practices.json, data/processed/practice_access.csv
 python3 scripts/build_story.py     # -> site/data/story.json (advocacy headline figures; needs statsmodels)
 python3 scripts/build_funding.py   # -> site/data/funding.json (core-funding gap per practice; needs story.json)
-python3 scripts/build_site.py      # -> site/index.html (standalone page)
+python3 scripts/build_lite.py      # -> site/data/lite.json (compact per-practice file for the main page)
+python3 scripts/build_site.py      # -> site/index.html (main page) and site/explorer.html (analyst explorer)
 cd site && python3 -m http.server  # open http://localhost:8000
 ```
 
