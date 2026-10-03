@@ -4,7 +4,18 @@ An interactive dashboard comparing **urgent and same-day appointment rates** acr
 
 The appointments data is the NHS Digital *Appointments in General Practice* practice-level crosstab for June to August 2026 ([August 2026 publication](https://digital.nhs.uk/data-and-information/publications/statistical/appointments-in-general-practice/august-2026)).
 
-## What the dashboard does
+## The page
+
+The page opens with an evidence-led case for GPs in deprived areas, **"Fewer GPs, more same-day care, where need is greatest"**. It has four sections:
+
+- **Need:** illness burden in the most vs least deprived fifth of practices.
+- **Workload:** same-day appointments per GP.
+- **The lever:** the adjusted link between GP staffing and same-day access.
+- **The pipeline:** which practices train new GPs.
+
+These are followed by four policy asks, a "your practice in numbers" lookup that produces a paragraph for letters to an MP, ICB or patient participation group, and an evidence-and-limits section. Every number in it comes from `scripts/build_story.py` (`site/data/story.json`). The full explorer follows below it.
+
+## What the explorer does
 
 - **Access measures** (per 1,000 registered patients per month, or as shares):
   - same-day
@@ -69,6 +80,7 @@ The newest workforce month in the archive was November 2025 when this was built.
 pip install pandas openpyxl
 # put Practice_Level_Crosstab_<Mon>_<YY>.csv files and Mapping.csv in data/raw/
 python3 scripts/build_data.py      # -> site/data/practices.json, data/processed/practice_access.csv
+python3 scripts/build_story.py     # -> site/data/story.json (advocacy headline figures; needs statsmodels)
 python3 scripts/build_site.py      # -> site/index.html (standalone page)
 cd site && python3 -m http.server  # open http://localhost:8000
 ```

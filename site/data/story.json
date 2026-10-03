@@ -1,0 +1,345 @@
+{
+ "rho": {
+  "dna_age": -0.5,
+  "dna_imd": 0.47,
+  "sdgp_gp": 0.17,
+  "sd_imd": 0.06,
+  "urg_imd": -0.01
+ },
+ "age65": {
+  "least": 22.5,
+  "most": 13.3
+ },
+ "within_icb_sd_gp_per_gp_q5_vs_q1": 71.0,
+ "practices": 5855,
+ "patients_m": 61.4,
+ "sd_gp_month_m": 7.8,
+ "sd_month_m": 13.8,
+ "imd_cuts": [
+  12.9,
+  18.3,
+  24.7,
+  33.1
+ ],
+ "by_imd": {
+  "gp_qual_fte_10k": [
+   4.85,
+   4.7,
+   4.46,
+   4.1,
+   4.07
+  ],
+  "pts_per_gp": [
+   2055.0,
+   2122.0,
+   2235.0,
+   2424.0,
+   2440.0
+  ],
+  "sd_gp_per_gp": [
+   188.0,
+   189.0,
+   199.0,
+   221.0,
+   229.0
+  ],
+  "sd_gp_rate": [
+   113.8,
+   110.4,
+   111.1,
+   112.4,
+   117.6
+  ],
+  "sd_rate": [
+   188.0,
+   200.3,
+   200.2,
+   199.6,
+   206.6
+  ],
+  "urg_sd_rate": [
+   105.0,
+   110.1,
+   104.2,
+   103.6,
+   106.8
+  ],
+  "dna_rate": [
+   14.4,
+   16.3,
+   19.1,
+   22.6,
+   27.1
+  ],
+  "trains_pct": [
+   66.0,
+   61.0,
+   58.0,
+   52.0,
+   48.0
+  ],
+  "ltc_sum": [
+   77.1,
+   82.6,
+   84.0,
+   80.5,
+   83.0
+  ]
+ },
+ "by_gp": {
+  "gp_qual_fte_10k": [
+   2.49,
+   3.66,
+   4.49,
+   5.33,
+   6.61
+  ],
+  "sd_gp_rate": [
+   97.7,
+   106.6,
+   116.6,
+   119.2,
+   129.4
+  ],
+  "sd_gp_rate_iqr": [
+   [
+    66.1,
+    142.2
+   ],
+   [
+    73.2,
+    157.1
+   ],
+   [
+    82.0,
+    167.7
+   ],
+   [
+    83.5,
+    165.8
+   ],
+   [
+    90.0,
+    180.0
+   ]
+  ],
+  "urg_sd_rate": [
+   93.3,
+   100.4,
+   110.3,
+   109.4,
+   117.8
+  ],
+  "n": [
+   1166,
+   1165,
+   1166,
+   1165,
+   1164
+  ]
+ },
+ "compare": [
+  {
+   "key": "prev_smok",
+   "label": "Smoking",
+   "kind": "need",
+   "least": 8.91,
+   "most": 18.19,
+   "diff_pct": 104.0
+  },
+  {
+   "key": "prev_copd",
+   "label": "COPD",
+   "kind": "need",
+   "least": 1.43,
+   "most": 2.52,
+   "diff_pct": 75.0
+  },
+  {
+   "key": "prev_mh",
+   "label": "Serious mental illness",
+   "kind": "need",
+   "least": 0.76,
+   "most": 1.24,
+   "diff_pct": 63.0
+  },
+  {
+   "key": "prev_ob",
+   "label": "Obesity",
+   "kind": "need",
+   "least": 11.45,
+   "most": 17.08,
+   "diff_pct": 49.0
+  },
+  {
+   "key": "prev_dm",
+   "label": "Diabetes",
+   "kind": "need",
+   "least": 6.78,
+   "most": 9.71,
+   "diff_pct": 43.0
+  },
+  {
+   "key": "prev_dep",
+   "label": "Depression",
+   "kind": "need",
+   "least": 12.98,
+   "most": 15.36,
+   "diff_pct": 18.0
+  },
+  {
+   "key": "dna_rate",
+   "label": "Missed appointments (DNAs) per patient",
+   "kind": "pressure",
+   "least": 14.35,
+   "most": 27.07,
+   "diff_pct": 89.0
+  },
+  {
+   "key": "sd_gp_per_gp",
+   "label": "Same-day GP appointments per GP",
+   "kind": "pressure",
+   "least": 187.73,
+   "most": 228.92,
+   "diff_pct": 22.0
+  },
+  {
+   "key": "pts_per_gp",
+   "label": "Patients per qualified GP",
+   "kind": "pressure",
+   "least": 2054.53,
+   "most": 2440.45,
+   "diff_pct": 19.0
+  },
+  {
+   "key": "gp_qual_fte_10k",
+   "label": "Qualified GPs per patient",
+   "kind": "capacity",
+   "least": 4.85,
+   "most": 4.07,
+   "diff_pct": -16.0
+  },
+  {
+   "key": "trains",
+   "label": "Practices training new GPs",
+   "kind": "capacity",
+   "least": 66.13,
+   "most": 47.99,
+   "diff_pct": -27.0
+  }
+ ],
+ "gp_gap": {
+  "per_10k": 0.66,
+  "q5_patients_m": 9.8,
+  "fte": 650,
+  "q1_weighted": 4.89,
+  "q5_weighted": 4.23
+ },
+ "lever": {
+  "sd_gp_rate": {
+   "per_gp_per_10k": 7.6,
+   "ci": [
+    5.9,
+    9.3
+   ],
+   "n": 5413,
+   "r2": 0.052
+  },
+  "urg_sd_rate": {
+   "per_gp_per_10k": 3.3,
+   "ci": [
+    1.4,
+    5.2
+   ],
+   "n": 5413,
+   "r2": 0.024
+  },
+  "gp_rate": {
+   "per_gp_per_10k": 12.9,
+   "ci": [
+    11.0,
+    14.9
+   ],
+   "n": 5413,
+   "r2": 0.093
+  }
+ },
+ "gradient": {
+  "raw_per_10_imd": -0.178,
+  "within_icb_per_10_imd": -0.235
+ },
+ "strongest": [
+  {
+   "measure": "DNA rate",
+   "factor": "Patients aged 65+",
+   "rho": -0.5,
+   "n": 5855
+  },
+  {
+   "measure": "DNA rate",
+   "factor": "Deprivation (IMD 2025)",
+   "rho": 0.47,
+   "n": 5855
+  },
+  {
+   "measure": "DNA rate",
+   "factor": "Smoking prevalence",
+   "rho": 0.39,
+   "n": 5852
+  },
+  {
+   "measure": "All appointments per 1,000",
+   "factor": "Asthma",
+   "rho": 0.38,
+   "n": 5854
+  },
+  {
+   "measure": "All appointments per 1,000",
+   "factor": "CHD",
+   "rho": 0.38,
+   "n": 5746
+  },
+  {
+   "measure": "DNA rate",
+   "factor": "Male patients",
+   "rho": 0.38,
+   "n": 5855
+  },
+  {
+   "measure": "All appointments per 1,000",
+   "factor": "Long-term condition burden",
+   "rho": 0.37,
+   "n": 5746
+  },
+  {
+   "measure": "DNA rate",
+   "factor": "Serious mental illness",
+   "rho": 0.35,
+   "n": 5854
+  },
+  {
+   "measure": "DNA rate",
+   "factor": "CHD",
+   "rho": -0.33,
+   "n": 5746
+  },
+  {
+   "measure": "All appointments per 1,000",
+   "factor": "Patients aged 65+",
+   "rho": 0.32,
+   "n": 5855
+  },
+  {
+   "measure": "All appointments per 1,000",
+   "factor": "Nurses per 10,000",
+   "rho": 0.3,
+   "n": 5542
+  },
+  {
+   "measure": "All appointments per 1,000",
+   "factor": "Other clinical staff per 10,000",
+   "rho": 0.3,
+   "n": 5765
+  }
+ ]
+}
