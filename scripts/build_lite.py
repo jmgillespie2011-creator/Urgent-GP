@@ -30,6 +30,19 @@ def main() -> None:
     d["sd"], d["urg"], d["sdgp"], d["dna"] = per1k("sd_3m"), per1k("urg_sd_3m"), per1k("sd_gp_3m"), per1k("dna_3m")
     fte = d["gp_fte"].where(d["gp_fte"] >= 0.5) if "gp_fte" in d else np.nan
     d["sdgp_per_gp"] = (d["sd_gp_3m"] / 3 / fte).where(lambda x: x < 2000)
+    d["acute_m"] = d["acute_3m"] / 3
+    d["acute_pct"] = (100 * d["acute_sd_3m"] / d["acute_3m"]).where(d["acute_3m"] > 0)
+    d["acute_rate"] = per1k("acute_3m")
+    d["acute_short"] = ((0.9 * d["acute_3m"] - d["acute_sd_3m"]).clip(lower=0) / 3)
+    d["acute_ok"] = (d["acute_m"] >= 30).astype(int)  # enough urgent appointments for a stable percentage
+    j = json.loads((ROOT / "site" / "data" / "practices.json").read_text())
+    by_code = {p["c"]: p["k"] for p in j["practices"]}
+    def monthly_pct(code):
+        k = by_code.get(code)
+        if not k:
+            return None
+        return [round(100 * s_ / a, 1) if a else None for s_, a in zip(k["acute_sd"], k["acute"])]
+    d["acute_months"] = d["practice_code"].map(monthly_pct)
     cuts = story["imd_cuts"]
     d["imd_q"] = np.select([d["imd"] <= c for c in cuts], [1, 2, 3, 4], default=5)
     d.loc[d["imd"].isna(), "imd_q"] = 0
@@ -51,11 +64,18 @@ def main() -> None:
         "ptsgp": d.get("pts_per_gp", pd.Series(np.nan, index=d.index)).round(0),
         "sd": d["sd"].round(1), "urg": d["urg"].round(1), "sdgp": d["sdgp"].round(1), "dna": d["dna"].round(1),
         "sdgp_gp": d["sdgp_per_gp"].round(0),
+        "acute_pct": d["acute_pct"].round(1), "acute_rate": d["acute_rate"].round(1), "acute_m": d["acute_m"].round(0),
+        "acute_short": d["acute_short"].round(0), "acute_ok": d["acute_ok"], "acute_months": d["acute_months"],
         "gap": d["gap"].round(-2), "gps": d["gps"].round(2), "extra": d["extra"].round(0), "gap_pt": d["gap_per_pt"].round(2),
     }
-    out = {k: [None if (isinstance(v, float) and np.isnan(v)) else (v.item() if hasattr(v, "item") else v) for v in s.tolist()]
-           for k, s in cols.items()}
-    meta = {"rows": len(d), "fields": list(cols), "funding_year": funding["year"], "imd_cuts": cuts}
+    def clean(v):
+        if isinstance(v, list):
+            return v
+        if v is None or (isinstance(v, float) and np.isnan(v)):
+            return None
+        return v.item() if hasattr(v, "item") else v
+    out = {k: [clean(v) for v in s.tolist()] for k, s in cols.items()}
+    meta = {"rows": len(d), "fields": list(cols), "funding_year": funding["year"], "imd_cuts": cuts, "months": j["months"]}
     OUT.write_text(json.dumps({"meta": meta, "cols": out}, separators=(",", ":"), ensure_ascii=False))
     print(f"Wrote {OUT.relative_to(ROOT)} ({OUT.stat().st_size / 1e6:.2f} MB, {len(d)} practices, {int(d['qc'].sum())} pass QC)")
 

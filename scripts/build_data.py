@@ -54,6 +54,12 @@ COUNT_FIELDS = [
     "urg_sd",     # urgent-type category, booked same day
     "dna",        # did not attend
     "unmapped",   # category = Inconsistent Mapping / Unmapped (data quality)
+    "acute",      # General Consultation Acute: NHS England's "clinically urgent" category (2026/27 contract)
+    "acute_sd",   # ... taking place on the day booked (numerator of the 90% same-day measure)
+    "acute_gp",   # ... with a GP
+    "acute_sd_gp",
+    "acute_att",  # ... attended (sensitivity check excluding DNAs and unknown status)
+    "acute_sd_att",
 ]
 
 MONTHS = {"Jan": 1, "Feb": 2, "Mar": 3, "Apr": 4, "May": 5, "Jun": 6,
@@ -86,6 +92,8 @@ def aggregate_month(path: Path) -> pd.DataFrame:
     gp = df["HCP_TYPE"].eq("GP")
     f2f = df["APPT_MODE"].eq("Face-to-Face")
     urgent = df["NATIONAL_CATEGORY"].isin(URGENT_CATEGORIES)
+    acute = df["NATIONAL_CATEGORY"].eq("General Consultation Acute")
+    attended = df["APPT_STATUS"].eq("Attended")
     flags = pd.DataFrame({
         "code": norm_code(df["GP_CODE"]),
         "total": n,
@@ -97,6 +105,12 @@ def aggregate_month(path: Path) -> pd.DataFrame:
         "urg_sd": n.where(urgent & same_day, 0),
         "dna": n.where(df["APPT_STATUS"].eq("DNA"), 0),
         "unmapped": n.where(df["NATIONAL_CATEGORY"].isin(UNMAPPED_CATEGORIES), 0),
+        "acute": n.where(acute, 0),
+        "acute_sd": n.where(acute & same_day, 0),
+        "acute_gp": n.where(acute & gp, 0),
+        "acute_sd_gp": n.where(acute & same_day & gp, 0),
+        "acute_att": n.where(acute & attended, 0),
+        "acute_sd_att": n.where(acute & same_day & attended, 0),
     })
     return flags.groupby("code", sort=True).sum()
 

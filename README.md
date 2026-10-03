@@ -23,22 +23,29 @@ The appointments data is the NHS Digital *Appointments in General Practice* prac
 
 ## The page
 
-`site/index.html` (built from `site/page.html`) sets out the findings in this order:
+`site/index.html` (built from `site/page.html`) is about **urgent appointments seen the same day**. It uses the measure in the 2026/27 GP contract: General Consultation Acute appointments that took place on the day they were booked, as a share of all General Consultation Acute appointments. The target is 90%. Sections:
 
-1. **Summary:** headline and four key figures.
-2. **Findings:**
-   - Need: higher need, fewer GPs
-   - Workload: each GP provides more same-day care
-   - Funding: core funding 19% below 2008/09 in real terms
-   - Staffing and access: more GPs per patient, more same-day appointments
-3. **Recommendations:** four.
-4. **Your practice:**
-   - staffing and same-day workload compared with England
-   - the practice's share of the funding shortfall, the salaried GPs it would pay for, and the estimated extra same-day appointments
-   - totals for its PCN and ICB
+1. **Summary:** national figure, share of practices reaching 90%, the deprivation gap, the core funding shortfall.
+2. **Where practices stand:** distribution of practices, with the 90% target marked; GP and other staff compared.
+3. **Need:** urgent demand, GP numbers and the share reaching 90%, by deprivation.
+4. **GP staffing:** the share reaching 90% by GP staffing, and the adjusted association.
+5. **Funding:** core funding against 2008/09, and the estimated effect of restoring it on the urgent same-day measure.
+6. **Recommendations:** four.
+7. **Your practice:**
+   - urgent same-day percentage by month and the gap to 90%
+   - GP staffing
+   - funding shortfall and its estimated effect
+   - PCN and ICB totals
    - a summary paragraph for correspondence
-5. **Practices by area:** select an ICB, one of three access measures and one comparison (deprivation, GPs per patient, older patients or funding shortfall). Shows area totals, a scatter chart and a table sorted by funding shortfall.
-6. **Methods and limitations:** strength of the evidence, the funding shortfall calculation, definitions and the strongest associations.
+8. **Practices by area:** ICB totals, a scatter chart with the 90% line, and a sortable table.
+9. **Methods and limitations.**
+
+June–August 2026 results:
+- 77.5% of urgent appointments took place the same day: 81% with GPs, 71% with other staff.
+- 29% of practices reached 90%.
+- Most vs least deprived fifth: 24% vs 35% of practices reached 90%, with 16% more urgent appointments per patient and 16% fewer GPs.
+- Each extra GP per 10,000 patients is associated with about 1 percentage point more seen the same day (95% CI 0.7–1.4), after adjustment.
+- Restoring core funding to its 2008/09 value is estimated to raise the national figure from 77.6% to about 80% and the share of practices reaching 90% from 29% to about 34%.
 
 The full analyst explorer, with every measure and month, the adjustable multivariable model and CSV upload, is at `site/explorer.html` (built from `site/dashboard.html`), linked from the page footer.
 
@@ -111,6 +118,7 @@ pip install pandas openpyxl
 python3 scripts/build_data.py      # -> site/data/practices.json, data/processed/practice_access.csv
 python3 scripts/build_story.py     # -> site/data/story.json (advocacy headline figures; needs statsmodels)
 python3 scripts/build_funding.py   # -> site/data/funding.json (core-funding gap per practice; needs story.json)
+python3 scripts/build_urgent.py    # -> site/data/urgent.json (urgent same-day measure, 90% target)
 python3 scripts/build_lite.py      # -> site/data/lite.json (compact per-practice file for the main page)
 python3 scripts/build_site.py      # -> site/index.html (main page) and site/explorer.html (analyst explorer)
 cd site && python3 -m http.server  # open http://localhost:8000

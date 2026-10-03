@@ -1,5 +1,5 @@
 <title>GP Same-Day Access Explorer</title>
-<meta name="description" content="Practices serving England's most deprived communities have fewer GPs, yet deliver as much same-day care. Core funding is 19% below 2008/09 in real terms. See what it means for your practice.">
+<meta name="description" content="How many urgent GP appointments take place the same day, against the 90% target in the 2026/27 GP contract, and how this relates to deprivation, GP numbers and core funding, for every practice in England.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,500..900&family=Public+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
@@ -173,86 +173,86 @@ footer.foot { border-top: 2px solid var(--ink); padding-top: 18px; display: grid
   <header class="hero">
     <nav aria-label="Sections"><a href="#findings">Findings</a><a href="#recommendations">Recommendations</a><a href="#yours">Your practice</a><a href="#every">Practices by area</a><a href="#evidence">Methods</a></nav>
     <span class="eyebrow">General practice in England · June–August 2026</span>
-    <h1>Fewer GPs where <em>need is greatest</em></h1>
-    <p class="lede">Practices serving England's most deprived communities have fewer GPs per patient, yet provide as much same-day care as other practices. Each GP therefore carries more of the workload. Core funding is now <span data-s="gap_pct_real">19%</span> below its 2008/09 value in real terms.</p>
+    <h1>Urgent appointments seen <em>the same day</em></h1>
+    <p class="lede">The 2026/27 GP contract requires practices to deal with clinically urgent requests on the same day, measured against a 90% target. In June to August 2026, <span data-u="nat">77.5%</span> of urgent appointments in England took place on the day they were booked. Practices in deprived areas, with more urgent demand and fewer GPs, were least likely to reach 90%.</p>
     <div class="hero-stats">
-      <div class="hero-stat"><b data-s="gp_less">16%</b><span>fewer GPs per patient in the most deprived fifth of practices</span></div>
-      <div class="hero-stat"><b data-s="sdgp_more">22%</b><span>more same-day appointments delivered by each of their GPs</span></div>
-      <div class="hero-stat"><b data-s="gap_bn">£1.69bn</b><span>a year less core funding than 2008/09, in real terms</span></div>
-      <div class="hero-stat"><b data-s="total_gps">15,500</b><span>salaried GPs that money would pay for</span></div>
+      <div class="hero-stat"><b data-u="nat">77.5%</b><span>of urgent appointments in England took place the same day</span></div>
+      <div class="hero-stat"><b data-u="meets">29%</b><span>of practices reached the 90% target</span></div>
+      <div class="hero-stat"><b data-u="dep_pair">24% vs 35%</b><span>of practices reached 90% in the most and least deprived areas</span></div>
+      <div class="hero-stat"><b data-s="gap_bn">£1.69bn</b><span>a year less core funding than 2008/09 in real terms, about <span data-s="total_gps">15,500</span> salaried GPs</span></div>
     </div>
   </header>
 
   <section class="finding" id="findings">
     <div class="text">
-      <span class="kicker">Need</span>
-      <h2>Higher need, fewer GPs</h2>
-      <p>Compared with practices in the least deprived fifth of England, the most deprived fifth have <strong>twice the smoking</strong>, <strong>three-quarters more COPD</strong> and <strong>nearly two-thirds more serious mental illness</strong>.</p>
-      <p>They also have <strong><span data-s="gp_less">16%</span> fewer GPs per patient</strong>, and fewer of them train new GPs. Their patients also miss nearly twice as many appointments.</p>
-      <p class="muted" style="font-size:0.86rem">Their lists are younger (<span data-s="young">13% aged 65+ against 23%</span>), so conditions of older age such as atrial fibrillation are less common. The conditions that are more common in deprived areas tend to develop at younger ages.</p>
+      <span class="kicker">Where practices stand</span>
+      <h2>Most practices are below the 90% target</h2>
+      <p>Across England, <strong><span data-u="nat">77.5%</span> of urgent appointments</strong> took place on the day they were booked. The median practice reached <span data-u="median">82%</span>. <strong><span data-u="meets">29%</span> of practices reached 90%</strong>, and <span data-u="meets80">55%</span> reached 80%.</p>
+      <p>Urgent appointments with a GP were more often on the same day (<span data-u="pct_gp">81%</span>) than those with other practice staff such as nurse practitioners and pharmacists (<span data-u="pct_other">71%</span>).</p>
+      <p>For every practice to reach 90%, about <strong><span data-u="short">848,000</span> urgent appointments a month</strong> would need to take place on the day of booking rather than later.</p>
     </div>
     <figure class="figure">
-      <h3>Most deprived fifth of practices compared with least deprived fifth</h3>
-      <div class="dv" id="dv"></div>
-      <figcaption>Median practice in each fifth, by IMD 2025 score. Need: QOF 2024/25. Workload: appointments June–August 2026. Capacity: GP workforce, November 2025.</figcaption>
+      <h3>Practices by share of urgent appointments seen the same day</h3>
+      <div id="ch-hist"></div>
+      <figcaption>June–August 2026 combined. Urgent: national category General Consultation Acute, the category NHS England uses for the target. Practices with fewer than 30 urgent appointments a month are not shown.</figcaption>
     </figure>
   </section>
 
   <section class="finding">
     <div class="text">
-      <span class="kicker">Workload</span>
-      <h2>Each GP provides more same-day care</h2>
-      <p>Same-day access per patient is similar across all levels of deprivation: about <span data-s="sdgp_q1">114</span> same-day GP appointments per 1,000 patients a month in the least deprived fifth and <span data-s="sdgp_q5">118</span> in the most.</p>
-      <p>With fewer GPs, <strong>each GP in the most deprived practices delivers <span data-s="sdgp_pergp_q5">229</span> same-day appointments a month, against <span data-s="sdgp_pergp_q1">188</span></strong>. The same pattern is seen between practices within the same ICB, so it is not explained by region.</p>
+      <span class="kicker">Need</span>
+      <h2>Deprived practices have more urgent demand and fewer GPs</h2>
+      <p>Practices in the most deprived fifth of England record <strong><span data-u="rate_more">16%</span> more urgent appointments per patient</strong> than the least deprived, with <strong><span data-s="gp_less">16%</span> fewer GPs per patient</strong>. Their patients have twice the smoking, three-quarters more COPD and nearly two-thirds more serious mental illness.</p>
+      <p>The median practice in the most deprived fifth saw <span data-u="med_q5">79%</span> of urgent appointments the same day, against <span data-u="med_q1">85%</span> in the least deprived. <strong><span data-u="miss_q5">76%</span> of the most deprived practices did not reach 90%.</strong></p>
     </div>
     <div class="pair">
-      <figure class="figure"><h3>GPs per 10,000 patients</h3><div id="ch-gp"></div><figcaption>Qualified GPs, full-time equivalent. By deprivation fifth, median practice.</figcaption></figure>
-      <figure class="figure"><h3>Same-day GP appointments per GP, a month</h3><div id="ch-pergp"></div><figcaption>By deprivation fifth, median practice.</figcaption></figure>
+      <figure class="figure"><h3>Practices reaching 90% (%)</h3><div id="ch-dep-meet"></div><figcaption>By deprivation fifth (IMD 2025).</figcaption></figure>
+      <figure class="figure"><h3>Urgent appointments per 1,000 patients, a month</h3><div id="ch-dep-rate"></div><figcaption>By deprivation fifth, median practice.</figcaption></figure>
     </div>
+  </section>
+
+  <section class="finding">
+    <div class="text">
+      <span class="kicker">GP staffing</span>
+      <h2>Practices with more GPs are more likely to reach 90%</h2>
+      <p><span data-u="meet_gp_q5">33%</span> of practices with the most GPs per patient reached 90%, against <span data-u="meet_gp_q1">22%</span> of those with the fewest.</p>
+      <p>After adjusting for deprivation, age, sex, smoking, other practice staff and how many appointments are recorded as urgent, each extra full-time GP per 10,000 patients was associated with <strong><span data-u="pp">1.0</span> percentage points</strong> more urgent appointments seen the same day (95% CI <span data-u="pp_ci">0.7–1.4</span>), and <span data-u="or">11%</span> higher odds of reaching 90%.</p>
+      <p>Each GP in the most deprived practices already provides <span data-s="sdgp_pergp_q5">229</span> same-day appointments a month, against <span data-s="sdgp_pergp_q1">188</span> in the least deprived.</p>
+    </div>
+    <figure class="figure">
+      <h3>Practices reaching 90% (%), by GP staffing</h3>
+      <div id="ch-gp-meet"></div>
+      <figcaption>Practices in fifths by qualified GPs per 10,000 patients (median shown under each).</figcaption>
+    </figure>
   </section>
 
   <section class="finding">
     <div class="text">
       <span class="kicker">Funding</span>
-      <h2>Core funding is worth <span data-s="gap_pct_real">19%</span> less than in 2008/09</h2>
-      <p>In 2008/09 practices received <strong><span data-s="ph_2008">£99.13</span> per person</strong> in core contract and QOF funding. Had that kept pace with inflation it would be <strong><span data-s="ph_kept">£152.94</span></strong> in <span data-s="fyear">2023/24</span>. Practices received <strong><span data-s="ph_actual">£123.70</span></strong>.</p>
-      <p>Across England that is <strong><span data-s="gap_bn">£1.69bn</span> a year</strong>, enough for about <strong><span data-s="total_gps">15,500</span> salaried GPs</strong> at <span data-s="gp_cost">£109,658</span> each including employer costs.</p>
-      <p class="muted" style="font-size:0.86rem">For comparison, the BMA called for £152.50 per weighted patient in 2025/26, close to the inflation-adjusted figure above.</p>
+      <h2>Core funding is <span data-s="gap_pct_real">19%</span> below 2008/09 in real terms</h2>
+      <p>In 2008/09 practices received <span data-s="ph_2008">£99.13</span> per person in core contract and QOF funding. Had that kept pace with inflation it would be <span data-s="ph_kept">£152.94</span> in <span data-s="fyear">2023/24</span>. Practices received <span data-s="ph_actual">£123.70</span>. Across England that is <strong><span data-s="gap_bn">£1.69bn</span> a year</strong>, enough for about <strong><span data-s="total_gps">15,500</span> salaried GPs</strong>.</p>
+      <p>Based on the associations above, those GPs would raise the share of urgent appointments seen the same day from <strong><span data-u="r_now">77.6%</span> to about <span data-u="r_after">80.1%</span></strong>, and the share of practices reaching 90% from <span data-u="m_now">29%</span> to about <span data-u="m_after">34%</span>.</p>
+      <p>Restoring funding would help, but on its own would not bring most practices to 90%. The target therefore needs to take account of capacity and need.</p>
     </div>
     <figure class="figure">
       <h3>Core contract + QOF funding per person, England</h3>
       <div id="ch-money"></div>
-      <figcaption>2008/09: NHS Digital, Investment in General Practice. <span data-s="fyear">2023/24</span>: NHS Payments to General Practice. Uprated by ONS CPI. Method under <a href="#evidence">Methods and limitations</a>.</figcaption>
-    </figure>
-  </section>
-
-  <section class="finding">
-    <div class="text">
-      <span class="kicker">Staffing and access</span>
-      <h2>More GPs per patient, more same-day appointments</h2>
-      <p>Practices with the most GPs per patient deliver <strong><span data-s="lever_pct">32%</span> more same-day GP appointments</strong> than those with the fewest. The association remains after adjusting for deprivation, age, sex, smoking, long-term conditions and other practice staff.</p>
-      <p class="callout"><b>≈<span data-s="per_gp">76</span> a month</b>more same-day GP appointments for each extra full-time GP (95% CI <span data-s="per_gp_ci">59–93</span>).</p>
-      <p>Restoring core funding to its 2008/09 value would pay for about <span data-s="total_gps">15,500</span> GPs. Based on this association, that could mean <strong>about <span data-s="sd_extra">1.17 million</span> more same-day GP appointments every month</strong>, <span data-s="sd_extra_pct">15%</span> more than practices deliver now.</p>
-    </div>
-    <figure class="figure">
-      <h3>Same-day GP appointments per 1,000 patients a month, by GP staffing</h3>
-      <div id="ch-lever"></div>
-      <figcaption>Practices in fifths by GPs per 10,000 patients (median shown under each). Dot: median practice. Line: middle half of practices.</figcaption>
+      <figcaption>2008/09: NHS Digital, Investment in General Practice. <span data-s="fyear">2023/24</span>: NHS Payments to General Practice. Uprated by ONS CPI. See <a href="#evidence">Methods and limitations</a>.</figcaption>
     </figure>
   </section>
 
   <section id="recommendations" style="display:grid;gap:18px">
     <div class="section-head"><h2>Recommendations</h2></div>
     <div class="recs">
-      <div class="rec"><h3>Restore core funding, weighted to need</h3><p>Bring core contract funding back to its 2008/09 real-terms value, about <span data-s="gap_bn">£1.69bn</span> a year, and weight it towards deprivation and early-onset illness.</p><p class="ev">Per person: <span data-s="ph_pair">£123.70 now vs £152.94 if it had kept pace</span>.</p></div>
+      <div class="rec"><h3>Restore core funding, weighted to need</h3><p>Return core contract funding to its 2008/09 real-terms value, about <span data-s="gap_bn">£1.69bn</span> a year, weighted towards deprivation and early-onset illness.</p><p class="ev">Core + QOF per person: <span data-s="ph_pair">£123.70 now, £152.94 if it had kept pace with inflation</span>.</p></div>
+      <div class="rec"><h3>Assess the 90% target against capacity and need</h3><p>Publish each practice's result alongside its GPs per patient and urgent demand, and do not penalise practices with the fewest GPs and highest need.</p><p class="ev">Practices reaching 90%: <span data-u="dep_pair2">24% most deprived, 35% least deprived</span>.</p></div>
       <div class="rec"><h3>Expand GP training in deprived areas</h3><p>Fund supervision time, premises and educators so that more practices in deprived areas can train GPs.</p><p class="ev">Practices training GPs: <span data-s="train_pair">48% vs 66%</span>, most vs least deprived.</p></div>
-      <div class="rec"><h3>Judge access against capacity</h3><p>Access targets and league tables should account for staffing and need, so that practices with fewer GPs and higher need are assessed fairly.</p><p class="ev">Same-day GP appointments per GP: <span data-s="sdgp_pair">229 vs 188</span> a month.</p></div>
-      <div class="rec"><h3>Fund work to reduce missed appointments</h3><p>Fund outreach, flexible booking and reminders in practices with the highest rates of missed appointments.</p><p class="ev">Missed appointments per 1,000 patients a month: <span data-s="dna_pair">27 vs 14</span>.</p></div>
+      <div class="rec"><h3>Make recording consistent</h3><p>Issue clear national guidance on which appointments count as clinically urgent, so that results reflect access rather than differences in how slots are mapped.</p><p class="ev">Appointments recorded as urgent: under <span data-u="share_p10">6%</span> in one in ten practices, over <span data-u="share_p90">41%</span> in another one in ten.</p></div>
     </div>
   </section>
 
   <section id="yours" class="panel">
-    <div class="section-head"><h2>Your practice</h2><p class="muted">Search for a practice to see its staffing, its share of the funding shortfall and the estimated effect on same-day appointments, with totals for its PCN and ICB. A summary paragraph is provided for use in correspondence.</p></div>
+    <div class="section-head"><h2>Your practice</h2><p class="muted">Search for a practice to see its share of urgent appointments seen the same day, its GP staffing and its share of the funding shortfall, with totals for its PCN and ICB. A summary paragraph is provided for use in correspondence.</p></div>
     <div class="search"><input type="search" id="ysearch" placeholder="Practice name, ODS code or PCN" autocomplete="off" aria-label="Find your practice"><div class="suggest" id="ysuggest" hidden></div></div>
     <div class="ycard" id="ycard"><p class="loading">Loading practices…</p></div>
   </section>
@@ -261,7 +261,7 @@ footer.foot { border-top: 2px solid var(--ink); padding-top: 18px; display: grid
     <div class="section-head"><h2>Practices by area</h2><p class="muted">Each dot is a practice. Select an ICB to see its totals and highlight its practices.</p></div>
     <div class="controls">
       <label class="ctl"><span>Area</span><select id="area"></select></label>
-      <div class="ctl"><span id="m-lbl">Access measure</span><div class="seg" id="measure" role="group" aria-labelledby="m-lbl"></div></div>
+      <div class="ctl"><span id="m-lbl">Measure</span><div class="seg" id="measure" role="group" aria-labelledby="m-lbl"></div></div>
       <div class="ctl"><span id="f-lbl">Compare with</span><div class="seg" id="factor" role="group" aria-labelledby="f-lbl"></div></div>
     </div>
     <div class="tiles" id="tiles"></div>
@@ -272,22 +272,32 @@ footer.foot { border-top: 2px solid var(--ink); padding-top: 18px; display: grid
       <figcaption id="sc-note"></figcaption>
     </figure>
     <div class="tbl-wrap"><table id="tbl"></table></div>
-    <p class="note">Sorted by funding shortfall. Select a practice to show it under <a href="#yours">Your practice</a>.</p>
+    <p class="note">Select a column heading to sort. Select a practice to show it under <a href="#yours">Your practice</a>.</p>
   </section>
 
   <section id="evidence" style="display:grid;gap:4px">
     <div class="section-head" style="margin-bottom:8px"><h2>Methods and limitations</h2></div>
     <details class="fold" open>
+      <summary>The urgent same-day measure</summary>
+      <div class="body">
+        <p>This follows NHS England's method for the 2026/27 contract: appointments in the national category <strong>General Consultation Acute</strong> that took place on the day they were booked, as a share of all General Consultation Acute appointments. All appointment statuses are counted. Excluding missed appointments makes little difference (<span data-u="nat_att">79%</span> rather than <span data-u="nat">77.5%</span> nationally).</p>
+        <ul>
+          <li>Practices decide which requests are clinically urgent and map their appointment slots to national categories. Practices differ in how they do this, so part of the variation between practices reflects recording rather than access.</li>
+          <li>The measure counts appointments. Urgent requests resolved without an appointment, or sent to other services, are not included.</li>
+          <li>Practice figures combine June, July and August 2026. Practices with fewer than 30 urgent appointments a month are left out of distributions and models because their percentages are unstable. They are still shown individually.</li>
+          <li>Practices with fewer than 1,000 patients, implausible appointment volumes or over 40% unmapped appointments are left out of charts and totals.</li>
+        </ul>
+      </div>
+    </details>
+    <details class="fold">
       <summary>Strength of the evidence</summary>
       <div class="body">
-        <p>The strongest association in the data is between <strong>missed appointments and a practice's population</strong>. DNA rates fall as the share of older patients rises (rank correlation <span data-s="rho_dna_age">−0.50</span>) and rise with deprivation (rank correlation <span data-s="rho_dna_imd">0.47</span>).</p>
-        <p>For same-day access, <strong>GP staffing has the strongest association, but it is modest</strong> (rank correlation about <span data-s="rho_sdgp_gp">0.17</span>). Deprivation, age, sex, smoking, long-term conditions and staffing together explain about <span data-s="r2">5%</span> of the difference between practices. The remaining variation reflects how practices organise, triage and record appointments, which national data does not capture.</p>
-        <p>The adjusted estimate (<span data-s="per_gp">76</span> more same-day GP appointments a month per extra full-time GP, 95% CI <span data-s="per_gp_ci">59–93</span>) comes from one linear model across <span data-s="model_n">5,413</span> practices. It includes deprivation, age 65+, age 0–14, % male, smoking, long-term condition burden, and nurse, other clinical and admin staffing. Its confidence interval allows for practices in the same ICB being alike.</p>
-        <p class="muted">A rank correlation runs from −1 to +1. Zero means no association. It measures the strength of an association, not statistical significance, and is not a p-value. With nearly 6,000 practices, even weak associations are statistically significant, so the size of the correlation is the relevant measure.</p>
+        <p>The associations with deprivation and GP staffing are consistent but modest (rank correlations of <span data-u="rho_imd">−0.12</span> and <span data-u="rho_gp">0.12</span>). The adjusted model explains about <span data-u="r2">3%</span> of the variation between practices in the urgent same-day measure. Most of the variation reflects how practices organise triage and record appointments, which national data does not capture.</p>
+        <p>The adjusted estimates come from a linear model (percentage seen the same day) and a logistic model (reaching 90%) across <span data-u="model_n">5,222</span> practices. They adjust for deprivation, age 65+, age 0–14, % male, smoking, nurse, other clinical and admin staffing, and the share of appointments recorded as urgent. Confidence intervals allow for practices in the same ICB being alike.</p>
+        <p class="muted">A rank correlation runs from −1 to +1. Zero means no association. It measures the strength of an association, not statistical significance, and is not a p-value.</p>
         <ul>
-          <li>These are associations across practices at one point in time. They are consistent with GP numbers driving access, but they do not prove it.</li>
-          <li>Staff employed by PCNs through the ARRS scheme (pharmacists, paramedics, physician associates and others) are not attributed to practices. Deprived areas may have received more of them, which would narrow the staffing gap.</li>
-          <li>Appointment recording varies between practices. Practices with fewer than 1,000 patients, implausible volumes or over 40% unmapped appointments are left out of charts and totals.</li>
+          <li>These are associations across practices at one point in time. They are consistent with GP numbers affecting same-day care, but they do not prove it.</li>
+          <li>Staff employed by PCNs through the ARRS scheme are not attributed to practices in the workforce data.</li>
         </ul>
       </div>
     </details>
@@ -297,11 +307,10 @@ footer.foot { border-top: 2px solid var(--ink); padding-top: 18px; display: grid
         <ul>
           <li>2008/09 England core contract + QOF funding: Global Sum + MPIG, PMS baseline, APMS/PCTMS core and QOF, <span data-s="core_2008">£5,136m</span> (NHS Digital, Investment in General Practice 2008/09–2012/13). QOF is included because QOF points were later moved into the global sum. The <span data-s="fyear">2023/24</span> figure counts the same items (NHS Payments to General Practice).</li>
           <li>Uprated by ONS CPI (×<span data-s="cpi_ratio">1.543</span>, financial-year averages) and England's population (×<span data-s="pop_ratio">1.119</span>), then compared with what was actually paid.</li>
-          <li>Seniority pay was also later folded into the global sum but cannot be separated in 2008/09. It is left out, which makes the estimated shortfall smaller than it is.</li>
-          <li>Funding for PCN-employed staff (ARRS), premises, IT and dispensing sits outside the core contract and is not counted.</li>
-          <li>Each practice's share is the national gap split by weighted patients, the same needs weighting the global sum uses.</li>
-          <li>Salaried GP cost: midpoint of the BMA model contract range plus employer NI and the employer pension contribution practices pay.</li>
-          <li>That many GPs would mean about <span data-s="per10k_add">2.5</span> more per 10,000 patients, which takes the typical practice to the top of today's staffing range. The same-day figure is an extrapolation at the edge of the data, and it assumes the GPs could be recruited.</li>
+          <li>Seniority pay was also later moved into the global sum but cannot be separated in 2008/09. It is left out, which makes the estimated shortfall smaller than it is.</li>
+          <li>Funding for PCN-employed staff (ARRS), premises, IT and dispensing is outside the core contract and not counted.</li>
+          <li>Each practice's share is the national shortfall divided by weighted patients. Salaried GP cost is the midpoint of the BMA model contract range plus employer NI and the employer pension contribution practices pay (<span data-s="gp_cost">£109,658</span>).</li>
+          <li>The estimated effect on the urgent same-day measure applies the adjusted association to each practice's additional GPs per 10,000 patients (about <span data-s="per10k_add">2.4</span> on average). It assumes the association is causal and that the GPs could be recruited.</li>
         </ul>
       </div>
     </details>
@@ -309,22 +318,18 @@ footer.foot { border-top: 2px solid var(--ink); padding-top: 18px; display: grid
       <summary>Definitions and data sources</summary>
       <div class="body">
         <ul>
-          <li><strong>Same-day</strong>: booked and delivered on the same day. <strong>Urgent same-day</strong>: national categories General Consultation Acute, Clinical Triage, Unplanned Clinical Activity and Walk-in, booked the same day. Rates are per 1,000 registered patients per month, averaged over June–August 2026.</li>
           <li><strong>Deprivation fifths</strong>: practices ranked by IMD 2025 practice score and split into five equal groups.</li>
           <li><strong>GPs per 10,000 patients</strong>: qualified GPs (excluding GPs in training) in full-time equivalents, November 2025.</li>
-          <li>Sources: NHS England Appointments in General Practice (June–August 2026), GP Workforce (November 2025), Patients Registered at a GP Practice (July 2026), QOF 2024/25 via Fingertips, IMD 2025, NHS Payments to General Practice (2023/24), Investment in General Practice (2008/09), ONS CPI and population estimates.</li>
+          <li><strong>Other practice staff</strong>: all non-GP clinicians and staff recorded in appointment data, including nurse practitioners, practice nurses, pharmacists and paramedics. The national data does not separate these roles.</li>
+          <li>Sources: NHS England Appointments in General Practice (June–August 2026), GP Workforce (November 2025), Patients Registered at a GP Practice (July 2026), QOF 2024/25 via Fingertips, IMD 2025, NHS Payments to General Practice (2023/24), Investment in General Practice (2008/09), ONS CPI and population estimates. NHS England, Recording same day appointments for all clinically urgent patients (2026).</li>
         </ul>
       </div>
-    </details>
-    <details class="fold">
-      <summary>Strongest associations</summary>
-      <div class="body"><div class="tbl-wrap" style="max-height:none"><table id="ev-table"></table></div></div>
     </details>
   </section>
 
   <footer class="foot">
     <p>Built from public NHS England, NHS Digital and ONS data. No patient-identifiable data is used.</p>
-    <p>Detailed analysis of all measures, months and factors, including the adjustable model: <a href="explorer.html">analyst explorer</a>.</p>
+    <p>Detailed analysis of all measures, months and factors: <a href="explorer.html">analyst explorer</a>.</p>
   </footer>
 </div>
 <div class="tip" id="tip" hidden></div>
@@ -334,16 +339,20 @@ footer.foot { border-top: 2px solid var(--ink); padding-top: 18px; display: grid
 "use strict";
 const $ = (id) => document.getElementById(id);
 const fmt = (v, d = 0) => (v == null || !isFinite(v) ? "–" : Number(v).toLocaleString("en-GB", { minimumFractionDigits: d, maximumFractionDigits: d }));
+const pct = (v, d = 0) => (v == null || !isFinite(v) ? "–" : fmt(v, d) + "%");
 const gbp = (v, d = 0) => (v == null || !isFinite(v) ? "–" : "£" + fmt(v, d));
 const gbpBig = (v) => (Math.abs(v) >= 1e9 ? `£${fmt(v / 1e9, 2)}bn` : Math.abs(v) >= 1e6 ? `£${fmt(v / 1e6, 1)}m` : gbp(Math.round(v / 100) * 100));
 const sig3 = (v) => { if (!isFinite(v) || v === 0) return v; const k = 10 ** (Math.floor(Math.log10(Math.abs(v))) - 2); return Math.round(v / k) * k; };
 const signed = (v, d = 2) => (v < 0 ? "−" : "") + fmt(Math.abs(v), d);
 const fy = (y) => String(y).replace("-", "/");
+const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+const mlabel = (m) => MONTHS[+m.slice(5) - 1];
 const css = (n) => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
 const quantile = (s, p) => { if (!s.length) return NaN; const i = (s.length - 1) * p, lo = Math.floor(i), hi = Math.ceil(i); return s[lo] + (s[hi] - s[lo]) * (i - lo); };
 const median = (a) => quantile(a.filter((v) => v != null && isFinite(v)).sort((x, y) => x - y), 0.5);
 const sum = (a) => a.reduce((s, v) => s + (v != null && isFinite(v) ? v : 0), 0);
 function setS(key, text) { document.querySelectorAll(`[data-s="${key}"]`).forEach((el) => { el.textContent = text; }); }
+function setU(key, text) { document.querySelectorAll(`[data-u="${key}"]`).forEach((el) => { el.textContent = text; }); }
 function el(tag, cls, text) { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
 const SVGNS = "http://www.w3.org/2000/svg";
 const sv = (tag, attrs, parent) => { const e = document.createElementNS(SVGNS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); if (parent) parent.append(e); return e; };
@@ -361,68 +370,91 @@ function showTip(ev, rows, title, sub) {
 }
 const hideTip = () => { $("tip").hidden = true; };
 
-let S = null, F = null, P = [];   // story, funding, practices (row objects)
+let S = null, F = null, U = null, P = [], MONTH_KEYS = [];
+const TARGET = 90;
 
-// ------------------------------------------------------------- headline numbers
+// ------------------------------------------------------------- figures in the text
 function fillNumbers() {
   const cmp = Object.fromEntries(S.compare.map((c) => [c.key, c]));
-  const gp = cmp.gp_qual_fte_10k, sd = cmp.sd_gp_per_gp, tr = cmp.trains, dna = cmp.dna_rate, lv = S.lever.sd_gp_rate;
-  const kept = F.per_head_2008 * F.cpi_ratio, perGp = lv.per_gp_per_10k * 10;
-  const extra = F.total_gps * perGp;
-  setS("gp_less", `${fmt(Math.abs(gp.diff_pct))}%`); setS("sdgp_more", `${fmt(sd.diff_pct)}%`);
-  setS("gap_bn", gbpBig(F.gap_m * 1e6)); setS("total_gps", fmt(sig3(F.total_gps)));
-  setS("gap_pct_real", `${fmt(100 * (1 - F.per_head_actual / kept))}%`);
-  setS("young", `${fmt(S.age65.most)}% aged 65+ against ${fmt(S.age65.least)}%`);
-  setS("sdgp_q1", fmt(S.by_imd.sd_gp_rate[0])); setS("sdgp_q5", fmt(S.by_imd.sd_gp_rate[4]));
-  setS("sdgp_pergp_q1", fmt(sd.least)); setS("sdgp_pergp_q5", fmt(sd.most));
+  const kept = F.per_head_2008 * F.cpi_ratio;
+  setS("gp_less", pct(Math.abs(cmp.gp_qual_fte_10k.diff_pct))); setS("gap_bn", gbpBig(F.gap_m * 1e6)); setS("total_gps", fmt(sig3(F.total_gps)));
+  setS("gap_pct_real", pct(100 * (1 - F.per_head_actual / kept)));
+  setS("sdgp_pergp_q1", fmt(cmp.sd_gp_per_gp.least)); setS("sdgp_pergp_q5", fmt(cmp.sd_gp_per_gp.most));
   setS("ph_2008", gbp(F.per_head_2008, 2)); setS("ph_kept", gbp(kept, 2)); setS("ph_actual", gbp(F.per_head_actual, 2)); setS("fyear", fy(F.year));
-  setS("gp_cost", gbp(F.gp_cost.total));
-  setS("lever_pct", `${fmt(100 * (S.by_gp.sd_gp_rate[4] / S.by_gp.sd_gp_rate[0] - 1))}%`);
-  setS("per_gp", fmt(perGp)); setS("per_gp_ci", `${fmt(lv.ci[0] * 10)}–${fmt(lv.ci[1] * 10)}`);
-  setS("sd_extra", extra >= 1e6 ? `${fmt(extra / 1e6, 2)} million` : fmt(sig3(extra)));
-  setS("sd_extra_pct", `${fmt(100 * extra / (S.sd_gp_month_m * 1e6))}%`);
-  setS("ph_pair", `${gbp(F.per_head_actual, 2)} now vs ${gbp(kept, 2)} if it had kept pace`);
-  setS("train_pair", `${fmt(tr.most)}% vs ${fmt(tr.least)}%`); setS("sdgp_pair", `${fmt(sd.most)} vs ${fmt(sd.least)}`); setS("dna_pair", `${fmt(dna.most)} vs ${fmt(dna.least)}`);
-  setS("rho_dna_age", signed(S.rho.dna_age)); setS("rho_dna_imd", signed(S.rho.dna_imd)); setS("rho_sdgp_gp", signed(S.rho.sdgp_gp));
-  setS("r2", `${fmt(lv.r2 * 100)}%`); setS("model_n", fmt(lv.n));
-  setS("core_2008", gbpBig(F.core_2008_m * 1e6)); setS("cpi_ratio", fmt(F.cpi_ratio, 3)); setS("pop_ratio", fmt(F.pop_ratio, 3));
-  setS("per10k_add", fmt(F.total_gps / F.weighted_total * 1e4, 1));
-  const t = $("ev-table"); t.replaceChildren();
-  const h = t.createTHead().insertRow(); ["Measure", "Practice factor", "Rank correlation", "Practices"].forEach((x, i) => { const th = el("th", i >= 2 ? "r" : null, x); h.append(th); });
-  const tb = t.createTBody();
-  S.strongest.slice(0, 10).forEach((r) => { const tr_ = tb.insertRow(); tr_.style.cursor = "default"; [r.measure, r.factor, signed(r.rho), fmt(r.n)].forEach((v, i) => { const td = tr_.insertCell(); td.textContent = v; if (i >= 2) td.className = "r"; }); });
+  setS("ph_pair", `${gbp(F.per_head_actual, 2)} now, ${gbp(kept, 2)} if it had kept pace with inflation`);
+  setS("train_pair", `${pct(cmp.trains.most)} vs ${pct(cmp.trains.least)}`);
+  setS("gp_cost", gbp(F.gp_cost.total)); setS("core_2008", gbpBig(F.core_2008_m * 1e6)); setS("cpi_ratio", fmt(F.cpi_ratio, 3)); setS("pop_ratio", fmt(F.pop_ratio, 3));
+  setS("per10k_add", fmt(U.restore.avg_add_gp_per_10k, 1));
+  const last = U.monthly[U.monthly.length - 1], mt = (k) => sum(U.monthly.map((m) => m[k] * m.acute)) / sum(U.monthly.map((m) => m.acute));
+  setU("nat", pct(U.national_pct_3m, 1)); setU("nat_att", pct(U.national_pct_attended));
+  setU("meets", pct(U.meets_pct)); setU("meets80", pct(U.meets_80_pct)); setU("median", pct(U.median_pct));
+  setU("pct_gp", pct(mt("pct_gp"))); setU("pct_other", pct(mt("pct_other")));
+  setU("short", fmt(sig3(U.short_per_month)));
+  const D = U.deprived;
+  setU("dep_pair", `${pct(D.most_meets)} vs ${pct(D.least_meets)}`); setU("dep_pair2", `${pct(D.most_meets)} most deprived, ${pct(D.least_meets)} least deprived`);
+  setU("rate_more", pct(100 * (D.most_rate / D.least_rate - 1))); setU("med_q5", pct(D.most_median)); setU("med_q1", pct(D.least_median)); setU("miss_q5", pct(D.most_miss_pct));
+  setU("meet_gp_q1", pct(U.by_gp.meets_pct[0])); setU("meet_gp_q5", pct(U.by_gp.meets_pct[4]));
+  setU("pp", fmt(U.model.pp_per_gp_per_10k, 1)); setU("pp_ci", `${fmt(U.model.ci[0], 1)}–${fmt(U.model.ci[1], 1)}`);
+  setU("or", pct(100 * (U.model.or_meets_per_gp_per_10k - 1)));
+  setU("r_now", pct(U.restore.national_pct_now, 1)); setU("r_after", pct(U.restore.national_pct_after, 1));
+  setU("m_now", pct(U.restore.meets_now_obs)); setU("m_after", pct(U.restore.meets_after_pred));
+  setU("share_p10", pct(U.acute_share_p10_p90[0])); setU("share_p90", pct(U.acute_share_p10_p90[1]));
+  setU("rho_imd", signed(U.rho.imd)); setU("rho_gp", signed(U.rho.gp_qual_fte_10k)); setU("r2", pct(U.model.r2 * 100)); setU("model_n", fmt(U.model.n));
+  void last;
 }
 
-// ------------------------------------------------------------- story charts
-function drawStory() {
-  // Need / workload / capacity rows
-  const dv = $("dv"); dv.replaceChildren();
-  const kinds = [["need", "Need", "var(--series-2)"], ["pressure", "Workload", "var(--series-3)"], ["capacity", "Capacity", "var(--series-1)"]];
-  const vals = S.compare.map((c) => c.diff_pct), lo = Math.min(0, ...vals) - 12, hi = Math.max(...vals) + 24;
-  const x = (v) => `${(100 * (v - lo)) / (hi - lo)}%`;
-  const dec = (c) => (["pts_per_gp", "dna_rate", "sd_gp_per_gp"].includes(c.key) ? 0 : c.key === "gp_qual_fte_10k" ? 2 : 1);
-  const suf = (c) => (c.key.startsWith("prev_") || c.key === "trains" ? "%" : "");
-  kinds.forEach(([kind, title, color]) => {
-    dv.append(el("div", "dv-group", title));
-    S.compare.filter((c) => c.kind === kind).forEach((c) => {
-      const row = el("div", "dv-row"), lab = el("div", "dv-label");
-      lab.append(document.createTextNode(c.label), el("small", null, `${fmt(c.least, dec(c))}${suf(c)} → ${fmt(c.most, dec(c))}${suf(c)}`));
-      const tr = el("div", "dv-track"), z = el("i", "dv-zero"), b = el("i", "dv-bar"), v = el("span", "dv-val", `${c.diff_pct > 0 ? "+" : "−"}${fmt(Math.abs(c.diff_pct))}%`);
-      z.style.left = x(0); b.style.background = color;
-      const a = Math.min(0, c.diff_pct), e = Math.max(0, c.diff_pct);
-      b.style.left = x(a); b.style.width = `calc(${x(e)} - ${x(a)})`;
-      if (c.diff_pct >= 0) v.style.left = `calc(${x(e)} + 6px)`; else v.style.right = `calc(100% - ${x(a)} + 6px)`;
-      tr.append(z, b, v); row.append(lab, tr); dv.append(row);
-    });
+// ------------------------------------------------------------- charts
+function histogram() {
+  const box = $("ch-hist"); box.replaceChildren();
+  const { bins, counts } = U.hist, W = box.clientWidth || 360, H = 230, padL = 40, padR = 10, padT = 22, padB = 34;
+  const svg = sv("svg", { viewBox: `0 0 ${W} ${H}`, width: W, height: H, role: "img", "aria-label": "Practices by share of urgent appointments seen the same day" }, box);
+  const from = 4, cs = counts.slice(from), bs = bins.slice(from);  // from 20%
+  const below = sum(counts.slice(0, from)); cs[0] += below;
+  const max = Math.max(...cs) * 1.1, n = cs.length, bw = (W - padL - padR) / n;
+  const sy = (v) => H - padB - v / max * (H - padT - padB), sx = (x) => padL + (x - bs[0]) / (100 - bs[0]) * (W - padL - padR);
+  niceTicks(0, max, 4).forEach((t) => { sv("line", { x1: padL, x2: W - padR, y1: sy(t), y2: sy(t), stroke: "var(--hair)" }, svg); const tx = sv("text", { x: padL - 6, y: sy(t), "text-anchor": "end", "dominant-baseline": "middle", fill: "var(--muted)", "font-size": 11 }, svg); tx.textContent = fmt(t); });
+  cs.forEach((c, i) => {
+    const lo = bs[i], meets = lo >= TARGET, x = padL + i * bw;
+    const r = sv("rect", { x: x + 1, y: sy(c), width: bw - 2, height: Math.max(0, H - padB - sy(c)), rx: 2, fill: meets ? "var(--series-3)" : "var(--series-1)", opacity: meets ? 1 : 0.7 }, svg);
+    const label = i === 0 ? `Under ${bs[1]}%` : `${lo}–${lo + 5}%`;
+    r.addEventListener("pointermove", (ev) => showTip(ev, [["Practices", fmt(c)]], label));
+    r.addEventListener("pointerleave", hideTip);
   });
+  sv("line", { x1: padL, x2: W - padR, y1: H - padB + 0.5, y2: H - padB + 0.5, stroke: "var(--axis)" }, svg);
+  [20, 30, 40, 50, 60, 70, 80, 90, 100].forEach((t) => { const tx = sv("text", { x: sx(t), y: H - padB + 15, "text-anchor": "middle", fill: "var(--muted)", "font-size": 11 }, svg); tx.textContent = t === 20 ? "≤20%" : `${t}%`; });
+  const x90 = sx(TARGET);
+  sv("line", { x1: x90, x2: x90, y1: padT - 8, y2: H - padB, stroke: "var(--ink)", "stroke-width": 1.5 }, svg);
+  const t = sv("text", { x: x90 - 6, y: padT - 10, "text-anchor": "end", fill: "var(--ink)", "font-size": 12, "font-weight": 700 }, svg); t.textContent = `90% target · ${pct(U.meets_pct)} of practices reach it`;
+}
+function dotLine(box, values, o) {
+  box.replaceChildren();
+  const W = box.clientWidth || 320, H = o.height || 200, padL = 40, padR = 14, padT = 20, padB = 42;
+  const svg = sv("svg", { viewBox: `0 0 ${W} ${H}`, width: W, height: H, role: "img" }, box);
+  const all = [...values, ...(o.ref != null ? [o.ref] : [])].filter(isFinite);
+  let y0 = o.y0 != null ? o.y0 : Math.min(...all), y1 = o.y1 != null ? o.y1 : Math.max(...all); const pad = (y1 - y0) * 0.18 || 1; if (o.y0 == null) y0 -= pad; if (o.y1 == null) y1 += pad;
+  const n = values.length, cw = (W - padL - padR) / n;
+  const sx = (i) => padL + (i + 0.5) * cw, sy = (v) => H - padB - (v - y0) / (y1 - y0) * (H - padT - padB);
+  niceTicks(y0, y1, 4).forEach((t) => { sv("line", { x1: padL, x2: W - padR, y1: sy(t), y2: sy(t), stroke: "var(--hair)" }, svg); const tx = sv("text", { x: padL - 6, y: sy(t), "text-anchor": "end", "dominant-baseline": "middle", fill: "var(--muted)", "font-size": 11 }, svg); tx.textContent = fmt(t, t % 1 ? 1 : 0) + (o.suffix || ""); });
+  sv("line", { x1: padL, x2: W - padR, y1: H - padB + 0.5, y2: H - padB + 0.5, stroke: "var(--axis)" }, svg);
+  sv("polyline", { points: values.map((v, i) => `${sx(i)},${sy(v)}`).join(" "), fill: "none", stroke: o.color, "stroke-width": 2, opacity: 0.55 }, svg);
+  values.forEach((v, i) => {
+    sv("circle", { cx: sx(i), cy: sy(v), r: 5.5, fill: o.color, stroke: "var(--surface)", "stroke-width": 2 }, svg);
+    if (i === 0 || i === n - 1) { const t = sv("text", { x: sx(i), y: sy(v) - 11, "text-anchor": "middle", fill: "var(--ink)", "font-size": 12, "font-weight": 700 }, svg); t.textContent = fmt(v, o.d) + (o.suffix || ""); }
+    const l = sv("text", { x: sx(i), y: H - padB + 15, "text-anchor": "middle", fill: "var(--ink-2)", "font-size": 11, "font-weight": 600 }, svg); l.textContent = o.labels[i];
+    if (o.sub[i]) { const l2 = sv("text", { x: sx(i), y: H - padB + 29, "text-anchor": "middle", fill: "var(--muted)", "font-size": 10 }, svg); l2.textContent = o.sub[i]; }
+    const hit = sv("rect", { x: sx(i) - cw / 2, y: padT, width: cw, height: H - padT - padB, fill: "transparent" }, svg);
+    hit.addEventListener("pointermove", (ev) => showTip(ev, [[o.tipLabel || "Value", fmt(v, o.d) + (o.suffix || "")]], o.labels[i] + (o.sub[i] ? ` (${o.sub[i]})` : "")));
+    hit.addEventListener("pointerleave", hideTip);
+  });
+}
+function drawStory() {
+  histogram();
   const Q = ["Q1", "Q2", "Q3", "Q4", "Q5"], ends = ["least", "", "", "", "most"];
-  dotLine($("ch-gp"), S.by_imd.gp_qual_fte_10k, { color: "var(--series-1)", d: 2, labels: Q, sub: ends });
-  dotLine($("ch-pergp"), S.by_imd.sd_gp_per_gp, { color: "var(--series-3)", d: 0, labels: Q, sub: ends });
-  dotLine($("ch-lever"), S.by_gp.sd_gp_rate, { color: "var(--series-1)", d: 0, labels: S.by_gp.gp_qual_fte_10k.map((v) => fmt(v, 1)), sub: ["fewest GPs", "", "", "", "most GPs"], ranges: S.by_gp.sd_gp_rate_iqr, height: 250 });
-  // money bars
+  dotLine($("ch-dep-meet"), U.by_imd.meets_pct, { color: "var(--series-1)", d: 0, labels: Q, sub: ends, suffix: "%", y0: 0, tipLabel: "Practices reaching 90%" });
+  dotLine($("ch-dep-rate"), U.by_imd.acute_rate, { color: "var(--series-2)", d: 0, labels: Q, sub: ends, tipLabel: "Urgent appointments per 1,000" });
+  dotLine($("ch-gp-meet"), U.by_gp.meets_pct, { color: "var(--series-1)", d: 0, labels: U.by_gp.gp10k.map((v) => fmt(v, 1)), sub: ["fewest GPs", "", "", "", "most GPs"], suffix: "%", y0: 0, height: 240, tipLabel: "Practices reaching 90%" });
   const box = $("ch-money"); box.replaceChildren();
-  const kept = F.per_head_2008 * F.cpi_ratio, max = kept * 1.3;
-  const wrap = el("div", "dv");
+  const kept = F.per_head_2008 * F.cpi_ratio, max = kept * 1.3, wrap = el("div", "dv");
   [["2008/09, in cash", F.per_head_2008, "var(--faint)"], [`${fy(F.year)} if it had kept pace with inflation`, kept, "var(--series-2)"], [`${fy(F.year)} actual`, F.per_head_actual, "var(--series-1)"]].forEach(([label, v, color]) => {
     const row = el("div", "dv-row"), tr = el("div", "dv-track"), b = el("i", "dv-bar"), t = el("span", "dv-val", gbp(v, 2));
     tr.style.height = "30px"; b.style.cssText = `left:0;width:${100 * v / max}%;background:${color};height:20px;top:5px`;
@@ -430,88 +462,84 @@ function drawStory() {
     tr.append(b, t); row.append(el("div", "dv-label", label), tr); wrap.append(row);
   });
   const c = el("p", "callout"); c.style.marginTop = "8px";
-  c.append(el("b", null, `${gbp(kept - F.per_head_actual, 2)} per person a year`), document.createTextNode(`short of the 2008/09 level in real terms: ${gbpBig(F.gap_m * 1e6)} across England.`));
+  c.append(el("b", null, `${gbp(kept - F.per_head_actual, 2)} per person a year`), document.createTextNode(`below the 2008/09 level in real terms: ${gbpBig(F.gap_m * 1e6)} across England.`));
   box.append(wrap, c);
-}
-function dotLine(box, values, o) {
-  box.replaceChildren();
-  const W = box.clientWidth || 320, H = o.height || 200, padL = 40, padR = 14, padT = 18, padB = 42;
-  const svg = sv("svg", { viewBox: `0 0 ${W} ${H}`, width: W, height: H, role: "img" }, box);
-  const all = [...values, ...(o.ranges || []).flat()].filter(isFinite);
-  let y0 = Math.min(...all), y1 = Math.max(...all); const pad = (y1 - y0) * 0.18 || 1; y0 -= pad; y1 += pad;
-  const n = values.length, cw = (W - padL - padR) / n;
-  const sx = (i) => padL + (i + 0.5) * cw, sy = (v) => H - padB - (v - y0) / (y1 - y0) * (H - padT - padB);
-  niceTicks(y0, y1, 4).forEach((t) => { sv("line", { x1: padL, x2: W - padR, y1: sy(t), y2: sy(t), stroke: "var(--hair)" }, svg); const tx = sv("text", { x: padL - 6, y: sy(t), "text-anchor": "end", "dominant-baseline": "middle", fill: "var(--muted)", "font-size": 11 }, svg); tx.textContent = fmt(t, t % 1 ? 1 : 0); });
-  sv("line", { x1: padL, x2: W - padR, y1: H - padB + 0.5, y2: H - padB + 0.5, stroke: "var(--axis)" }, svg);
-  sv("polyline", { points: values.map((v, i) => `${sx(i)},${sy(v)}`).join(" "), fill: "none", stroke: o.color, "stroke-width": 2, opacity: 0.55 }, svg);
-  values.forEach((v, i) => {
-    if (o.ranges) sv("line", { x1: sx(i), x2: sx(i), y1: sy(o.ranges[i][0]), y2: sy(o.ranges[i][1]), stroke: o.color, "stroke-width": 2, opacity: 0.3, "stroke-linecap": "round" }, svg);
-    sv("circle", { cx: sx(i), cy: sy(v), r: 5.5, fill: o.color, stroke: "var(--surface)", "stroke-width": 2 }, svg);
-    if (i === 0 || i === n - 1) { const t = sv("text", { x: sx(i), y: sy(v) - 11, "text-anchor": "middle", fill: "var(--ink)", "font-size": 12, "font-weight": 700 }, svg); t.textContent = fmt(v, o.d); }
-    const l = sv("text", { x: sx(i), y: H - padB + 15, "text-anchor": "middle", fill: "var(--ink-2)", "font-size": 11, "font-weight": 600 }, svg); l.textContent = o.labels[i];
-    if (o.sub[i]) { const l2 = sv("text", { x: sx(i), y: H - padB + 29, "text-anchor": "middle", fill: "var(--muted)", "font-size": 10 }, svg); l2.textContent = o.sub[i]; }
-    const hit = sv("rect", { x: sx(i) - cw / 2, y: padT, width: cw, height: H - padT - padB, fill: "transparent" }, svg);
-    const rows = [["Median practice", fmt(v, o.d)]]; if (o.ranges) rows.push(["Middle half", `${fmt(o.ranges[i][0])}–${fmt(o.ranges[i][1])}`]);
-    hit.addEventListener("pointermove", (ev) => showTip(ev, rows, o.labels[i] + (o.sub[i] ? ` (${o.sub[i]})` : "")));
-    hit.addEventListener("pointerleave", hideTip);
-  });
 }
 
 // ------------------------------------------------------------- your practice
 const QUINT = ["", "least deprived", "second least deprived", "middle", "second most deprived", "most deprived"];
-let ENG = null;  // England medians among practices passing data-quality checks
+let ENG = null;
 function englandMedians() {
   const q = P.filter((p) => p.qc);
-  ENG = { gp10k: median(q.map((p) => p.gp10k)), ptsgp: median(q.map((p) => p.ptsgp)), sdgp_gp: median(q.map((p) => p.sdgp_gp)), sdgp: median(q.map((p) => p.sdgp)) };
+  ENG = { gp10k: median(q.map((p) => p.gp10k)), ptsgp: median(q.map((p) => p.ptsgp)), sdgp_gp: median(q.map((p) => p.sdgp_gp)) };
 }
 function rollup(rows) {
-  const q = rows.filter((p) => p.gap != null);
-  return { n: rows.length, patients: sum(rows.map((p) => p.list)), gap: sum(q.map((p) => p.gap)), gps: sum(q.map((p) => p.gps)), extra: sum(q.map((p) => p.extra)) };  // funding covers every practice, whatever its appointment data quality
+  const ok = rows.filter((p) => p.qc && p.acute_ok && p.acute_pct != null);
+  const acute = sum(ok.map((p) => p.acute_m)), acuteSd = sum(ok.map((p) => p.acute_m * p.acute_pct / 100));
+  const f = rows.filter((p) => p.gap != null);
+  return { n: rows.length, patients: sum(rows.map((p) => p.list)), pct: acute ? 100 * acuteSd / acute : null, nOk: ok.length, meets: ok.filter((p) => p.acute_pct >= TARGET).length,
+    gap: sum(f.map((p) => p.gap)), gps: sum(f.map((p) => p.gps)) };
 }
 function stat(k, v, d) { const e = el("div", "ystat"); e.append(el("span", "k", k), el("span", "v", v), el("span", "d", d)); return e; }
-const vsEng = (a, b, dd = 0) => (a == null || !isFinite(a) || !b ? "" : `${a >= b ? "+" : "−"}${fmt(Math.abs(100 * (a / b - 1)))}% vs England median ${fmt(b, dd)}`);
+const vsEng = (a, b, dd = 0) => (a == null || !isFinite(a) || !b ? "" : `England median ${fmt(b, dd)}`);
 function renderYours(p) {
   const card = $("ycard"); card.replaceChildren();
-  const h = el("h3", null, p.n); const sub = el("p", "muted"); sub.innerHTML = ""; sub.append(el("span", "mono", p.c), document.createTextNode(` · ${p.pcn} · ${p.icb} · ${fmt(p.list)} patients${p.imd_q ? ` · ${QUINT[p.imd_q]} fifth by deprivation` : ""}`));
-  card.append(el("div", "ygroup")); card.firstChild.append(h, sub);
-  if (!p.qc) card.append(el("p", "note", "This practice's appointment data did not pass the quality checks (very small list, implausible volumes or mostly unmapped appointments), so treat its access figures with caution."));
+  const head = el("div", "ygroup"), sub = el("p", "muted");
+  sub.append(el("span", "mono", p.c), document.createTextNode(` · ${p.pcn} · ${p.icb} · ${fmt(p.list)} patients${p.imd_q ? ` · ${QUINT[p.imd_q]} fifth by deprivation` : ""}`));
+  head.append(el("h3", null, p.n), sub); card.append(head);
+  // urgent same-day
+  const g0 = el("div", "ygroup"), grid0 = el("div", "ygrid");
+  const meets = p.acute_pct != null && p.acute_pct >= TARGET;
+  grid0.append(stat("Urgent appointments seen the same day", pct(p.acute_pct, 1), p.acute_pct == null ? "" : meets ? "Reaches the 90% target" : `${fmt(TARGET - p.acute_pct, 1)} points below the 90% target`));
+  const ms = (p.acute_months || []).map((v, i) => `${mlabel(MONTH_KEYS[i])} ${pct(v)}`).join(" · ");
+  grid0.append(stat("By month", ms ? "" : "–", ms));
+  grid0.lastChild.querySelector(".v").remove();
+  grid0.append(stat("Urgent appointments a month", fmt(p.acute_m), `${fmt(p.acute_rate)} per 1,000 patients`));
+  grid0.append(stat("Needed the same day to reach 90%", p.acute_short ? `${fmt(p.acute_short)} a month` : "0", p.acute_short ? "more urgent appointments seen on the day of booking" : "already at or above 90%"));
+  g0.append(el("span", "kicker", "Urgent appointments, June–August 2026"), grid0);
+  if (!p.acute_ok || !p.qc) g0.append(el("p", "note", "This practice has few urgent appointments recorded, or its appointment data did not pass the quality checks, so treat these figures with caution."));
+  card.append(g0);
+  // staffing
   const g1 = el("div", "ygroup"), grid1 = el("div", "ygrid");
   grid1.append(stat("GPs per 10,000 patients", fmt(p.gp10k, 2), vsEng(p.gp10k, ENG.gp10k, 2)),
     stat("Patients per GP", fmt(p.ptsgp), vsEng(p.ptsgp, ENG.ptsgp)),
-    stat("Same-day GP appointments per GP, a month", fmt(p.sdgp_gp), vsEng(p.sdgp_gp, ENG.sdgp_gp)),
-    stat("Same-day GP appointments per 1,000 patients, a month", fmt(p.sdgp), vsEng(p.sdgp, ENG.sdgp)));
-  g1.append(el("span", "kicker", "Staffing and same-day workload"), grid1); card.append(g1);
+    stat("Same-day GP appointments per GP, a month", fmt(p.sdgp_gp), vsEng(p.sdgp_gp, ENG.sdgp_gp)));
+  g1.append(el("span", "kicker", "GP staffing"), grid1); card.append(g1);
+  // funding
+  let effect = null;
   if (p.gap != null) {
+    const add10k = p.list ? p.gps / p.list * 1e4 : 0, m = U.model;
+    effect = { pp: add10k * m.pp_per_gp_per_10k, lo: add10k * m.ci[0], hi: add10k * m.ci[1] };
     const g2 = el("div", "ygroup"), grid2 = el("div", "ygrid");
     grid2.append(stat("Core funding shortfall a year", gbp(p.gap), `share of the ${fy(F.year)} national shortfall, by weighted patients`),
       stat("Salaried GPs that would pay for", fmt(p.gps, 1), `full-time, at ${gbp(F.gp_cost.total)} each`),
-      stat("More same-day GP appointments a month", `≈${fmt(p.extra)}`, `estimate, 95% CI ${fmt(p.gps * S.lever.sd_gp_rate.ci[0] * 10)}–${fmt(p.gps * S.lever.sd_gp_rate.ci[1] * 10)}`));
-    g2.append(el("span", "kicker", "If core funding had kept pace since 2008/09"), grid2); card.append(g2);
-    const pcn = rollup(P.filter((x) => x.pcn && x.pcn === p.pcn)), icb = rollup(P.filter((x) => x.icb && x.icb === p.icb));
-    const r = el("div", "rollup");
-    [[p.pcn, pcn], [p.icb, icb]].forEach(([name, t]) => { const d = el("div", "roll"); d.append(el("b", null, name), el("span", null, `${fmt(t.n)} practices, ${fmt(t.patients)} patients: ${gbpBig(t.gap)} a year, about ${fmt(t.gps)} salaried GPs and ${fmt(sig3(t.extra))} more same-day GP appointments a month.`)); r.append(d); });
-    card.append(r);
+      stat("Estimated effect on urgent same-day", `+${fmt(effect.pp, 1)} points`, `95% CI ${fmt(effect.lo, 1)}–${fmt(effect.hi, 1)}`));
+    g2.append(el("span", "kicker", "If core funding had kept pace with inflation since 2008/09"), grid2); card.append(g2);
   }
+  const pcn = rollup(P.filter((x) => x.pcn && x.pcn === p.pcn)), icb = rollup(P.filter((x) => x.icb && x.icb === p.icb));
+  const r = el("div", "rollup");
+  [[p.pcn, pcn], [p.icb, icb]].forEach(([name, t]) => { const d = el("div", "roll"); d.append(el("b", null, name), el("span", null, `${fmt(t.n)} practices. Urgent appointments seen the same day: ${pct(t.pct, 1)}. ${fmt(t.meets)} of ${fmt(t.nOk)} practices reach 90%. Core funding shortfall ${gbpBig(t.gap)} a year, about ${fmt(t.gps)} salaried GPs.`)); r.append(d); });
+  card.append(r);
   const text = [
     `${p.n} (${p.c}) serves ${fmt(p.list)} patients${p.imd_q ? ` and is in the ${QUINT[p.imd_q]} fifth of practices in England by deprivation (IMD 2025)` : ""}.`,
-    p.gp10k != null ? `It has ${fmt(p.gp10k, 2)} full-time-equivalent qualified GPs per 10,000 patients (England median ${fmt(ENG.gp10k, 2)}), or ${fmt(p.ptsgp)} patients per GP.` : "",
-    p.sdgp_gp != null ? `From June to August 2026 each GP delivered on average ${fmt(p.sdgp_gp)} same-day appointments a month (England median ${fmt(ENG.sdgp_gp)}).` : "",
-    p.gap != null ? `Had core contract funding kept pace with inflation since 2008/09, the practice would have received about ${gbp(p.gap)} more in ${fy(F.year)}: enough for ${fmt(p.gps, 1)} full-time salaried GPs, which on national patterns could mean around ${fmt(p.extra)} more same-day GP appointments a month.` : "",
-    `Across England core funding is ${fmt(100 * (1 - F.per_head_actual / (F.per_head_2008 * F.cpi_ratio)))}% below its 2008/09 value in real terms, ${gbpBig(F.gap_m * 1e6)} a year.`,
+    p.acute_pct != null ? `From June to August 2026, ${pct(p.acute_pct, 1)} of its urgent appointments took place on the day they were booked, against the 90% target in the 2026/27 GP contract. Across England the figure was ${pct(U.national_pct_3m, 1)}, and ${pct(U.meets_pct)} of practices reached 90%.` : "",
+    p.gp10k != null ? `The practice has ${fmt(p.gp10k, 2)} full-time-equivalent GPs per 10,000 patients (England median ${fmt(ENG.gp10k, 2)}).` : "",
+    p.gap != null ? `Had core contract funding kept pace with inflation since 2008/09, the practice would have received about ${gbp(p.gap)} more in ${fy(F.year)}, enough for ${fmt(p.gps, 1)} full-time salaried GPs.` : "",
+    `Practices in the most deprived areas record ${pct(100 * (U.deprived.most_rate / U.deprived.least_rate - 1))} more urgent appointments per patient with fewer GPs, and only ${pct(U.deprived.most_meets)} of them reached 90%.`,
     "Sources: NHS England Appointments in General Practice and GP Workforce; NHS Digital Payments to General Practice and Investment in General Practice; ONS CPI.",
   ].filter(Boolean).join(" ");
-  const letter = el("div", "letter", text);
-  const btns = el("div"); btns.style.cssText = "display:flex;gap:8px;flex-wrap:wrap";
+  const letter = el("div", "letter", text), btns = el("div");
+  btns.style.cssText = "display:flex;gap:8px;flex-wrap:wrap";
   const copy = el("button", "btn primary", "Copy paragraph"); copy.type = "button";
   copy.addEventListener("click", async () => {
     try { await navigator.clipboard.writeText(text); copy.textContent = "Copied"; }
     catch { const rg = document.createRange(); rg.selectNodeContents(letter); const s = getSelection(); s.removeAllRanges(); s.addRange(rg); copy.textContent = "Selected: press Ctrl+C or ⌘C"; }
     setTimeout(() => (copy.textContent = "Copy paragraph"), 2500);
   });
-  const show = el("button", "btn", "Show on the chart below"); show.type = "button";
+  const show = el("button", "btn", "Show in practices by area"); show.type = "button";
   show.addEventListener("click", () => { state.area = p.icb; $("area").value = p.icb; drawEvery(); $("every").scrollIntoView({ behavior: "smooth" }); });
   btns.append(copy, show);
-  const g3 = el("div", "ygroup"); g3.append(el("span", "kicker", "For a letter to your MP, ICB or patient group"), letter, btns); card.append(g3);
+  const g3 = el("div", "ygroup"); g3.append(el("span", "kicker", "Summary for correspondence"), letter, btns); card.append(g3);
 }
 function pick(p) { state.sel = p.c; $("ysearch").value = p.n; renderYours(p); drawEvery(); }
 function setupSearch() {
@@ -533,51 +561,60 @@ function setupSearch() {
   inp.addEventListener("blur", () => setTimeout(close, 120));
 }
 
-// ------------------------------------------------------------- every practice
-const MEASURES = [["sdgp", "Same-day GP", "Same-day GP appointments per 1,000 patients a month"], ["sd", "All same-day", "Same-day appointments (all staff) per 1,000 patients a month"], ["urg", "Urgent same-day", "Urgent same-day appointments per 1,000 patients a month"]];
+// ------------------------------------------------------------- practices by area
+const MEASURES = [
+  ["acute_pct", "Urgent seen same day", "Urgent appointments seen the same day (%)", 1, true],
+  ["acute_rate", "Urgent per 1,000", "Urgent appointments per 1,000 patients a month", 0, true],
+  ["sdgp", "Same-day GP per 1,000", "Same-day GP appointments per 1,000 patients a month", 0, false],
+];
 const FACTORS = [["imd", "Deprivation", "IMD 2025 score (higher = more deprived)", 1], ["gp10k", "GPs per patient", "Qualified GPs per 10,000 patients", 1], ["age65", "Older patients", "Patients aged 65+ (%)", 0], ["gap_pt", "Funding shortfall", "Core funding shortfall per patient (£ a year)", 0]];
-const state = { area: "", measure: "sdgp", factor: "imd", sel: null };
+const state = { area: "", measure: "acute_pct", factor: "imd", sel: null, sort: "gap", dir: -1 };
 let pts = [];
 function seg(boxId, items, key) {
   const box = $(boxId); box.replaceChildren();
   items.forEach(([k, label]) => { const b = el("button", null, label); b.type = "button"; b.setAttribute("aria-pressed", String(state[key] === k)); b.addEventListener("click", () => { state[key] = k; [...box.children].forEach((c, i) => c.setAttribute("aria-pressed", String(items[i][0] === k))); drawEvery(); }); box.append(b); });
 }
 function setupEvery() {
-  const s = $("area"); const icbs = [...new Set(P.map((p) => p.icb).filter(Boolean))].sort();
-  s.append(new Option("All England", "")); icbs.forEach((i) => s.append(new Option(i, i)));
+  const s = $("area"); [...new Set(P.map((p) => p.icb).filter(Boolean))].sort().forEach((i, n) => { if (!n) s.append(new Option("All England", "")); s.append(new Option(i, i)); });
   s.addEventListener("change", () => { state.area = s.value; drawEvery(); });
   seg("measure", MEASURES, "measure"); seg("factor", FACTORS, "factor");
   const cv = $("scatter");
   const near = (ev) => { const r = cv.getBoundingClientRect(), mx = ev.clientX - r.left, my = ev.clientY - r.top; let best = null, bd = 18 * 18; for (let i = pts.length - 1; i >= 0; i--) { const q = pts[i], d = (q.x - mx) ** 2 + (q.y - my) ** 2; if (d < bd) { bd = d; best = q; } } return best; };
-  cv.addEventListener("pointermove", (ev) => { const q = near(ev); if (!q) { hideTip(); cv.style.cursor = "default"; return; } cv.style.cursor = "pointer"; const m = MEASURES.find((x) => x[0] === state.measure), f = FACTORS.find((x) => x[0] === state.factor); showTip(ev, [[m[1], fmt(q.p[state.measure])], [f[1], state.factor === "gap_pt" ? gbp(q.p.gap_pt, 2) : fmt(q.p[state.factor], f[3])], ["Funding shortfall a year", gbp(q.p.gap)], ["Patients", fmt(q.p.list)]], q.p.n, `${q.p.c} · ${q.p.pcn}`); });
+  cv.addEventListener("pointermove", (ev) => {
+    const q = near(ev); if (!q) { hideTip(); cv.style.cursor = "default"; return; }
+    cv.style.cursor = "pointer"; const f = FACTORS.find((x) => x[0] === state.factor);
+    showTip(ev, [["Urgent seen same day", pct(q.p.acute_pct, 1)], [f[1], state.factor === "gap_pt" ? gbp(q.p.gap_pt, 2) : fmt(q.p[state.factor], f[3])], ["GPs per 10,000", fmt(q.p.gp10k, 2)], ["Patients", fmt(q.p.list)]], q.p.n, `${q.p.c} · ${q.p.pcn}`);
+  });
   cv.addEventListener("pointerleave", hideTip);
   cv.addEventListener("click", (ev) => { const q = near(ev); if (q) { pick(q.p); $("yours").scrollIntoView({ behavior: "smooth" }); } });
 }
 function drawEvery() {
   const inArea = (p) => !state.area || p.icb === state.area;
-  const rows = P.filter((p) => p.qc && p[state.measure] != null && p[state.factor] != null);
-  const area = rows.filter(inArea), m = MEASURES.find((x) => x[0] === state.measure), f = FACTORS.find((x) => x[0] === state.factor);
+  const m = MEASURES.find((x) => x[0] === state.measure), f = FACTORS.find((x) => x[0] === state.factor);
+  const rows = P.filter((p) => p.qc && (!m[4] || p.acute_ok) && p[state.measure] != null && p[state.factor] != null);
+  const area = rows.filter(inArea);
   // tiles
-  const t = state.area ? rollup(P.filter(inArea)) : { n: P.length, patients: sum(P.map((p) => p.list)), gap: F.gap_m * 1e6, gps: F.total_gps, extra: F.total_sd_gp_extra_month };
+  const t = rollup(P.filter(inArea)), name = state.area || "England";
+  if (!state.area) { t.gap = F.gap_m * 1e6; t.gps = F.total_gps; }
   const T = $("tiles"); T.replaceChildren();
   const tile = (k, v, d) => { const e = el("div", "tile"); e.append(el("span", "k", k), el("span", "v", v), el("span", "d", d)); T.append(e); };
-  const name = state.area || "England";
   tile(`${name}: practices`, fmt(t.n), `${fmt(sig3(t.patients))} patients`);
-  tile("Core funding shortfall a year", gbpBig(t.gap), `${fy(F.year)}, against 2008/09 in real terms`);
-  tile("Salaried GPs it would pay for", fmt(sig3(t.gps)), "full-time equivalents");
-  tile("More same-day GP appointments", `≈${fmt(sig3(t.extra))}`, "a month, estimated");
+  tile("Urgent appointments seen the same day", pct(t.pct, 1), state.area ? `England ${pct(U.national_pct_3m, 1)}` : "June–August 2026");
+  tile("Practices reaching 90%", pct(t.nOk ? 100 * t.meets / t.nOk : null), `${fmt(t.meets)} of ${fmt(t.nOk)} practices`);
+  tile("Core funding shortfall a year", gbpBig(t.gap), `about ${fmt(sig3(t.gps))} salaried GPs`);
   // scatter
   const lc = (x) => (/^[A-Z][a-z]/.test(x) ? x[0].toLowerCase() + x.slice(1) : x);
-  $("sc-title").textContent = `${m[2]} vs ${lc(f[2].replace(/ \(.*\)$/, ""))}`;
+  $("sc-title").textContent = `${m[2].replace(/ \(%\)$/, "")} vs ${lc(f[2].replace(/ \(.*\)$/, ""))}`;
   const cv = $("scatter"), box = cv.parentElement, W = box.clientWidth, H = Math.max(300, Math.min(440, W * 0.55)), dpr = devicePixelRatio || 1;
   cv.width = W * dpr; cv.height = H * dpr; cv.style.height = H + "px";
   const ctx = cv.getContext("2d"); ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.clearRect(0, 0, W, H);
   const xs = rows.map((p) => p[state.factor]).sort((a, b) => a - b), ys = rows.map((p) => p[state.measure]).sort((a, b) => a - b);
-  const x0 = Math.min(0, quantile(xs, 0.005)), x1 = quantile(xs, 0.995), y0 = 0, y1 = quantile(ys, 0.99) * 1.05;
-  const padL = 46, padR = 12, padT = 10, padB = 40;
+  const isPct = state.measure === "acute_pct";
+  const x0 = Math.min(0, quantile(xs, 0.005)), x1 = quantile(xs, 0.995), y0 = 0, y1 = isPct ? 100 : quantile(ys, 0.99) * 1.05;
+  const padL = 46, padR = 12, padT = 12, padB = 40;
   const sx = (v) => padL + (Math.min(Math.max(v, x0), x1) - x0) / (x1 - x0) * (W - padL - padR), sy = (v) => H - padB - (Math.min(Math.max(v, y0), y1) - y0) / (y1 - y0) * (H - padT - padB);
   ctx.font = `11px ${css("--font-ui")}`; ctx.lineWidth = 1;
-  niceTicks(y0, y1, 5).forEach((tk) => { const y = Math.round(sy(tk)) + 0.5; ctx.strokeStyle = css("--hair"); ctx.beginPath(); ctx.moveTo(padL, y); ctx.lineTo(W - padR, y); ctx.stroke(); ctx.fillStyle = css("--muted"); ctx.textAlign = "right"; ctx.textBaseline = "middle"; ctx.fillText(fmt(tk), padL - 6, y); });
+  niceTicks(y0, y1, 5).forEach((tk) => { const y = Math.round(sy(tk)) + 0.5; ctx.strokeStyle = css("--hair"); ctx.beginPath(); ctx.moveTo(padL, y); ctx.lineTo(W - padR, y); ctx.stroke(); ctx.fillStyle = css("--muted"); ctx.textAlign = "right"; ctx.textBaseline = "middle"; ctx.fillText(fmt(tk) + (isPct ? "%" : ""), padL - 6, y); });
   niceTicks(x0, x1, W < 500 ? 4 : 7).forEach((tk) => { ctx.fillStyle = css("--muted"); ctx.textAlign = "center"; ctx.textBaseline = "top"; ctx.fillText(state.factor === "gap_pt" ? "£" + fmt(tk) : fmt(tk, tk % 1 ? 1 : 0), sx(tk), H - padB + 6); });
   ctx.strokeStyle = css("--axis"); ctx.beginPath(); ctx.moveTo(padL, H - padB + 0.5); ctx.lineTo(W - padR, H - padB + 0.5); ctx.stroke();
   ctx.fillStyle = css("--ink-2"); ctx.textAlign = "center"; ctx.textBaseline = "bottom"; ctx.fillText(f[2], padL + (W - padL - padR) / 2, H - 2);
@@ -586,44 +623,50 @@ function drawEvery() {
   const dot = (p, color, r, a) => { const x = sx(p[state.factor]), y = sy(p[state.measure]); ctx.globalAlpha = a; ctx.beginPath(); ctx.arc(x, y, r, 0, 2 * Math.PI); ctx.fillStyle = color; ctx.fill(); pts.push({ x, y, p }); };
   rows.forEach((p) => { if (state.area && !inArea(p)) dot(p, faint, 2.2, 0.8); });
   rows.forEach((p) => { if (inArea(p)) dot(p, s1, state.area ? 3.4 : 2.3, state.area ? 0.75 : 0.35); });
-  // median trend (England) in 10 bins
+  ctx.globalAlpha = 1;
+  if (isPct) {  // 90% target line
+    const y = Math.round(sy(TARGET)) + 0.5; ctx.strokeStyle = css("--ink"); ctx.lineWidth = 1.5; ctx.beginPath(); ctx.moveTo(padL, y); ctx.lineTo(W - padR, y); ctx.stroke();
+    ctx.font = `700 11px ${css("--font-ui")}`; ctx.textAlign = "right"; ctx.textBaseline = "bottom"; ctx.lineWidth = 3; ctx.strokeStyle = surf; ctx.strokeText("90% target", W - padR - 4, y - 3); ctx.fillStyle = css("--ink"); ctx.fillText("90% target", W - padR - 4, y - 3);
+  }
   const sorted = [...rows].sort((a, b) => a[state.factor] - b[state.factor]), nb = 10, line = [];
   for (let b = 0; b < nb; b++) { const sg = sorted.slice(Math.floor(b * sorted.length / nb), Math.floor((b + 1) * sorted.length / nb)); if (sg.length) line.push([median(sg.map((p) => p[state.factor])), median(sg.map((p) => p[state.measure]))]); }
-  ctx.globalAlpha = 1; ctx.lineJoin = "round";
-  [[surf, 5], [css("--ink"), 2]].forEach(([c, w]) => { ctx.strokeStyle = c; ctx.lineWidth = w; ctx.beginPath(); line.forEach(([x, y], i) => (i ? ctx.lineTo(sx(x), sy(y)) : ctx.moveTo(sx(x), sy(y)))); ctx.stroke(); });
+  ctx.lineJoin = "round";
+  [[surf, 5], [css("--series-2"), 2]].forEach(([c, w]) => { ctx.strokeStyle = c; ctx.lineWidth = w; ctx.beginPath(); line.forEach(([x, y], i) => (i ? ctx.lineTo(sx(x), sy(y)) : ctx.moveTo(sx(x), sy(y)))); ctx.stroke(); });
   const sel = rows.find((p) => p.c === state.sel);
   if (sel) {
-    dot(sel, s2, 6, 1); ctx.globalAlpha = 1; ctx.lineWidth = 2; ctx.strokeStyle = surf; ctx.stroke();
+    dot(sel, css("--ink"), 6, 1); ctx.globalAlpha = 1; ctx.lineWidth = 2; ctx.strokeStyle = surf; ctx.stroke();
     const x = sx(sel[state.factor]), y = sy(sel[state.measure]); ctx.font = `600 12px ${css("--font-ui")}`; ctx.textAlign = "left"; ctx.textBaseline = "middle";
     const lbl = sel.n.length > 28 ? sel.n.slice(0, 27) + "…" : sel.n, tw = ctx.measureText(lbl).width, lx = x + 10 + tw > W - padR ? x - 10 - tw : x + 10;
     ctx.lineWidth = 3; ctx.strokeStyle = surf; ctx.strokeText(lbl, lx, y); ctx.fillStyle = css("--ink"); ctx.fillText(lbl, lx, y);
   }
   const leg = $("sc-legend"); leg.replaceChildren();
   const item = (cls, color, text) => { const s = el("span"); const i = el("i", "sw " + cls); i.style.background = color; s.append(i, document.createTextNode(text)); leg.append(s); };
-  item("", s1, state.area || "Practices"); if (state.area) item("", faint, "Rest of England"); item("line", css("--ink"), "England median trend"); if (sel) item("", s2, sel.n);
+  item("", s1, state.area || "Practices"); if (state.area) item("", faint, "Rest of England"); item("line", s2, "England median"); if (sel) item("", css("--ink"), sel.n);
   const medA = median(area.map((p) => p[state.measure])), medE = median(rows.map((p) => p[state.measure]));
-  $("sc-note").textContent = `${fmt(area.length)} practices${state.area ? ` in ${state.area}` : ""}, June–August 2026 average. Median practice: ${fmt(medA)}${state.area ? ` (England ${fmt(medE)})` : ""}. Practices beyond the axes are drawn at the edge; practices failing data-quality checks are not shown.`;
+  $("sc-note").textContent = `${fmt(area.length)} practices${state.area ? ` in ${state.area}` : ""}, June–August 2026. Median practice: ${fmt(medA, m[3])}${isPct ? "%" : ""}${state.area ? ` (England ${fmt(medE, m[3])}${isPct ? "%" : ""})` : ""}. Not shown: practices failing data-quality checks${m[4] ? " or with fewer than 30 urgent appointments a month" : ""}.`;
   // table
+  const COLS = [["n", "Practice", 0], ["pcn", "PCN", 0], ["list", "Patients", 1], ["acute_pct", "Urgent same day", 1], ["gp10k", "GPs per 10,000", 1], ["gap", "Funding shortfall a year", 1], ["gps", "Salaried GPs", 1]];
   const tbl = $("tbl"); tbl.replaceChildren();
   const hr = tbl.createTHead().insertRow();
-  [["Practice", 0], ["PCN", 0], ["Patients", 1], ["GPs per 10,000", 1], [`${m[1]} per 1,000`, 1], ["Funding shortfall a year", 1], ["Salaried GPs", 1], ["More same-day GP a month", 1]].forEach(([h, r]) => hr.append(el("th", r ? "r" : null, h)));
+  COLS.forEach(([k, h, r]) => { const th = el("th", r ? "r" : null, h + (state.sort === k ? (state.dir > 0 ? " ↑" : " ↓") : "")); th.style.cursor = "pointer"; th.tabIndex = 0; const go = () => { state.dir = state.sort === k ? -state.dir : (r ? -1 : 1); state.sort = k; drawEvery(); }; th.addEventListener("click", go); th.addEventListener("keydown", (e) => { if (e.key === "Enter") go(); }); hr.append(th); });
   const tb = tbl.createTBody();
-  P.filter((p) => inArea(p) && p.gap != null).sort((a, b) => b.gap - a.gap).slice(0, 300).forEach((p) => {
+  const val = (p) => p[state.sort];
+  P.filter(inArea).sort((a, b) => { const x = val(a), y = val(b); if (x == null) return 1; if (y == null) return -1; return (x < y ? -1 : x > y ? 1 : 0) * state.dir; }).slice(0, 300).forEach((p) => {
     const tr = tb.insertRow(); if (p.c === state.sel) tr.className = "sel";
     tr.addEventListener("click", () => { pick(p); $("yours").scrollIntoView({ behavior: "smooth" }); });
     const td = (v, r) => { const c = tr.insertCell(); c.textContent = v; if (r) c.className = "r"; return c; };
     const n = td(p.n); n.append(el("span", "mono muted", "  " + p.c));
-    td(p.pcn); td(fmt(p.list), 1); td(fmt(p.gp10k, 2), 1); td(p.qc ? fmt(p[state.measure]) : "–", 1); td(gbp(p.gap), 1); td(fmt(p.gps, 1), 1); td(fmt(p.extra), 1);
+    td(p.pcn); td(fmt(p.list), 1); td(p.acute_pct != null ? pct(p.acute_pct, 1) + (p.acute_pct >= TARGET ? " ✓" : "") : "–", 1); td(fmt(p.gp10k, 2), 1); td(gbp(p.gap), 1); td(fmt(p.gps, 1), 1);
   });
 }
 
-// ------------------------------------------------------------- boot
+// ------------------------------------------------------------- start
 async function boot() {
   try {
-    const [l, s, f] = await Promise.all(["data/lite.json", "data/story.json", "data/funding.json"].map((u) => fetch(u).then((r) => { if (!r.ok) throw new Error(`${u}: HTTP ${r.status}`); return r.json(); })));
-    S = s; F = f;
+    const [l, s, f, u] = await Promise.all(["data/lite.json", "data/story.json", "data/funding.json", "data/urgent.json"].map((x) => fetch(x).then((r) => { if (!r.ok) throw new Error(`${x}: HTTP ${r.status}`); return r.json(); })));
+    S = s; F = f; U = u; MONTH_KEYS = l.meta.months;
     const c = l.cols; P = c.c.map((_, i) => Object.fromEntries(Object.keys(c).map((k) => [k, c[k][i]])));
-    const tidy = (x) => (x || "").replace(/\b(Gp|Nhs|Pcn|Ics|Icb|Uk)\b/g, (w) => w.toUpperCase()).replace(/\(([A-Za-z]{2,4})\)/g, (w) => w.toUpperCase()).replace(/\bAnd\b/g, "and").replace(/\bOf\b/g, "of").replace(/\bThe\b(?!^)/g, (w, i) => (i ? "the" : w));
+    const tidy = (x) => (x || "").replace(/\b(Gp|Nhs|Pcn|Icb|Uk)\b/g, (w) => w.toUpperCase()).replace(/\(([A-Za-z]{2,4})\)/g, (w) => w.toUpperCase()).replace(/\bAnd\b/g, "and").replace(/\bOf\b/g, "of");
     P.forEach((p) => { p.n = tidy(p.n); p.pcn = tidy(p.pcn); });
   } catch (err) {
     $("ycard").replaceChildren(el("p", "loading", `Could not load the data (${err.message}). If you opened this file directly, serve the folder over HTTP.`));
