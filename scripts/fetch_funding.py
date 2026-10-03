@@ -106,8 +106,7 @@ def fetch_investment() -> None:
 
 # --------------------------------------------------------------------------- NHS Payments to General Practice
 def fetch_payments() -> None:
-    page, files = f.archived_files("nhs-payments-to-general-practice", r"nhs-payments-to-general-practice[-a-z]*-20\d\d-\d\d",
-                                   r"\.(csv|zip)")
+    page, files = f.archived_files("nhs-payments-to-general-practice", r"[a-z0-9-]*20\d\d-\d\d", r"\.(csv|zip)")
     files.sort(key=lambda x: not re.search(r"practice|csv", x[0] + x[1], re.I))
     for href, text in files:
         try:
@@ -133,7 +132,10 @@ def main() -> int:
     ok = 0
     steps = [("CPI", lambda: ons_series("D7BT", "mm23", "economy/inflationandpriceindices", "cpi_d7bt.csv")),
              ("GDP deflator", lambda: ons_series("YBGB", "ukea", "economy/grossdomesticproductgdp", "gdp_deflator_ybgb.csv")),
-             ("investment", fetch_investment), ("payments", fetch_payments)]
+             ("population", lambda: ons_series("ENPOP", "pop", "peoplepopulationandcommunity/populationandmigration/populationestimates", "england_population_enpop.csv")),
+             ("payments", fetch_payments)]
+    if not (OUT / "investment").exists():
+        steps.append(("investment", fetch_investment))
     for name, fn in steps:
         print(f"== {name}")
         try:
