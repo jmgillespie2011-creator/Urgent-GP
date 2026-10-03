@@ -104,7 +104,6 @@ button.btn:hover { background: var(--accent-wash); }
 .tbl-wrap { overflow-x: auto; border: 1px solid var(--hair); border-radius: 8px; }
 table { border-collapse: collapse; width: 100%; font-size: 0.82rem; }
 th, td { text-align: left; padding: 7px 10px; border-bottom: 1px solid var(--hair); white-space: nowrap; }
-th.nt { text-transform: none; letter-spacing: 0; }
 th { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted); font-weight: 600; background: var(--surface); position: sticky; top: 0; }
 td.r, th.r { text-align: right; font-variant-numeric: tabular-nums; }
 tbody tr:last-child td { border-bottom: 0; }
@@ -330,8 +329,9 @@ th.sortable:hover { color: var(--ink); }
       <div class="text">
         <span class="kicker">How strong is this?</span>
         <h2>The evidence, and its limits</h2>
-        <p>The strongest single association in this data is between <strong>missed appointments and a practice's population</strong>. DNA rates fall steeply as the share of older patients rises (ρ = <span data-s="rho_dna_age">−0.50</span>) and climb with deprivation (ρ = <span data-s="rho_dna_imd">0.47</span>).</p>
-        <p>For same-day access itself, <strong>GP staffing is the strongest factor</strong>, but it is modest (ρ ≈ <span data-s="rho_sdgp_gp">0.17</span>). Everything measured here together explains only about <span data-s="r2">5%</span> of the difference between practices in same-day GP appointments. The rest comes from how each practice organises, triages and records its work, which the national data cannot see.</p>
+        <p>The strongest single association in this data is between <strong>missed appointments and a practice's population</strong>. DNA rates fall steeply as the share of older patients rises (rank correlation <span data-s="rho_dna_age">−0.50</span>) and climb with deprivation (rank correlation <span data-s="rho_dna_imd">0.47</span>).</p>
+        <p>For same-day access itself, <strong>GP staffing is the strongest factor</strong>, but it is modest (rank correlation about <span data-s="rho_sdgp_gp">0.17</span>). Everything measured here together explains only about <span data-s="r2">5%</span> of the difference between practices in same-day GP appointments. The rest comes from how each practice organises, triages and records its work, which the national data cannot see.</p>
+        <p class="muted" style="font-size:0.88rem">How to read these numbers: a rank correlation runs from −1 to +1. Zero means no link, and ±1 means practices line up perfectly. It measures how strong a link is, not whether it is statistically significant. It is not a p-value. With nearly 6,000 practices even weak links are statistically significant, so it is the size that matters.</p>
       </div>
       <div class="tbl-wrap"><table class="evidence-table" id="ev-table"></table></div>
       <ul class="notes" style="padding-left:18px;margin:0">
@@ -391,7 +391,7 @@ th.sortable:hover { color: var(--ink); }
         <button type="button" id="preset-wf" aria-pressed="false">Population + workforce</button>
       </div>
     </div>
-    <p class="muted" style="font-size:0.82rem">Unadjusted: Spearman rank correlation with the access measure. Adjusted: change in the measure per 1 standard deviation of the factor, holding the other ticked factors constant (linear model, 95% CI). Click a row to plot it.</p>
+    <p class="muted" style="font-size:0.82rem">Rank correlation: Spearman rank correlation with the access measure, from −1 to +1. This measures the strength of the link and is not a p-value. Adjusted: change in the measure per 1 standard deviation of the factor, holding the other ticked factors constant (linear model, 95% CI). Click a row to plot it.</p>
     <div class="tbl-wrap"><table id="model-table"></table></div>
   </section>
 
@@ -659,7 +659,7 @@ function renderTiles() {
   const gap = quantile(g[1], 0.5) - quantile(g[0], 0.5);
   const sign = gap > 0 ? "+" : "";
   t.append(tile(`Top vs bottom quintile of ${shortFactor(f)}`, isFinite(gap) ? `${sign}${fmt(gap, m.d)}` : "–", `Median ${fmt(quantile(g[1], 0.5), m.d)} vs ${fmt(quantile(g[0], 0.5), m.d)} (national quintiles)`));
-  t.append(tile("Rank correlation (ρ)", cr && isFinite(cr.rho) ? fmt(cr.rho, 2) : "–", `${strength(cr?.rho)} · ${fmt(area.length)} practices`));
+  t.append(tile("Rank correlation (−1 to +1)", cr && isFinite(cr.rho) ? fmt(cr.rho, 2) : "–", `${strength(cr?.rho)} · ${fmt(area.length)} practices`));
 }
 function strength(r) {
   if (r == null || !isFinite(r)) return "Not enough practices";
@@ -836,7 +836,7 @@ function renderModel() {
   const { corr, model, m } = view;
   const t = $("model-table"); t.replaceChildren();
   const thead = t.createTHead().insertRow();
-  ["Factor", "Group", "Coverage", "Unadjusted ρ", "", "Adjusted effect per 1 SD", "In model"].forEach((h, i) => { const th = document.createElement("th"); th.textContent = h; if ([2, 3, 5].includes(i)) th.className = "r"; if (i === 3) th.classList.add("nt"); thead.append(th); });
+  ["Factor", "Group", "Coverage", "Rank correlation", "", "Adjusted effect per 1 SD", "In model"].forEach((h, i) => { const th = document.createElement("th"); th.textContent = h; if ([2, 3, 5].includes(i)) th.className = "r"; thead.append(th); });
   const tb = t.createTBody();
   corr.forEach(({ c, rho, cover }) => {
     const tr = tb.insertRow(); tr.className = "clickable" + (c.key === state.factor ? " sel" : "");
@@ -880,7 +880,7 @@ function renderWorkforce() {
   $("wf-note").textContent = model ? `${m.short} · population + workforce model explains ${fmt(model.r2 * 100, 0)}% of variation (${fmt(model.n)} practices)` : m.short;
   const t = $("wf-table"); t.replaceChildren();
   const head = t.createTHead().insertRow();
-  ["Staffing measure", `${m.short} by fifth (Q1 lowest → Q5 highest)`, "Q1 → Q5 medians", "ρ", "After population mix (per 1 SD)"].forEach((h, i) => { const th = document.createElement("th"); th.textContent = h; if (i >= 3) th.className = "r"; if (i === 3) th.classList.add("nt"); head.append(th); });
+  ["Staffing measure", `${m.short} by fifth (Q1 lowest → Q5 highest)`, "Q1 → Q5 medians", "Rank correlation", "After population mix (per 1 SD)"].forEach((h, i) => { const th = document.createElement("th"); th.textContent = h; if (i >= 3) th.className = "r"; head.append(th); });
   const tb = t.createTBody();
   // Pass 1: medians per fifth for every measure, so all rows share one y-scale and can be compared.
   const rowsData = wf.map((c) => {
@@ -1272,10 +1272,10 @@ function fillStory() {
   renderStoryCharts();
   const t = $("ev-table"); t.replaceChildren();
   const h = t.createTHead().insertRow();
-  ["Access or workload measure", "Practice factor", "ρ", "Practices"].forEach((x, i) => { const th = document.createElement("th"); th.textContent = x; if (i >= 2) th.className = "r" + (i === 2 ? " nt" : ""); h.append(th); });
+  ["Access or workload measure", "Practice factor", "Rank correlation", "Practices"].forEach((x, i) => { const th = document.createElement("th"); th.textContent = x; if (i >= 2) th.className = "r"; h.append(th); });
   const tb = t.createTBody();
   s.strongest.slice(0, 8).forEach((r) => { const tr_ = tb.insertRow(); [r.measure, r.factor, sign(r.rho), fmt(r.n)].forEach((v, i) => { const td = tr_.insertCell(); td.textContent = v; if (i >= 2) td.className = "r"; }); });
-  const cap = t.createCaption(); cap.textContent = "Strongest rank correlations (Spearman ρ) across all measures and factors"; cap.style.cssText = "text-align:left;padding:8px 10px;font-size:0.8rem;color:var(--muted)";
+  const cap = t.createCaption(); cap.textContent = "Strongest rank correlations (Spearman, −1 to +1) across all measures and factors. These show strength of association, not p-values."; cap.style.cssText = "text-align:left;padding:8px 10px;font-size:0.8rem;color:var(--muted)";
 }
 function renderStoryCharts() {
   const s = STORY; if (!s) return;

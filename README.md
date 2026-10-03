@@ -48,7 +48,7 @@ These are followed by four policy asks, a "your practice in numbers" lookup that
 - **Scatter plot** of each practice against the chosen factor, with a binned-median trend line.
 - **Quintile chart**: median practice and interquartile range for each national quintile of the factor (e.g. IMD Q1 least deprived to Q5 most deprived).
 - **"What lines up with the variation?" table**:
-  - an unadjusted Spearman ρ for every factor
+  - an unadjusted Spearman rank correlation (−1 to +1) for every factor
   - an adjusted linear model (effect per 1 SD, with 95% CI) whose factors you can tick on or off
 - **Compare practices**: search for a practice (or add its whole PCN). Each one is shown against its England percentile and against the value the model *expects* for its population mix.
 - **All-practices table**: sortable, filterable and copyable as CSV.
@@ -71,6 +71,8 @@ These are followed by four policy asks, a "your practice in numbers" lookup that
 | Practice | Registered list size | December 2025 (also the rate denominator) |
 
 The workforce figures exclude staff employed by PCNs under the ARRS scheme.
+
+Correlations quoted here and on the page are Spearman rank correlations (−1 to +1). They measure the strength of an association. They are not p-values.
 
 ## Definitions
 
@@ -111,12 +113,12 @@ The `site/` folder is fully static, so it can be hosted on GitHub Pages, Vercel 
 
 - The median practice delivers about **199 same-day appointments per 1,000 patients per month**. The 90th-percentile practice delivers 3.5× the 10th.
 - **Deprivation barely moves same-day access**:
-  - the median rises from about 188 in the least-deprived quintile to 207 in the most-deprived (ρ ≈ 0.06)
+  - the median rises from about 188 in the least-deprived quintile to 207 in the most-deprived (rank correlation ≈ 0.06)
   - urgent same-day access is flat at about 104 per 1,000 in both
-- Smoking, age and disease burden also show weak links (|ρ| < 0.2).
+- Smoking, age and disease burden also show weak links (rank correlations between −0.2 and 0.2).
 - **GP staffing shows the clearest link**:
   - Same-day **GP** appointments rise from a median of 98 to 129 per 1,000 a month (+32%) from the lowest to the highest fifth of qualified GPs per 10,000 patients.
   - After adjusting for deprivation, age, sex, smoking and the QOF registers, 1 SD more qualified GP FTE (about 1.8 per 10,000) means about 13 more same-day GP appointments per 1,000 a month.
   - Nurse, admin and reception staffing show little or no link with same-day GP access.
-- More deprived practices have fewer qualified GPs per patient (ρ ≈ −0.17), which partly offsets their higher need.
+- More deprived practices have fewer qualified GPs per patient (rank correlation ≈ −0.17), which partly offsets their higher need.
 - Population and staffing factors together explain only about 6% of between-practice variation. Most of the variation is practice-level: how each practice organises and records access.
