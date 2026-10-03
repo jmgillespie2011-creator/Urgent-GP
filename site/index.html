@@ -224,6 +224,7 @@ th.sortable:hover { color: var(--ink); }
         <div class="hero-stat"><b data-s="gp_less">16%</b><span>fewer qualified GPs per patient in the most deprived fifth of practices than in the least deprived</span></div>
         <div class="hero-stat"><b data-s="sdgp_more">22%</b><span>more same-day appointments delivered by each GP in those practices</span></div>
         <div class="hero-stat"><b data-s="gp_gap">≈650</b><span>full-time GPs needed for the most deprived fifth to match the staffing of the least deprived</span></div>
+        <div class="hero-stat"><b data-f="gap_m">£1.69bn</b><span>a year less core funding than in 2008/09 in real terms, enough for about <span data-f="total_gps">15,500</span> salaried GPs</span></div>
       </div>
     </header>
 
@@ -285,7 +286,8 @@ th.sortable:hover { color: var(--ink); }
         <span class="kicker">5 · The money</span>
         <h2>Core funding has not kept pace since 2008</h2>
         <p>In 2008/09 practices in England received <strong><span data-f="per_head_2008">£99</span> per person</strong> in core contract and QOF funding. Had that kept pace with inflation, it would be <strong><span data-f="per_head_expected">£…</span></strong> per person in <span data-f="year">2024/25</span>. Practices actually received <strong><span data-f="per_head_actual">£…</span></strong>.</p>
-        <p>Across England that is <strong><span data-f="gap_m">£…</span> a year</strong>. Spent on salaried GPs at <span data-f="gp_cost">£…</span> each (salary plus employer costs), it would fund about <strong><span data-f="total_gps">…</span> full-time GPs</strong>. Going by how same-day access rises with GP numbers, that could mean about <strong><span data-f="sd_month">…</span> more same-day GP appointments every month</strong>.</p>
+        <p>Across England that is <strong><span data-f="gap_m">£…</span> a year</strong>. Spent on salaried GPs at <span data-f="gp_cost">£…</span> each (salary plus employer costs), it would fund about <strong><span data-f="total_gps">…</span> full-time GPs</strong>. Going by how same-day access rises with GP numbers, that could mean about <strong><span data-f="sd_month">…</span> more same-day GP appointments every month</strong>, <span data-f="sd_pct">…</span> more than practices deliver now.</p>
+        <p>For comparison, the BMA's 2025/26 ask was <strong>£152.50 per weighted patient</strong>. Bringing core funding back to its 2008/09 value, by this separate route, gives <span data-f="per_head_expected">£…</span>.</p>
         <p class="muted" style="font-size:0.85rem">Every practice's share is shown in <a href="#your-practice">Your practice in numbers</a>. The method and its limits are set out in the notes under the chart.</p>
       </div>
       <figure class="figure" style="margin:0">
@@ -301,6 +303,7 @@ th.sortable:hover { color: var(--ink); }
             <li>Funding for PCN-employed staff (the ARRS scheme), premises, IT and dispensing sits outside the core contract and is not counted.</li>
             <li>Each practice's share is the national gap divided by weighted patients, the same needs weighting used for the global sum.</li>
             <li>Salaried GP cost: midpoint of the BMA model contract range plus employer NI and the employer pension contribution practices pay.</li>
+            <li>That many GPs would mean about <span data-f="per10k_add">2.5</span> more per 10,000 patients, which takes the typical practice to the top of today's observed staffing range. The same-day estimate is therefore an extrapolation at the edge of the data.</li>
             <li>The same-day effect uses the adjusted cross-practice estimate of <span data-f="sd_per_gp">76</span> same-day GP appointments a month per extra GP (95% CI <span data-f="sd_ci">59–93</span>). It assumes the association is causal and that the GPs could be recruited.</li>
           </ul>
         </details>
@@ -977,7 +980,7 @@ function renderCompare() {
         d.append(pill);
       } else d.textContent = "–";
     }
-    if (FUNDING) { const fd = fundingFor(p.c); td(fd ? gbp(fd.shortfall) : "–", "r"); td(fd ? fmt(fd.gps, 1) : "–", "r"); td(fd ? fmt(fd.sd) : "–", "r"); }
+    if (FUNDING) { const fd = fundingFor(p.c); td(fd ? gbp(Math.round(fd.shortfall / 100) * 100) : "–", "r"); td(fd ? fmt(fd.gps, 1) : "–", "r"); td(fd ? fmt(fd.sd) : "–", "r"); }
     covShown.forEach((c) => td(fmt(p.v[c.key], 1), "r"));
   });
 }
@@ -1205,6 +1208,7 @@ let FUNDING = null;
 const gbp = (v, d = 0) => (v == null || !isFinite(v) ? "–" : "£" + fmt(v, d));
 const gbpBig = (v) => (Math.abs(v) >= 1e9 ? `£${fmt(v / 1e9, 2)}bn` : Math.abs(v) >= 1e6 ? `£${fmt(v / 1e6, 1)}m` : gbp(v));
 const fyLabel = (y) => y.replace("-", "/");
+const sig3 = (v) => { if (!isFinite(v) || v === 0) return v; const k = 10 ** (Math.floor(Math.log10(Math.abs(v))) - 2); return Math.round(v / k) * k; };
 function setF(key, text) { document.querySelectorAll(`[data-f="${key}"]`).forEach((el) => { el.textContent = text; }); }
 function fundingFor(code) {
   if (!FUNDING) return null;
@@ -1217,8 +1221,10 @@ function fillFunding() {
   const kept = F.per_head_2008 * F.cpi_ratio;
   setF("year", fyLabel(F.year));
   setF("per_head_2008", gbp(F.per_head_2008, 2)); setF("per_head_expected", gbp(kept, 2)); setF("per_head_actual", gbp(F.per_head_actual, 2));
-  setF("gap_m", gbpBig(F.gap_m * 1e6)); setF("gp_cost", gbp(F.gp_cost.total)); setF("total_gps", fmt(F.total_gps));
-  setF("sd_month", fmt(F.total_sd_gp_extra_month)); setF("core_2008_m", gbpBig(F.core_2008_m * 1e6));
+  setF("gap_m", gbpBig(F.gap_m * 1e6)); setF("gp_cost", gbp(F.gp_cost.total)); setF("total_gps", fmt(sig3(F.total_gps)));
+  setF("sd_month", fmt(sig3(F.total_sd_gp_extra_month)));
+  if (STORY) setF("sd_pct", `${fmt(100 * F.total_sd_gp_extra_month / (STORY.sd_gp_month_m * 1e6), 0)}%`);
+  setF("per10k_add", fmt(F.total_gps / F.weighted_total * 1e4, 1)); setF("core_2008_m", gbpBig(F.core_2008_m * 1e6));
   setF("cpi_ratio", fmt(F.cpi_ratio, 3)); setF("pop_ratio", fmt(F.pop_ratio, 3));
   setF("sd_per_gp", fmt(F.sd_per_gp_month)); setF("sd_ci", `${fmt(F.sd_per_gp_ci[0])}–${fmt(F.sd_per_gp_ci[1])}`);
   setF("per_head_pair", `${gbp(F.per_head_actual, 2)} vs ${gbp(kept, 2)} if it had kept pace`);
@@ -1229,7 +1235,7 @@ function renderMoneyChart() {
   box.replaceChildren();
   const kept = F.per_head_2008 * F.cpi_ratio;
   const rows = [["2008/09, cash", F.per_head_2008, "var(--faint)"], [`${fyLabel(F.year)} if it had kept pace with inflation`, kept, "var(--series-2)"], [`${fyLabel(F.year)} actual`, F.per_head_actual, "var(--series-1)"]];
-  const max = Math.max(...rows.map((r) => r[1])) * 1.12;
+  const max = Math.max(...rows.map((r) => r[1])) * 1.3;
   const wrap = document.createElement("div"); wrap.className = "dv";
   rows.forEach(([label, v, color]) => {
     const row = document.createElement("div"); row.className = "dv-row";
@@ -1373,10 +1379,7 @@ function renderYours(p) {
   [["Qualified GPs per 10,000 patients", st.gp10k, 2, pctVs(st.gp10k, med.gp10k)],
    ["Patients per qualified GP", st.ptsPerGp, 0, pctVs(st.ptsPerGp, med.ptsPerGp)],
    ["Same-day GP appointments per GP a month", st.sdgpPerGp, 0, pctVs(st.sdgpPerGp, med.sdgpPerGp)],
-   ["Same-day GP appointments per 1,000 patients a month", st.sdgpRate, 0, pctVs(st.sdgpRate, med.sdgpRate)]].concat(fd ? [
-   [`Core funding short of 2008/09 real terms, ${fyLabel(FUNDING.year)}`, null, 0, "a year (share of the national gap by weighted patients)", gbp(fd.shortfall)],
-   ["Salaried GPs that would pay for", fd.gps, 1, `full-time, at ${gbp(FUNDING.gp_cost.total)} each including employer costs`],
-   ["Extra same-day GP appointments a month (estimate)", fd.sd, 0, `95% CI ${fmt(fd.sdLo)}–${fmt(fd.sdHi)}`]] : []).forEach(([k, v, d, sub, txt]) => {
+   ["Same-day GP appointments per 1,000 patients a month", st.sdgpRate, 0, pctVs(st.sdgpRate, med.sdgpRate)]].forEach(([k, v, d, sub, txt]) => {
     const e = document.createElement("div"); e.className = "ystat";
     const a = document.createElement("span"); a.className = "k"; a.textContent = k;
     const b = document.createElement("span"); b.className = "v"; b.textContent = txt || (v == null ? "–" : fmt(v, d));
@@ -1386,7 +1389,7 @@ function renderYours(p) {
     `${p.n} (${p.c}) serves ${fmt(p.v.list_size)} patients${fifth ? ` and sits in the ${fifth} fifth of practices in England by IMD 2025 deprivation score` : ""}.`,
     st.gp10k != null ? `It has ${fmt(st.gp10k, 2)} qualified full-time-equivalent GPs per 10,000 patients, against an England median of ${fmt(med.gp10k, 2)}; that is ${fmt(st.ptsPerGp, 0)} patients per GP.` : "",
     st.sdgpPerGp != null ? `Between June and August 2026 each GP delivered on average ${fmt(st.sdgpPerGp, 0)} same-day appointments a month (England median ${fmt(med.sdgpPerGp, 0)}), or ${fmt(st.sdgpRate, 0)} per 1,000 patients.` : "",
-    fd ? `Had core contract funding kept pace with inflation since 2008/09, the practice would have received about ${gbp(fd.shortfall)} more in ${fyLabel(FUNDING.year)}: enough for ${fmt(fd.gps, 1)} full-time salaried GPs, which on national patterns could mean around ${fmt(fd.sd)} more same-day GP appointments a month.` : "",
+    fd ? `Had core contract funding kept pace with inflation since 2008/09, the practice would have received about ${gbp(Math.round(fd.shortfall / 100) * 100)} more in ${fyLabel(FUNDING.year)}: enough for ${fmt(fd.gps, 1)} full-time salaried GPs, which on national patterns could mean around ${fmt(fd.sd)} more same-day GP appointments a month.` : "",
     STORY ? `Across England, practices in the most deprived fifth have ${fmt(Math.abs(STORY.compare.find((c) => c.key === "gp_qual_fte_10k").diff_pct), 0)}% fewer GPs per patient than the least deprived, and each GP delivers ${fmt(STORY.compare.find((c) => c.key === "sd_gp_per_gp").diff_pct, 0)}% more same-day appointments. Matching staffing would take about ${fmt(STORY.gp_gap.fte)} more full-time GPs.` : "",
     `Sources: NHS England Appointments in General Practice (Jun–Aug 2026), GP Workforce (Nov 2025)${fd ? `, NHS Payments to General Practice ${fyLabel(FUNDING.year)}, Investment in General Practice 2008/09 and ONS CPI` : ""}.`,
   ].filter(Boolean).join(" ");
@@ -1400,7 +1403,22 @@ function renderYours(p) {
   const more = document.createElement("button"); more.className = "btn"; more.type = "button"; more.textContent = "Compare it in the explorer"; more.style.justifySelf = "start";
   more.addEventListener("click", () => { if (!state.selected.includes(p.c)) state.selected.push(p.c); update(); document.getElementById("cmp-table").scrollIntoView({ behavior: "smooth", block: "center" }); });
   const row = document.createElement("div"); row.style.cssText = "display:flex;gap:8px;flex-wrap:wrap"; row.append(btn, more);
-  card.append(h, grid, letter, row);
+  const sub1 = document.createElement("span"); sub1.className = "kicker"; sub1.textContent = "Staffing and same-day workload";
+  card.append(h, sub1, grid);
+  if (fd) {
+    const sub2 = document.createElement("span"); sub2.className = "kicker"; sub2.textContent = `If core funding had kept pace with inflation since 2008/09 (${fyLabel(FUNDING.year)})`;
+    const g2 = document.createElement("div"); g2.className = "yours-grid";
+    [["Core funding shortfall a year", gbp(Math.round(fd.shortfall / 100) * 100), "this practice's share of the national gap, by weighted patients"],
+     ["Salaried GPs that would pay for", fmt(fd.gps, 1), `full-time, at ${gbp(FUNDING.gp_cost.total)} each including employer costs`],
+     ["Extra same-day GP appointments a month", `≈${fmt(fd.sd)}`, `estimate, 95% CI ${fmt(fd.sdLo)}–${fmt(fd.sdHi)}`]].forEach(([k, v, sub]) => {
+      const e = document.createElement("div"); e.className = "ystat";
+      const a = document.createElement("span"); a.className = "k"; a.textContent = k;
+      const b = document.createElement("span"); b.className = "v"; b.textContent = v;
+      const c = document.createElement("span"); c.className = "d"; c.textContent = sub; e.append(a, b, c); g2.append(e);
+    });
+    card.append(sub2, g2);
+  }
+  card.append(letter, row);
 }
 function setupYours() {
   const inp = $("ysearch"), box = $("ysuggest"); let list = [], act = -1;

@@ -96,7 +96,8 @@ def load_payments() -> tuple[pd.DataFrame, str]:
 
     def col(*keys: str) -> str | None:
         for k in keys:
-            hit = next((orig for n, orig in cols.items() if n.startswith(k)), None)
+            hit = next((orig for n, orig in cols.items() if n.startswith(k)), None) or \
+                next((orig for n, orig in cols.items() if k in n), None)
             if hit:
                 return hit
         return None

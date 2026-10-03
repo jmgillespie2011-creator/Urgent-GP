@@ -4,6 +4,23 @@ An interactive dashboard comparing **urgent and same-day appointment rates** acr
 
 The appointments data is the NHS Digital *Appointments in General Practice* practice-level crosstab for June to August 2026 ([August 2026 publication](https://digital.nhs.uk/data-and-information/publications/statistical/appointments-in-general-practice/august-2026)).
 
+## Core funding since 2008/09
+
+`scripts/build_funding.py` estimates how much core funding each practice has lost because core contract funding did not keep pace with inflation from 2008/09. The steps:
+
+1. **2008/09 England core + QOF: £5,136m.** This is Global Sum/MPIG, PMS baseline, PCTMS/APMS core and QOF, from NHS Digital's *Investment in General Practice 2008/09–2012/13*. QOF is included because QOF points were later folded into the global sum. Seniority can't be separated in 2008/09 and is left out, which makes the gap smaller.
+2. **Uprate it** by ONS CPI (D7BT, financial-year average) and England's population (ONS ENPOP).
+3. **Compare** with the same items actually paid, from *NHS Payments to General Practice* (latest year available: 2023/24).
+4. **Share the national gap between practices** by weighted patients.
+5. **Convert it to salaried GPs** using the midpoint of the BMA model salary range plus employer NI and the practice-paid pension contribution (£109,658 in 2023/24).
+6. **Estimate the same-day effect:** each GP is worth 76 same-day GP appointments a month (95% CI 59–93), from the adjusted cross-practice model in `story.json`.
+
+2023/24 result:
+- Core + QOF was **£123.70 per person**, against **£152.94** had the 2008/09 level (£99.13) kept pace with CPI. That is **19% below** the 2008/09 level in real terms.
+- The gap is **£1.69bn a year**, about **15,500 salaried GPs**.
+- That could mean about **1.17m more same-day GP appointments a month**, an extrapolation at the edge of the observed staffing range.
+- For comparison, the BMA's 2025/26 ask was £152.50 per weighted patient.
+
 ## The page
 
 The page opens with an evidence-led case for GPs in deprived areas, **"Fewer GPs, more same-day care, where need is greatest"**. It has four sections:
@@ -81,6 +98,7 @@ pip install pandas openpyxl
 # put Practice_Level_Crosstab_<Mon>_<YY>.csv files and Mapping.csv in data/raw/
 python3 scripts/build_data.py      # -> site/data/practices.json, data/processed/practice_access.csv
 python3 scripts/build_story.py     # -> site/data/story.json (advocacy headline figures; needs statsmodels)
+python3 scripts/build_funding.py   # -> site/data/funding.json (core-funding gap per practice; needs story.json)
 python3 scripts/build_site.py      # -> site/index.html (standalone page)
 cd site && python3 -m http.server  # open http://localhost:8000
 ```
