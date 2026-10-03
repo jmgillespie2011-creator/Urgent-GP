@@ -4,14 +4,21 @@
     "indicator": "Smoking: QOF prevalence",
     "period": "2024/25"
   },
-  "fetched_utc": "2026-10-03T19:27:08Z",
+  "fetched_utc": "2026-10-03T19:39:47Z",
   "fingertips_profile": {
     "profile_id": 20,
     "indicators": 24
   },
   "age_sex": {
-    "source": "Fingertips indicator 93468",
-    "period": "2025"
+    "page": "https://digital.nhs.uk/data-and-information/publications/statistical/patients-registered-at-a-gp-practice/july-2026",
+    "file": "https://files.digital.nhs.uk/BB/362F1A/gp-reg-pat-prac-quin-age.zip",
+    "csv": "gp-reg-pat-prac-quin-age.csv",
+    "extract_date": "2026-07-01"
   },
-  "workforce_error": "RuntimeError: browser GET https://web.archive.org/cdx/search/cdx?url=digital.nhs.uk/data-and-information/publications/statistical/general-and-personal-medical-services/*&output=json&filter=statuscode:200&fl=timestamp,original&collapse=urlkey&limit=20000: HTTP 503"
+  "workforce": {
+    "page": "https://digital.nhs.uk/data-and-information/publications/statistical/general-and-personal-medical-services/31-december-2025",
+    "file": "https://files.digital.nhs.uk/9F/0225CE/GPWPracticeCSV.122025.zip",
+    "csv": "1 General Practice \u2013 December 2025 Practice Level - Detailed.csv",
+    "columns": 294
+  }
 }

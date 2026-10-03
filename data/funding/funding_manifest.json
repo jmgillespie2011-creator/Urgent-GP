@@ -11,5 +11,8 @@
     "source": "https://www.ons.gov.uk/generator?format=csv&uri=/peoplepopulationandcommunity/populationandmigration/populationestimates/timeseries/enpop/pop",
     "series": "ENPOP"
   },
-  "payments_error": "RuntimeError: browser GET https://web.archive.org/cdx/search/cdx?url=digital.nhs.uk/data-and-information/publications/statistical/nhs-payments-to-general-practice/*&output=json&filter=statuscode:200&fl=timestamp,original&collapse=urlkey&limit=20000: HTTP 503"
+  "payments": {
+    "page": "https://digital.nhs.uk/data-and-information/publications/statistical/nhs-payments-to-general-practice/england-2023-24",
+    "file": "https://files.digital.nhs.uk/7A/651D52/nhspaymentsgp-23-24-prac-csv.csv"
+  }
 }
