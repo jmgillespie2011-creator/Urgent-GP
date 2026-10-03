@@ -108,32 +108,45 @@ def fetch_investment() -> None:
 
 
 # --------------------------------------------------------------------------- NHS Payments to General Practice
-def fetch_payments() -> None:
-    page, files = f.archived_files("nhs-payments-to-general-practice", r"[a-z0-9-]*20\d\d-\d\d", r"\.(csv|zip)")
-    files.sort(key=lambda x: not re.search(r"practice|csv", x[0] + x[1], re.I))
-    for href, text in files:
-        try:
-            blob = f.get_file(href)
-        except Exception as e:  # noqa: BLE001
-            print(f"    {href}: {e}")
-            continue
-        if blob[:2] == b"PK":
-            z = zipfile.ZipFile(io.BytesIO(blob))
-            names = [n for n in z.namelist() if n.lower().endswith(".csv")]
-            print(f"    zip {href}: {names}")
-            for n in names:
-                save(n.rsplit("/", 1)[-1], z.read(n), OUT / "payments")
-        else:
-            save(href.rsplit("/", 1)[-1], blob, OUT / "payments")
-        manifest["payments"] = {"page": page, "file": href}
-        return
-    raise RuntimeError("no payments file downloaded")
+PAYMENTS_PAGES = [f"{f.PUB}nhs-payments-to-general-practice/england-{y}" for y in ("2024-25", "2023-24")]
 
+
+def fetch_payments() -> None:
+    """Latest practice-level payments CSV. Archived pages are fetched by URL (no index lookup needed)."""
+    for page in PAYMENTS_PAGES:
+        try:
+            html = f.get(f"{f.WAYBACK}/web/2026id_/{page}", tries=3).decode("utf-8", "replace")
+        except Exception as e:  # noqa: BLE001
+            print(f"    {page}: {e}")
+            continue
+        files = [(h, t) for h, t in file_links(html) if re.search(r"\.(csv|zip)", h, re.I)]
+        files.sort(key=lambda x: not re.search(r"practice", x[0] + x[1], re.I) or bool(re.search(r"pcn", x[0] + x[1], re.I)))
+        print(f"  {page}: {len(files)} data files")
+        for href, text in files:
+            print(f"    {text[:70]} -> {href}")
+        for href, text in files:
+            if re.search(r"pcn", href + text, re.I):
+                continue
+            try:
+                blob = f.get_file(href)
+            except Exception as e:  # noqa: BLE001
+                print(f"    {href}: {e}")
+                continue
+            if blob[:2] == b"PK":
+                z = zipfile.ZipFile(io.BytesIO(blob))
+                for n in z.namelist():
+                    if n.lower().endswith(".csv"):
+                        save(n.rsplit("/", 1)[-1], z.read(n), OUT / "payments")
+            else:
+                save(href.rsplit("/", 1)[-1], blob, OUT / "payments")
+            manifest["payments"] = {"page": page, "file": href}
+            return
+    raise RuntimeError("no payments file downloaded")
 
 def main() -> int:
     OUT.mkdir(parents=True, exist_ok=True)
     ok = 0
-    steps = [] if False else [("CPI", lambda: ons_series("D7BT", "mm23", "economy/inflationandpriceindices", "cpi_d7bt.csv")),
+    steps = [("CPI", lambda: ons_series("D7BT", "mm23", "economy/inflationandpriceindices", "cpi_d7bt.csv")),
              ("GDP deflator", lambda: ons_series("YBGB", "ukea", "economy/grossdomesticproductgdp", "gdp_deflator_ybgb.csv")),
              ("population", lambda: ons_series("ENPOP", "pop", "peoplepopulationandcommunity/populationandmigration/populationestimates", "england_population_enpop.csv")),
              ("payments", fetch_payments)]
