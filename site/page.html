@@ -4,7 +4,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,500..900&family=Public+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <style>
-/* Layout: one argument read top to bottom (hero, four beats, asks), then one tool (your practice),
+/* Layout: findings read top to bottom (summary, four findings, recommendations), then the practice lookup,
    then one view of every practice, then the evidence folded away. Narrow reading column, wide figures. */
 :root {
   --bg: #f6f7f5; --surface: #fcfcfb; --ink: #101614; --ink-2: #4b5552; --muted: #7d8784;
@@ -58,10 +58,10 @@ a { color: var(--accent); }
 .hero-stat b { font-family: var(--font-display); font-stretch: 80%; font-weight: 800; font-size: clamp(2.1rem, 4.2vw, 3.1rem); line-height: 1; color: var(--hero-accent); }
 .hero-stat span { color: var(--hero-ink-2); font-size: 0.88rem; }
 
-/* beats */
-.beat { display: grid; grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr); gap: 20px 40px; align-items: start; border-top: 1px solid var(--hair); padding-top: 32px; }
-@media (max-width: 900px) { .beat { grid-template-columns: minmax(0, 1fr); } }
-.beat h2, .section-head h2 { font-family: var(--font-display); font-stretch: 85%; font-weight: 800; font-size: clamp(1.6rem, 3.2vw, 2.3rem); line-height: 1.06; }
+/* findings */
+.finding { display: grid; grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr); gap: 20px 40px; align-items: start; border-top: 1px solid var(--hair); padding-top: 32px; }
+@media (max-width: 900px) { .finding { grid-template-columns: minmax(0, 1fr); } }
+.finding h2, .section-head h2 { font-family: var(--font-display); font-stretch: 85%; font-weight: 800; font-size: clamp(1.6rem, 3.2vw, 2.3rem); line-height: 1.06; }
 .text { display: grid; gap: 12px; max-width: 58ch; }
 .text p { color: var(--ink-2); }
 .text p strong { color: var(--ink); }
@@ -84,16 +84,16 @@ a { color: var(--accent); }
 .dv-bar { position: absolute; top: 5px; height: 12px; border-radius: 3px; }
 .dv-val { position: absolute; top: 2px; font-size: 0.8rem; font-weight: 700; font-variant-numeric: tabular-nums; white-space: nowrap; }
 
-/* asks */
+/* recommendations */
 .section-head { display: grid; gap: 8px; max-width: 70ch; }
-.asks { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; counter-reset: ask; }
-@media (max-width: 1000px) { .asks { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-@media (max-width: 560px) { .asks { grid-template-columns: minmax(0, 1fr); } }
-.ask { background: var(--surface); border: 1px solid var(--ring); border-radius: 10px; padding: 18px; display: grid; gap: 8px; align-content: start; counter-increment: ask; }
-.ask::before { content: counter(ask); font-family: var(--font-display); font-weight: 800; font-stretch: 80%; font-size: 2rem; line-height: 1; color: var(--series-2); }
-.ask h3 { font-size: 1.02rem; line-height: 1.3; }
-.ask p { color: var(--ink-2); font-size: 0.88rem; }
-.ask .ev { font-size: 0.78rem; color: var(--muted); border-top: 1px solid var(--hair); padding-top: 8px; }
+.recs { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; counter-reset: rec; }
+@media (max-width: 1000px) { .recs { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 560px) { .recs { grid-template-columns: minmax(0, 1fr); } }
+.rec { background: var(--surface); border: 1px solid var(--ring); border-radius: 10px; padding: 18px; display: grid; gap: 8px; align-content: start; counter-increment: rec; }
+.rec::before { content: counter(rec); font-family: var(--font-display); font-weight: 800; font-stretch: 80%; font-size: 2rem; line-height: 1; color: var(--series-2); }
+.rec h3 { font-size: 1.02rem; line-height: 1.3; }
+.rec p { color: var(--ink-2); font-size: 0.88rem; }
+.rec .ev { font-size: 0.78rem; color: var(--muted); border-top: 1px solid var(--hair); padding-top: 8px; }
 
 /* your practice */
 .panel { background: var(--surface); border: 1px solid var(--ring); border-radius: 12px; padding: clamp(16px, 3vw, 28px); display: grid; gap: 18px; }
@@ -123,7 +123,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, summary:focus-v
 /* every practice */
 .controls { display: flex; flex-wrap: wrap; gap: 12px 18px; align-items: end; }
 .ctl { display: grid; gap: 4px; min-width: 0; max-width: 100%; }
-#asks, #every, #evidence { grid-template-columns: minmax(0, 1fr); }
+#recommendations, #every, #evidence { grid-template-columns: minmax(0, 1fr); }
 #area { width: min(100%, 440px); }
 .ctl > span { font-size: 0.7rem; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; color: var(--muted); }
 select { font: inherit; color: var(--ink); background: var(--bg); border: 1px solid var(--axis); border-radius: 6px; padding: 7px 8px; max-width: 100%; }
@@ -171,10 +171,10 @@ footer.foot { border-top: 2px solid var(--ink); padding-top: 18px; display: grid
 
 <div class="wrap">
   <header class="hero">
-    <nav aria-label="Sections"><a href="#case">The case</a><a href="#asks">What would help</a><a href="#yours">Your practice</a><a href="#every">Every practice</a><a href="#evidence">Evidence</a></nav>
+    <nav aria-label="Sections"><a href="#findings">Findings</a><a href="#recommendations">Recommendations</a><a href="#yours">Your practice</a><a href="#every">Practices by area</a><a href="#evidence">Methods</a></nav>
     <span class="eyebrow">General practice in England · June–August 2026</span>
-    <h1>Fewer GPs, <em>more same-day care</em>, where need is greatest</h1>
-    <p class="lede">Practices serving England's most deprived communities have fewer GPs per patient, yet deliver as much same-day care as anywhere else. They do it by asking each GP to do more. Core funding is now <span data-s="gap_pct_real">19%</span> below its 2008/09 value in real terms.</p>
+    <h1>Fewer GPs where <em>need is greatest</em></h1>
+    <p class="lede">Practices serving England's most deprived communities have fewer GPs per patient, yet provide as much same-day care as other practices. Each GP therefore carries more of the workload. Core funding is now <span data-s="gap_pct_real">19%</span> below its 2008/09 value in real terms.</p>
     <div class="hero-stats">
       <div class="hero-stat"><b data-s="gp_less">16%</b><span>fewer GPs per patient in the most deprived fifth of practices</span></div>
       <div class="hero-stat"><b data-s="sdgp_more">22%</b><span>more same-day appointments delivered by each of their GPs</span></div>
@@ -183,13 +183,13 @@ footer.foot { border-top: 2px solid var(--ink); padding-top: 18px; display: grid
     </div>
   </header>
 
-  <section class="beat" id="case">
+  <section class="finding" id="findings">
     <div class="text">
-      <span class="kicker">1 · Need</span>
-      <h2>More illness, fewer doctors</h2>
+      <span class="kicker">Need</span>
+      <h2>Higher need, fewer GPs</h2>
       <p>Compared with practices in the least deprived fifth of England, the most deprived fifth have <strong>twice the smoking</strong>, <strong>three-quarters more COPD</strong> and <strong>nearly two-thirds more serious mental illness</strong>.</p>
-      <p>They also have <strong><span data-s="gp_less">16%</span> fewer GPs per patient</strong>, and fewer of them train new GPs. Their patients miss nearly twice as many appointments, each one a gap to chase.</p>
-      <p class="muted" style="font-size:0.86rem">Their lists are younger (<span data-s="young">13% aged 65+ against 23%</span>), so conditions of old age such as atrial fibrillation are less common. The illness that tracks deprivation is the kind that arrives earlier in life.</p>
+      <p>They also have <strong><span data-s="gp_less">16%</span> fewer GPs per patient</strong>, and fewer of them train new GPs. Their patients also miss nearly twice as many appointments.</p>
+      <p class="muted" style="font-size:0.86rem">Their lists are younger (<span data-s="young">13% aged 65+ against 23%</span>), so conditions of older age such as atrial fibrillation are less common. The conditions that are more common in deprived areas tend to develop at younger ages.</p>
     </div>
     <figure class="figure">
       <h3>Most deprived fifth of practices compared with least deprived fifth</h3>
@@ -198,12 +198,12 @@ footer.foot { border-top: 2px solid var(--ink); padding-top: 18px; display: grid
     </figure>
   </section>
 
-  <section class="beat">
+  <section class="finding">
     <div class="text">
-      <span class="kicker">2 · Workload</span>
-      <h2>The gap is filled by GPs working harder</h2>
-      <p>Same-day access per patient is roughly level across deprivation: about <span data-s="sdgp_q1">114</span> same-day GP appointments per 1,000 patients a month in the least deprived fifth and <span data-s="sdgp_q5">118</span> in the most.</p>
-      <p>With fewer GPs, <strong>each GP in the most deprived practices delivers <span data-s="sdgp_pergp_q5">229</span> same-day appointments a month, against <span data-s="sdgp_pergp_q1">188</span></strong>. The pattern holds between practices in the same ICB, so it is not just a regional divide.</p>
+      <span class="kicker">Workload</span>
+      <h2>Each GP provides more same-day care</h2>
+      <p>Same-day access per patient is similar across all levels of deprivation: about <span data-s="sdgp_q1">114</span> same-day GP appointments per 1,000 patients a month in the least deprived fifth and <span data-s="sdgp_q5">118</span> in the most.</p>
+      <p>With fewer GPs, <strong>each GP in the most deprived practices delivers <span data-s="sdgp_pergp_q5">229</span> same-day appointments a month, against <span data-s="sdgp_pergp_q1">188</span></strong>. The same pattern is seen between practices within the same ICB, so it is not explained by region.</p>
     </div>
     <div class="pair">
       <figure class="figure"><h3>GPs per 10,000 patients</h3><div id="ch-gp"></div><figcaption>Qualified GPs, full-time equivalent. By deprivation fifth, median practice.</figcaption></figure>
@@ -211,28 +211,28 @@ footer.foot { border-top: 2px solid var(--ink); padding-top: 18px; display: grid
     </div>
   </section>
 
-  <section class="beat">
+  <section class="finding">
     <div class="text">
-      <span class="kicker">3 · Money</span>
+      <span class="kicker">Funding</span>
       <h2>Core funding is worth <span data-s="gap_pct_real">19%</span> less than in 2008/09</h2>
       <p>In 2008/09 practices received <strong><span data-s="ph_2008">£99.13</span> per person</strong> in core contract and QOF funding. Had that kept pace with inflation it would be <strong><span data-s="ph_kept">£152.94</span></strong> in <span data-s="fyear">2023/24</span>. Practices received <strong><span data-s="ph_actual">£123.70</span></strong>.</p>
       <p>Across England that is <strong><span data-s="gap_bn">£1.69bn</span> a year</strong>, enough for about <strong><span data-s="total_gps">15,500</span> salaried GPs</strong> at <span data-s="gp_cost">£109,658</span> each including employer costs.</p>
-      <p class="muted" style="font-size:0.86rem">For comparison, the BMA's 2025/26 ask was £152.50 per weighted patient, close to this "kept pace" figure.</p>
+      <p class="muted" style="font-size:0.86rem">For comparison, the BMA called for £152.50 per weighted patient in 2025/26, close to the inflation-adjusted figure above.</p>
     </div>
     <figure class="figure">
       <h3>Core contract + QOF funding per person, England</h3>
       <div id="ch-money"></div>
-      <figcaption>2008/09: NHS Digital, Investment in General Practice. <span data-s="fyear">2023/24</span>: NHS Payments to General Practice. Uprated by ONS CPI. Method under <a href="#evidence">Evidence</a>.</figcaption>
+      <figcaption>2008/09: NHS Digital, Investment in General Practice. <span data-s="fyear">2023/24</span>: NHS Payments to General Practice. Uprated by ONS CPI. Method under <a href="#evidence">Methods and limitations</a>.</figcaption>
     </figure>
   </section>
 
-  <section class="beat">
+  <section class="finding">
     <div class="text">
-      <span class="kicker">4 · What it would buy</span>
-      <h2>More GPs, more same-day appointments</h2>
-      <p>Practices with the most GPs per patient deliver <strong><span data-s="lever_pct">32%</span> more same-day GP appointments</strong> than those with the fewest. The link holds after taking account of deprivation, age, sex, smoking, long-term conditions and the practice's other staff.</p>
+      <span class="kicker">Staffing and access</span>
+      <h2>More GPs per patient, more same-day appointments</h2>
+      <p>Practices with the most GPs per patient deliver <strong><span data-s="lever_pct">32%</span> more same-day GP appointments</strong> than those with the fewest. The association remains after adjusting for deprivation, age, sex, smoking, long-term conditions and other practice staff.</p>
       <p class="callout"><b>≈<span data-s="per_gp">76</span> a month</b>more same-day GP appointments for each extra full-time GP (95% CI <span data-s="per_gp_ci">59–93</span>).</p>
-      <p>Restoring core funding to its 2008/09 value would pay for about <span data-s="total_gps">15,500</span> GPs. On this pattern that means <strong>about <span data-s="sd_extra">1.17 million</span> more same-day GP appointments every month</strong>, <span data-s="sd_extra_pct">15%</span> more than practices deliver now.</p>
+      <p>Restoring core funding to its 2008/09 value would pay for about <span data-s="total_gps">15,500</span> GPs. Based on this association, that could mean <strong>about <span data-s="sd_extra">1.17 million</span> more same-day GP appointments every month</strong>, <span data-s="sd_extra_pct">15%</span> more than practices deliver now.</p>
     </div>
     <figure class="figure">
       <h3>Same-day GP appointments per 1,000 patients a month, by GP staffing</h3>
@@ -241,24 +241,24 @@ footer.foot { border-top: 2px solid var(--ink); padding-top: 18px; display: grid
     </figure>
   </section>
 
-  <section id="asks" style="display:grid;gap:18px">
-    <div class="section-head"><span class="kicker">What would help</span><h2>Four asks</h2></div>
-    <div class="asks">
-      <div class="ask"><h3>Restore core funding, weighted to need</h3><p>Bring core contract funding back to its 2008/09 real-terms value, about <span data-s="gap_bn">£1.69bn</span> a year, and weight it towards deprivation and early-onset illness.</p><p class="ev">Per person: <span data-s="ph_pair">£123.70 now vs £152.94 if it had kept pace</span>.</p></div>
-      <div class="ask"><h3>Grow GP training where GPs are scarcest</h3><p>Fund supervision time, premises and educators so practices in deprived areas can train GPs, and new GPs start their careers where the gap is widest.</p><p class="ev">Practices training GPs: <span data-s="train_pair">48% vs 66%</span>, most vs least deprived.</p></div>
-      <div class="ask"><h3>Judge access against capacity</h3><p>Access targets and league tables should account for staffing and need, so practices doing the most with the least are not labelled as failing.</p><p class="ev">Same-day GP appointments per GP: <span data-s="sdgp_pair">229 vs 188</span> a month.</p></div>
-      <div class="ask"><h3>Resource the work behind missed appointments</h3><p>Fund outreach, flexible booking and reminders where missed appointments are highest, rather than counting them against the practice.</p><p class="ev">Missed appointments per 1,000 patients a month: <span data-s="dna_pair">27 vs 14</span>.</p></div>
+  <section id="recommendations" style="display:grid;gap:18px">
+    <div class="section-head"><h2>Recommendations</h2></div>
+    <div class="recs">
+      <div class="rec"><h3>Restore core funding, weighted to need</h3><p>Bring core contract funding back to its 2008/09 real-terms value, about <span data-s="gap_bn">£1.69bn</span> a year, and weight it towards deprivation and early-onset illness.</p><p class="ev">Per person: <span data-s="ph_pair">£123.70 now vs £152.94 if it had kept pace</span>.</p></div>
+      <div class="rec"><h3>Expand GP training in deprived areas</h3><p>Fund supervision time, premises and educators so that more practices in deprived areas can train GPs.</p><p class="ev">Practices training GPs: <span data-s="train_pair">48% vs 66%</span>, most vs least deprived.</p></div>
+      <div class="rec"><h3>Judge access against capacity</h3><p>Access targets and league tables should account for staffing and need, so that practices with fewer GPs and higher need are assessed fairly.</p><p class="ev">Same-day GP appointments per GP: <span data-s="sdgp_pair">229 vs 188</span> a month.</p></div>
+      <div class="rec"><h3>Fund work to reduce missed appointments</h3><p>Fund outreach, flexible booking and reminders in practices with the highest rates of missed appointments.</p><p class="ev">Missed appointments per 1,000 patients a month: <span data-s="dna_pair">27 vs 14</span>.</p></div>
     </div>
   </section>
 
   <section id="yours" class="panel">
-    <div class="section-head"><span class="kicker">Use the evidence</span><h2>Your practice in numbers</h2><p class="muted">Find your practice to see its staffing, its share of the funding gap and what that gap would buy, with totals for its PCN and ICB and a paragraph to paste into a letter to your MP, ICB or patient group.</p></div>
+    <div class="section-head"><h2>Your practice</h2><p class="muted">Search for a practice to see its staffing, its share of the funding shortfall and the estimated effect on same-day appointments, with totals for its PCN and ICB. A summary paragraph is provided for use in correspondence.</p></div>
     <div class="search"><input type="search" id="ysearch" placeholder="Practice name, ODS code or PCN" autocomplete="off" aria-label="Find your practice"><div class="suggest" id="ysuggest" hidden></div></div>
     <div class="ycard" id="ycard"><p class="loading">Loading practices…</p></div>
   </section>
 
   <section id="every" style="display:grid;gap:18px">
-    <div class="section-head"><span class="kicker">Every practice</span><h2>See where your area stands</h2><p class="muted">Each dot is a practice. Pick an ICB to see its totals and to highlight its practices against the rest of England.</p></div>
+    <div class="section-head"><h2>Practices by area</h2><p class="muted">Each dot is a practice. Select an ICB to see its totals and highlight its practices.</p></div>
     <div class="controls">
       <label class="ctl"><span>Area</span><select id="area"></select></label>
       <div class="ctl"><span id="m-lbl">Access measure</span><div class="seg" id="measure" role="group" aria-labelledby="m-lbl"></div></div>
@@ -272,18 +272,18 @@ footer.foot { border-top: 2px solid var(--ink); padding-top: 18px; display: grid
       <figcaption id="sc-note"></figcaption>
     </figure>
     <div class="tbl-wrap"><table id="tbl"></table></div>
-    <p class="note">Sorted by funding gap. Click a practice to load it into <a href="#yours">Your practice</a>.</p>
+    <p class="note">Sorted by funding shortfall. Select a practice to show it under <a href="#yours">Your practice</a>.</p>
   </section>
 
   <section id="evidence" style="display:grid;gap:4px">
-    <div class="section-head" style="margin-bottom:8px"><span class="kicker">Evidence</span><h2>How strong is this, and how was it worked out?</h2></div>
+    <div class="section-head" style="margin-bottom:8px"><h2>Methods and limitations</h2></div>
     <details class="fold" open>
-      <summary>How strong is the evidence?</summary>
+      <summary>Strength of the evidence</summary>
       <div class="body">
-        <p>The strongest single link in the data is between <strong>missed appointments and a practice's population</strong>. DNA rates fall as the share of older patients rises (rank correlation <span data-s="rho_dna_age">−0.50</span>) and rise with deprivation (rank correlation <span data-s="rho_dna_imd">0.47</span>).</p>
-        <p>For same-day access, <strong>GP staffing is the strongest factor, but it is modest</strong> (rank correlation about <span data-s="rho_sdgp_gp">0.17</span>). Deprivation, age, sex, smoking, long-term conditions and staffing together explain about <span data-s="r2">5%</span> of the difference between practices. The rest is how each practice organises, triages and records its work.</p>
+        <p>The strongest association in the data is between <strong>missed appointments and a practice's population</strong>. DNA rates fall as the share of older patients rises (rank correlation <span data-s="rho_dna_age">−0.50</span>) and rise with deprivation (rank correlation <span data-s="rho_dna_imd">0.47</span>).</p>
+        <p>For same-day access, <strong>GP staffing has the strongest association, but it is modest</strong> (rank correlation about <span data-s="rho_sdgp_gp">0.17</span>). Deprivation, age, sex, smoking, long-term conditions and staffing together explain about <span data-s="r2">5%</span> of the difference between practices. The remaining variation reflects how practices organise, triage and record appointments, which national data does not capture.</p>
         <p>The adjusted estimate (<span data-s="per_gp">76</span> more same-day GP appointments a month per extra full-time GP, 95% CI <span data-s="per_gp_ci">59–93</span>) comes from one linear model across <span data-s="model_n">5,413</span> practices. It includes deprivation, age 65+, age 0–14, % male, smoking, long-term condition burden, and nurse, other clinical and admin staffing. Its confidence interval allows for practices in the same ICB being alike.</p>
-        <p class="muted">A rank correlation runs from −1 to +1. Zero means no link. It measures how strong a link is, not whether it is statistically significant, and it is not a p-value. With nearly 6,000 practices even weak links are statistically significant, so the size is what matters.</p>
+        <p class="muted">A rank correlation runs from −1 to +1. Zero means no association. It measures the strength of an association, not statistical significance, and is not a p-value. With nearly 6,000 practices, even weak associations are statistically significant, so the size of the correlation is the relevant measure.</p>
         <ul>
           <li>These are associations across practices at one point in time. They are consistent with GP numbers driving access, but they do not prove it.</li>
           <li>Staff employed by PCNs through the ARRS scheme (pharmacists, paramedics, physician associates and others) are not attributed to practices. Deprived areas may have received more of them, which would narrow the staffing gap.</li>
@@ -292,12 +292,12 @@ footer.foot { border-top: 2px solid var(--ink); padding-top: 18px; display: grid
       </div>
     </details>
     <details class="fold">
-      <summary>How the funding gap is calculated</summary>
+      <summary>Funding shortfall calculation</summary>
       <div class="body">
         <ul>
           <li>2008/09 England core contract + QOF funding: Global Sum + MPIG, PMS baseline, APMS/PCTMS core and QOF, <span data-s="core_2008">£5,136m</span> (NHS Digital, Investment in General Practice 2008/09–2012/13). QOF is included because QOF points were later moved into the global sum. The <span data-s="fyear">2023/24</span> figure counts the same items (NHS Payments to General Practice).</li>
           <li>Uprated by ONS CPI (×<span data-s="cpi_ratio">1.543</span>, financial-year averages) and England's population (×<span data-s="pop_ratio">1.119</span>), then compared with what was actually paid.</li>
-          <li>Seniority pay was also later folded into the global sum but cannot be separated in 2008/09. It is left out, which makes the gap smaller than it is.</li>
+          <li>Seniority pay was also later folded into the global sum but cannot be separated in 2008/09. It is left out, which makes the estimated shortfall smaller than it is.</li>
           <li>Funding for PCN-employed staff (ARRS), premises, IT and dispensing sits outside the core contract and is not counted.</li>
           <li>Each practice's share is the national gap split by weighted patients, the same needs weighting the global sum uses.</li>
           <li>Salaried GP cost: midpoint of the BMA model contract range plus employer NI and the employer pension contribution practices pay.</li>
@@ -317,14 +317,14 @@ footer.foot { border-top: 2px solid var(--ink); padding-top: 18px; display: grid
       </div>
     </details>
     <details class="fold">
-      <summary>Strongest links in the data</summary>
+      <summary>Strongest associations</summary>
       <div class="body"><div class="tbl-wrap" style="max-height:none"><table id="ev-table"></table></div></div>
     </details>
   </section>
 
   <footer class="foot">
     <p>Built from public NHS England, NHS Digital and ONS data. No patient-identifiable data is used.</p>
-    <p>Want every measure, month and factor, including the full adjusted model? Open the <a href="explorer.html">analyst explorer</a>.</p>
+    <p>Detailed analysis of all measures, months and factors, including the adjustable model: <a href="explorer.html">analyst explorer</a>.</p>
   </footer>
 </div>
 <div class="tip" id="tip" hidden></div>
@@ -483,7 +483,7 @@ function renderYours(p) {
   g1.append(el("span", "kicker", "Staffing and same-day workload"), grid1); card.append(g1);
   if (p.gap != null) {
     const g2 = el("div", "ygroup"), grid2 = el("div", "ygrid");
-    grid2.append(stat("Core funding short of 2008/09, a year", gbp(p.gap), `share of the ${fy(F.year)} national gap, by weighted patients`),
+    grid2.append(stat("Core funding shortfall a year", gbp(p.gap), `share of the ${fy(F.year)} national shortfall, by weighted patients`),
       stat("Salaried GPs that would pay for", fmt(p.gps, 1), `full-time, at ${gbp(F.gp_cost.total)} each`),
       stat("More same-day GP appointments a month", `≈${fmt(p.extra)}`, `estimate, 95% CI ${fmt(p.gps * S.lever.sd_gp_rate.ci[0] * 10)}–${fmt(p.gps * S.lever.sd_gp_rate.ci[1] * 10)}`));
     g2.append(el("span", "kicker", "If core funding had kept pace since 2008/09"), grid2); card.append(g2);
@@ -535,7 +535,7 @@ function setupSearch() {
 
 // ------------------------------------------------------------- every practice
 const MEASURES = [["sdgp", "Same-day GP", "Same-day GP appointments per 1,000 patients a month"], ["sd", "All same-day", "Same-day appointments (all staff) per 1,000 patients a month"], ["urg", "Urgent same-day", "Urgent same-day appointments per 1,000 patients a month"]];
-const FACTORS = [["imd", "Deprivation", "IMD 2025 score (higher = more deprived)", 1], ["gp10k", "GPs per patient", "Qualified GPs per 10,000 patients", 1], ["age65", "Older patients", "Patients aged 65+ (%)", 0], ["gap_pt", "Funding gap", "Core funding gap per patient (£ a year)", 0]];
+const FACTORS = [["imd", "Deprivation", "IMD 2025 score (higher = more deprived)", 1], ["gp10k", "GPs per patient", "Qualified GPs per 10,000 patients", 1], ["age65", "Older patients", "Patients aged 65+ (%)", 0], ["gap_pt", "Funding shortfall", "Core funding shortfall per patient (£ a year)", 0]];
 const state = { area: "", measure: "sdgp", factor: "imd", sel: null };
 let pts = [];
 function seg(boxId, items, key) {
@@ -549,7 +549,7 @@ function setupEvery() {
   seg("measure", MEASURES, "measure"); seg("factor", FACTORS, "factor");
   const cv = $("scatter");
   const near = (ev) => { const r = cv.getBoundingClientRect(), mx = ev.clientX - r.left, my = ev.clientY - r.top; let best = null, bd = 18 * 18; for (let i = pts.length - 1; i >= 0; i--) { const q = pts[i], d = (q.x - mx) ** 2 + (q.y - my) ** 2; if (d < bd) { bd = d; best = q; } } return best; };
-  cv.addEventListener("pointermove", (ev) => { const q = near(ev); if (!q) { hideTip(); cv.style.cursor = "default"; return; } cv.style.cursor = "pointer"; const m = MEASURES.find((x) => x[0] === state.measure), f = FACTORS.find((x) => x[0] === state.factor); showTip(ev, [[m[1], fmt(q.p[state.measure])], [f[1], state.factor === "gap_pt" ? gbp(q.p.gap_pt, 2) : fmt(q.p[state.factor], f[3])], ["Funding gap a year", gbp(q.p.gap)], ["Patients", fmt(q.p.list)]], q.p.n, `${q.p.c} · ${q.p.pcn}`); });
+  cv.addEventListener("pointermove", (ev) => { const q = near(ev); if (!q) { hideTip(); cv.style.cursor = "default"; return; } cv.style.cursor = "pointer"; const m = MEASURES.find((x) => x[0] === state.measure), f = FACTORS.find((x) => x[0] === state.factor); showTip(ev, [[m[1], fmt(q.p[state.measure])], [f[1], state.factor === "gap_pt" ? gbp(q.p.gap_pt, 2) : fmt(q.p[state.factor], f[3])], ["Funding shortfall a year", gbp(q.p.gap)], ["Patients", fmt(q.p.list)]], q.p.n, `${q.p.c} · ${q.p.pcn}`); });
   cv.addEventListener("pointerleave", hideTip);
   cv.addEventListener("click", (ev) => { const q = near(ev); if (q) { pick(q.p); $("yours").scrollIntoView({ behavior: "smooth" }); } });
 }
@@ -563,7 +563,7 @@ function drawEvery() {
   const tile = (k, v, d) => { const e = el("div", "tile"); e.append(el("span", "k", k), el("span", "v", v), el("span", "d", d)); T.append(e); };
   const name = state.area || "England";
   tile(`${name}: practices`, fmt(t.n), `${fmt(sig3(t.patients))} patients`);
-  tile("Core funding gap a year", gbpBig(t.gap), `${fy(F.year)}, against 2008/09 in real terms`);
+  tile("Core funding shortfall a year", gbpBig(t.gap), `${fy(F.year)}, against 2008/09 in real terms`);
   tile("Salaried GPs it would pay for", fmt(sig3(t.gps)), "full-time equivalents");
   tile("More same-day GP appointments", `≈${fmt(sig3(t.extra))}`, "a month, estimated");
   // scatter
@@ -606,7 +606,7 @@ function drawEvery() {
   // table
   const tbl = $("tbl"); tbl.replaceChildren();
   const hr = tbl.createTHead().insertRow();
-  [["Practice", 0], ["PCN", 0], ["Patients", 1], ["GPs per 10,000", 1], [`${m[1]} per 1,000`, 1], ["Funding gap a year", 1], ["Salaried GPs", 1], ["More same-day GP a month", 1]].forEach(([h, r]) => hr.append(el("th", r ? "r" : null, h)));
+  [["Practice", 0], ["PCN", 0], ["Patients", 1], ["GPs per 10,000", 1], [`${m[1]} per 1,000`, 1], ["Funding shortfall a year", 1], ["Salaried GPs", 1], ["More same-day GP a month", 1]].forEach(([h, r]) => hr.append(el("th", r ? "r" : null, h)));
   const tb = tbl.createTBody();
   P.filter((p) => inArea(p) && p.gap != null).sort((a, b) => b.gap - a.gap).slice(0, 300).forEach((p) => {
     const tr = tb.insertRow(); if (p.c === state.sel) tr.className = "sel";
@@ -630,7 +630,7 @@ async function boot() {
     return;
   }
   englandMedians(); fillNumbers(); drawStory(); setupSearch(); setupEvery();
-  $("ycard").replaceChildren(el("p", "muted", "Search above, or click any practice in the chart or table below."));
+  $("ycard").replaceChildren(el("p", "muted", "Search above, or select a practice in the chart or table below."));
   drawEvery();
   let rt; addEventListener("resize", () => { clearTimeout(rt); rt = setTimeout(() => { drawStory(); drawEvery(); }, 150); });
   const redraw = () => { drawStory(); drawEvery(); };

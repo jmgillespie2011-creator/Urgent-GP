@@ -19,26 +19,26 @@ The appointments data is the NHS Digital *Appointments in General Practice* prac
 - Core + QOF was **£123.70 per person**, against **£152.94** had the 2008/09 level (£99.13) kept pace with CPI. That is **19% below** the 2008/09 level in real terms.
 - The gap is **£1.69bn a year**, about **15,500 salaried GPs**.
 - That could mean about **1.17m more same-day GP appointments a month**, an extrapolation at the edge of the observed staffing range.
-- For comparison, the BMA's 2025/26 ask was £152.50 per weighted patient.
+- For comparison, the BMA called for £152.50 per weighted patient in 2025/26.
 
 ## The page
 
-`site/index.html` (built from `site/page.html`) is an advocacy page, read top to bottom:
+`site/index.html` (built from `site/page.html`) sets out the findings in this order:
 
-1. **Hero:** the claim and four headline numbers.
-2. **Four beats:**
-   - more illness, fewer doctors
-   - GPs working harder
-   - core funding 19% below 2008/09 in real terms
-   - what more GPs would buy
-3. **Four asks.**
-4. **Your practice in numbers:**
-   - staffing and same-day workload against England
-   - the practice's share of the funding gap, the salaried GPs it would pay for, and the extra same-day appointments they could deliver
+1. **Summary:** headline and four key figures.
+2. **Findings:**
+   - Need: higher need, fewer GPs
+   - Workload: each GP provides more same-day care
+   - Funding: core funding 19% below 2008/09 in real terms
+   - Staffing and access: more GPs per patient, more same-day appointments
+3. **Recommendations:** four.
+4. **Your practice:**
+   - staffing and same-day workload compared with England
+   - the practice's share of the funding shortfall, the salaried GPs it would pay for, and the estimated extra same-day appointments
    - totals for its PCN and ICB
-   - a paragraph to copy into a letter
-5. **Every practice:** pick an ICB, one of three access measures, and one comparison (deprivation, GPs per patient, older patients or funding gap). Shows area totals, one scatter chart, and a table sorted by funding gap.
-6. **Evidence:** folded sections on strength of evidence, the funding method, definitions and the strongest correlations.
+   - a summary paragraph for correspondence
+5. **Practices by area:** select an ICB, one of three access measures and one comparison (deprivation, GPs per patient, older patients or funding shortfall). Shows area totals, a scatter chart and a table sorted by funding shortfall.
+6. **Methods and limitations:** strength of the evidence, the funding shortfall calculation, definitions and the strongest associations.
 
 The full analyst explorer, with every measure and month, the adjustable multivariable model and CSV upload, is at `site/explorer.html` (built from `site/dashboard.html`), linked from the page footer.
 
