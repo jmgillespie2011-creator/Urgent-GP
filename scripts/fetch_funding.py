@@ -71,8 +71,11 @@ def ons_series(code: str, dataset: str, topic: str, fname: str) -> None:
                 j = json.loads(text)
                 rows = [(r["date"], r["value"]) for k in ("years", "quarters", "months") for r in j.get(k, [])]
             else:
-                rows = [tuple(x.strip('"') for x in line.split(",", 1)) for line in text.splitlines()
-                        if re.match(r'^"?\d{4}', line)]
+                rows = []
+                for line in text.splitlines():
+                    m = re.match(r'^"?([^",]+)"?,"?([^"]*)"?\s*$', line)
+                    if m and re.match(r"\d{4}", m.group(1)):
+                        rows.append((m.group(1), m.group(2).replace(",", "")))
             if len(rows) > 20:
                 (OUT / fname).write_text("period,value\n" + "\n".join(f"{a},{b}" for a, b in rows))
                 print(f"  wrote {fname}: {len(rows)} rows from {src}")
@@ -130,7 +133,7 @@ def fetch_payments() -> None:
 def main() -> int:
     OUT.mkdir(parents=True, exist_ok=True)
     ok = 0
-    steps = [("CPI", lambda: ons_series("D7BT", "mm23", "economy/inflationandpriceindices", "cpi_d7bt.csv")),
+    steps = [] if False else [("CPI", lambda: ons_series("D7BT", "mm23", "economy/inflationandpriceindices", "cpi_d7bt.csv")),
              ("GDP deflator", lambda: ons_series("YBGB", "ukea", "economy/grossdomesticproductgdp", "gdp_deflator_ybgb.csv")),
              ("population", lambda: ons_series("ENPOP", "pop", "peoplepopulationandcommunity/populationandmigration/populationestimates", "england_population_enpop.csv")),
              ("payments", fetch_payments)]

@@ -165,8 +165,18 @@ def archived_files(series: str, slug_rx: str, file_rx: str) -> tuple[str, list[t
     Internet Archive, which keeps the original files.digital.nhs.uk download links.
     """
     prefix = PUB.replace("https://", "") + series + "/"
-    cdx = json.loads(get(f"{WAYBACK}/cdx/search/cdx?url={urllib.parse.quote(prefix)}*&output=json"
-                         f"&filter=statuscode:200&fl=timestamp,original&limit=20000", tries=3))
+    cdx = None
+    for attempt in range(4):  # the CDX index intermittently returns an empty or HTML error body
+        raw = get(f"{WAYBACK}/cdx/search/cdx?url={urllib.parse.quote(prefix)}*&output=json"
+                  f"&filter=statuscode:200&fl=timestamp,original&collapse=urlkey&limit=20000", tries=3)
+        try:
+            cdx = json.loads(raw)
+            break
+        except ValueError:
+            print(f"    CDX response not JSON (attempt {attempt + 1}): {raw[:120]!r}")
+            time.sleep(10 * (attempt + 1))
+    if cdx is None:
+        raise RuntimeError(f"Internet Archive index unavailable for {series}")
     pages: dict[str, tuple[str, str]] = {}
     for ts, orig in cdx[1:]:
         m = re.search(series + r"/(" + slug_rx + r")/?$", orig.split("?")[0])
