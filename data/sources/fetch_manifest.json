@@ -4,7 +4,7 @@
     "indicator": "Smoking: QOF prevalence",
     "period": "2024/25"
   },
-  "fetched_utc": "2026-10-03T19:19:48Z",
+  "fetched_utc": "2026-10-03T19:27:08Z",
   "fingertips_profile": {
     "profile_id": 20,
     "indicators": 24
@@ -13,5 +13,5 @@
     "source": "Fingertips indicator 93468",
     "period": "2025"
   },
-  "workforce_error": "RuntimeError: browser GET https://web.archive.org/cdx/search/cdx?url=digital.nhs.uk/data-and-information/publications/statistical/general-and-personal-medical-services/*&output=json&filter=statuscode:200&fl=timestamp,original&limit=20000: HTTP 503"
+  "workforce_error": "RuntimeError: browser GET https://web.archive.org/cdx/search/cdx?url=digital.nhs.uk/data-and-information/publications/statistical/general-and-personal-medical-services/*&output=json&filter=statuscode:200&fl=timestamp,original&collapse=urlkey&limit=20000: HTTP 503"
 }
