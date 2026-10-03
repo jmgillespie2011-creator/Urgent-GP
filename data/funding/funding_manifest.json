@@ -7,16 +7,9 @@
     "source": "https://www.ons.gov.uk/generator?format=csv&uri=/economy/grossdomesticproductgdp/timeseries/ybgb/ukea",
     "series": "YBGB"
   },
-  "investment": {
-    "page": "https://digital.nhs.uk/data-and-information/publications/statistical/investment-in-general-practice/investment-in-general-practice-england-wales-northern-ireland-and-scotland-2008-09-to-2012-13",
-    "archived": "20230404072533",
-    "files": [
-      "data/funding/investment/inve-gene-prac-eng-wal-ni-scot-08-13.csv",
-      "data/funding/investment/inve-gene-prac-data-qual-state.pdf"
-    ]
+  "england_population_enpop.csv": {
+    "source": "https://www.ons.gov.uk/generator?format=csv&uri=/peoplepopulationandcommunity/populationandmigration/populationestimates/timeseries/enpop/pop",
+    "series": "ENPOP"
   },
-  "payments": {
-    "page": "https://digital.nhs.uk/data-and-information/publications/statistical/nhs-payments-to-general-practice/nhs-payments-to-general-practice-england-2016-17",
-    "file": "https://files.digital.nhs.uk/publication/4/3/nhspaymentsgp-16-17-csv.csv"
-  }
+  "payments_error": "json.decoder.JSONDecodeError: Expecting value: line 1 column 1 (char 0)"
 }
